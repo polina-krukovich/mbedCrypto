@@ -19,3 +19,6 @@ all:
 	@gcc -w -g self_tests.c $(SRCS) -I./includes/ -lcrypto -lssl -o run_tests.out
 
 	@echo "Compilation done!"
+
+.PHONY docs:
+	doxygen dox/doxygen.cfg
