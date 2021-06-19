@@ -30,7 +30,7 @@
  * algorithms. In some cases higher level provides higher time consumption.
  */
 #ifndef SECURITY_LEVEL
-	#define SECURITY_LEVEL                          (MIN_SECURITY_LEVEL)
+	#define SECURITY_LEVEL                            (MIN_SECURITY_LEVEL)
 #endif /* SECURITY_LEVEL */
 
 
@@ -39,7 +39,7 @@
  *  with HMAC function based on SHA1. 
  */
 #ifndef PBKDF2_HMAC_SHA1
-	#define PBKDF2_HMAC_SHA1                         (ENABLED) 
+	#define PBKDF2_HMAC_SHA1                          (ENABLED) 
 #endif
 
 
@@ -48,7 +48,7 @@
  *  with HMAC function based on SHA256. 
  */
 #ifndef PBKDF2_HMAC_SHA256
-	#define PBKDF2_HMAC_SHA256                       (ENABLED) 
+	#define PBKDF2_HMAC_SHA256                        (ENABLED) 
 #endif
 
 
@@ -57,7 +57,34 @@
  *  with HMAC function based on SHA512. 
  */
 #ifndef PBKDF2_HMAC_SHA512
-	#define PBKDF2_HMAC_SHA512                       (ENABLED) 
+	#define PBKDF2_HMAC_SHA512                        (ENABLED) 
+#endif
+
+
+/**
+ * @brief When SECURED_SHA1 is enabled algorithm get rid of security 
+ * sensitive data after that.
+ */
+#ifndef SECURED_SHA1
+	#define SECURED_SHA1                        	  (ENABLED)
+#endif
+
+
+/**
+ * @brief When SECURED_SHA256 is enabled algorithm get rid of security 
+ * sensitive data after that.
+ */
+#ifndef SECURED_SHA256
+	#define SECURED_SHA256                      	  (ENABLED)
+#endif
+
+
+/**
+ * @brief When SECURED_SHA512 is enabled algorithm get rid of security 
+ * sensitive data after that.
+ */
+#ifndef SECURED_SHA512
+	#define SECURED_SHA512                      	  (ENABLED)
 #endif
 
 
