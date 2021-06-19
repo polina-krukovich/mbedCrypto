@@ -34,7 +34,7 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
     E = ctx->h4;
 
 /* Select what implimentation should be */
-#ifdef SHA1_MIN_SIZE
+#if (SHA1_MIN_SIZE == ENABLED)
 
     for (uint32_t i = 0; i < 16; ++i)
     {
@@ -268,7 +268,7 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
     ctx->h3 += D;
     ctx->h4 += E;
     
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || defined(SECURED_SHA1)
+#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_SHA1 == ENABLED)
     temp = MAX_WORD_VALUE;
     A = MAX_WORD_VALUE;
     B = MAX_WORD_VALUE;
@@ -350,7 +350,7 @@ SECURITY_FUNCTION_BEGIN;
     
 SECURITY_FUNCTION_EXIT:
 
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || defined(SECURED_SHA1)
+#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_SHA1 == ENABLED)
     fill = MAX_WORD_VALUE;
     left = MAX_WORD_VALUE;
 #endif /* SECURED_SHA1 */
@@ -393,7 +393,7 @@ SECURITY_FUNCTION_BEGIN;
 
 SECURITY_FUNCTION_EXIT:
 
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || defined(SECURED_SHA1)
+#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_SHA1 == ENABLED)
     last = MAX_WORD_VALUE;
     padn = MAX_WORD_VALUE;
     high = MAX_WORD_VALUE;
@@ -416,7 +416,7 @@ SECURITY_FUNCTION_BEGIN;
 
 SECURITY_FUNCTION_EXIT:
 
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || defined(SECURED_SHA1)
+#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_SHA1 == ENABLED)
     memset_safe(&ctx, MAX_BYTE_VALUE, sizeof(ctx));
 #endif /* SECURED_SHA1 */
 
