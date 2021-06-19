@@ -10,10 +10,10 @@
 
 #define memset_safe memset
 
-#define MAX_BYTE_VALUE              0xFF
-#define MAX_SHORT_VALUE             0xFFFF
-#define MAX_WORD_VALUE              0xFFFFFFFF
-#define MAX_DWORD_VALUE             0xFFFFFFFFFFFFFFFF
+#define MAX_BYTE_VALUE                                  0xFF
+#define MAX_SHORT_VALUE                                 0xFFFF
+#define MAX_WORD_VALUE                                  0xFFFFFFFF
+#define MAX_DWORD_VALUE                                 0xFFFFFFFFFFFFFFFF
 
 
 typedef enum security_status_e
@@ -57,9 +57,5 @@ do{                                         \
         goto SECURITY_FUNCTION_EXIT;        \
     }                                       \
 } while (0)                                 \
-
-#define SHA1_MIN_SIZE
-#define SHA256_MIN_SIZE
-#define SHA512_MIN_SIZE
 
 #endif /*__SECURITY_H__*/
