@@ -9,6 +9,14 @@
     b = SHIFT_LEFT(b, 30);                          \
 }
 
+#define ROT(t)                                        \
+(                                                   \
+    temp = W[(t - 3) & 0x0F] ^ W[(t - 8) & 0x0F] ^  \
+           W[(t - 14) & 0x0F] ^ W[t & 0x0F],        \
+    (W[t & 0x0F] = SHIFT_LEFT(temp, 1))             \
+)
+
+
 static const uint8_t sha1_padding[SHA1_BUFFER_SIZE] =
 {
  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -41,13 +49,6 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
         GET_UINT32_BE(W[i], data, (i << 2));
     }
 
-#define R(t)                                        \
-(                                                   \
-    temp = W[(t - 3) & 0x0F] ^ W[(t - 8) & 0x0F] ^  \
-        W[(t - 14) & 0x0F] ^ W[t & 0x0F],           \
-    (W[t & 0x0F] = SHIFT_LEFT(temp, 1))             \
-)
-
 #define F(x, y, z) (z ^ (x & (y ^ z)))
 #define K 0x5A827999
 
@@ -61,10 +62,10 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
     }
 
     PAD(A, B, C, D, E, W[15]);
-    PAD(E, A, B, C, D, R(16));
-    PAD(D, E, A, B, C, R(17));
-    PAD(C, D, E, A, B, R(18));
-    PAD(B, C, D, E, A, R(19));
+    PAD(E, A, B, C, D, ROT(16));
+    PAD(D, E, A, B, C, ROT(17));
+    PAD(C, D, E, A, B, ROT(18));
+    PAD(B, C, D, E, A, ROT(19));
 
 #undef K
 #undef F
@@ -74,11 +75,11 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
 
     for (uint32_t i = 20; i < 40; i += 5)
     {
-        PAD(A, B, C, D, E, R(i + 0));
-        PAD(E, A, B, C, D, R(i + 1));
-        PAD(D, E, A, B, C, R(i + 2));
-        PAD(C, D, E, A, B, R(i + 3));
-        PAD(B, C, D, E, A, R(i + 4));
+        PAD(A, B, C, D, E, ROT(i + 0));
+        PAD(E, A, B, C, D, ROT(i + 1));
+        PAD(D, E, A, B, C, ROT(i + 2));
+        PAD(C, D, E, A, B, ROT(i + 3));
+        PAD(B, C, D, E, A, ROT(i + 4));
     }
 
 #undef K
@@ -89,11 +90,11 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
 
     for (uint32_t i = 40; i < 60; i += 5)
     {
-        PAD(A, B, C, D, E, R(i + 0));
-        PAD(E, A, B, C, D, R(i + 1));
-        PAD(D, E, A, B, C, R(i + 2));
-        PAD(C, D, E, A, B, R(i + 3));
-        PAD(B, C, D, E, A, R(i + 4));
+        PAD(A, B, C, D, E, ROT(i + 0));
+        PAD(E, A, B, C, D, ROT(i + 1));
+        PAD(D, E, A, B, C, ROT(i + 2));
+        PAD(C, D, E, A, B, ROT(i + 3));
+        PAD(B, C, D, E, A, ROT(i + 4));
     }
 
 #undef K
@@ -104,11 +105,11 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
 
     for (uint32_t i = 60; i < 80; i += 5)
     {
-        PAD(A, B, C, D, E, R(i + 0));
-        PAD(E, A, B, C, D, R(i + 1));
-        PAD(D, E, A, B, C, R(i + 2));
-        PAD(C, D, E, A, B, R(i + 3));
-        PAD(B, C, D, E, A, R(i + 4));
+        PAD(A, B, C, D, E, ROT(i + 0));
+        PAD(E, A, B, C, D, ROT(i + 1));
+        PAD(D, E, A, B, C, ROT(i + 2));
+        PAD(C, D, E, A, B, ROT(i + 3));
+        PAD(B, C, D, E, A, ROT(i + 4));
     }
 
 #undef K
@@ -133,14 +134,6 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
     GET_UINT32_BE(W[14], data, 56);
     GET_UINT32_BE(W[15], data, 60);
 
-
-#define R(t)                                        \
-(                                                   \
-    temp = W[(t - 3) & 0x0F] ^ W[(t - 8) & 0x0F] ^  \
-           W[(t - 14) & 0x0F] ^ W[t & 0x0F],        \
-    (W[t & 0x0F] = SHIFT_LEFT(temp, 1))             \
-)
-
 #define F(x, y, z) (z ^ (x & (y ^ z)))
 #define K 0x5A827999
 
@@ -163,10 +156,10 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
     PAD(B, C, D, E, A, W[14]);
 
     PAD(A, B, C, D, E, W[15]);
-    PAD(E, A, B, C, D, R(16));
-    PAD(D, E, A, B, C, R(17));
-    PAD(C, D, E, A, B, R(18));
-    PAD(B, C, D, E, A, R(19));
+    PAD(E, A, B, C, D, ROT(16));
+    PAD(D, E, A, B, C, ROT(17));
+    PAD(C, D, E, A, B, ROT(18));
+    PAD(B, C, D, E, A, ROT(19));
 
 #undef K
 #undef F
@@ -174,29 +167,29 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
 #define F(x, y, z) (x ^ y ^ z)
 #define K 0x6ED9EBA1
 
-    PAD(A, B, C, D, E, R(20));
-    PAD(E, A, B, C, D, R(21));
-    PAD(D, E, A, B, C, R(22));
-    PAD(C, D, E, A, B, R(23));
-    PAD(B, C, D, E, A, R(24));
+    PAD(A, B, C, D, E, ROT(20));
+    PAD(E, A, B, C, D, ROT(21));
+    PAD(D, E, A, B, C, ROT(22));
+    PAD(C, D, E, A, B, ROT(23));
+    PAD(B, C, D, E, A, ROT(24));
     
-    PAD(A, B, C, D, E, R(25));
-    PAD(E, A, B, C, D, R(26));
-    PAD(D, E, A, B, C, R(27));
-    PAD(C, D, E, A, B, R(28));
-    PAD(B, C, D, E, A, R(29));
+    PAD(A, B, C, D, E, ROT(25));
+    PAD(E, A, B, C, D, ROT(26));
+    PAD(D, E, A, B, C, ROT(27));
+    PAD(C, D, E, A, B, ROT(28));
+    PAD(B, C, D, E, A, ROT(29));
 
-    PAD(A, B, C, D, E, R(30));
-    PAD(E, A, B, C, D, R(31));
-    PAD(D, E, A, B, C, R(32));
-    PAD(C, D, E, A, B, R(33));
-    PAD(B, C, D, E, A, R(34));
+    PAD(A, B, C, D, E, ROT(30));
+    PAD(E, A, B, C, D, ROT(31));
+    PAD(D, E, A, B, C, ROT(32));
+    PAD(C, D, E, A, B, ROT(33));
+    PAD(B, C, D, E, A, ROT(34));
 
-    PAD(A, B, C, D, E, R(35));
-    PAD(E, A, B, C, D, R(36));
-    PAD(D, E, A, B, C, R(37));
-    PAD(C, D, E, A, B, R(38));
-    PAD(B, C, D, E, A, R(39));
+    PAD(A, B, C, D, E, ROT(35));
+    PAD(E, A, B, C, D, ROT(36));
+    PAD(D, E, A, B, C, ROT(37));
+    PAD(C, D, E, A, B, ROT(38));
+    PAD(B, C, D, E, A, ROT(39));
 
 #undef K
 #undef F
@@ -204,29 +197,29 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
 #define F(x, y, z) ((x & y) | (z & (x | y)))
 #define K 0x8F1BBCDC
 
-    PAD(A, B, C, D, E, R(40));
-    PAD(E, A, B, C, D, R(41));
-    PAD(D, E, A, B, C, R(42));
-    PAD(C, D, E, A, B, R(43));
-    PAD(B, C, D, E, A, R(44));
+    PAD(A, B, C, D, E, ROT(40));
+    PAD(E, A, B, C, D, ROT(41));
+    PAD(D, E, A, B, C, ROT(42));
+    PAD(C, D, E, A, B, ROT(43));
+    PAD(B, C, D, E, A, ROT(44));
 
-    PAD(A, B, C, D, E, R(45));
-    PAD(E, A, B, C, D, R(46));
-    PAD(D, E, A, B, C, R(47));
-    PAD(C, D, E, A, B, R(48));
-    PAD(B, C, D, E, A, R(49));
+    PAD(A, B, C, D, E, ROT(45));
+    PAD(E, A, B, C, D, ROT(46));
+    PAD(D, E, A, B, C, ROT(47));
+    PAD(C, D, E, A, B, ROT(48));
+    PAD(B, C, D, E, A, ROT(49));
 
-    PAD(A, B, C, D, E, R(50));
-    PAD(E, A, B, C, D, R(51));
-    PAD(D, E, A, B, C, R(52));
-    PAD(C, D, E, A, B, R(53));
-    PAD(B, C, D, E, A, R(54));
+    PAD(A, B, C, D, E, ROT(50));
+    PAD(E, A, B, C, D, ROT(51));
+    PAD(D, E, A, B, C, ROT(52));
+    PAD(C, D, E, A, B, ROT(53));
+    PAD(B, C, D, E, A, ROT(54));
 
-    PAD(A, B, C, D, E, R(55));
-    PAD(E, A, B, C, D, R(56));
-    PAD(D, E, A, B, C, R(57));
-    PAD(C, D, E, A, B, R(58));
-    PAD(B, C, D, E, A, R(59)); 
+    PAD(A, B, C, D, E, ROT(55));
+    PAD(E, A, B, C, D, ROT(56));
+    PAD(D, E, A, B, C, ROT(57));
+    PAD(C, D, E, A, B, ROT(58));
+    PAD(B, C, D, E, A, ROT(59)); 
 
 #undef K
 #undef F
@@ -234,29 +227,29 @@ static void sha1_process(sha1_t *ctx, const uint8_t *data)
 #define F(x, y, z) (x ^ y ^ z)
 #define K 0xCA62C1D6
 
-    PAD(A, B, C, D, E, R(60));
-    PAD(E, A, B, C, D, R(61));
-    PAD(D, E, A, B, C, R(62));
-    PAD(C, D, E, A, B, R(63));
-    PAD(B, C, D, E, A, R(64));
+    PAD(A, B, C, D, E, ROT(60));
+    PAD(E, A, B, C, D, ROT(61));
+    PAD(D, E, A, B, C, ROT(62));
+    PAD(C, D, E, A, B, ROT(63));
+    PAD(B, C, D, E, A, ROT(64));
 
-    PAD(A, B, C, D, E, R(65));
-    PAD(E, A, B, C, D, R(66));
-    PAD(D, E, A, B, C, R(67));
-    PAD(C, D, E, A, B, R(68));
-    PAD(B, C, D, E, A, R(69));
+    PAD(A, B, C, D, E, ROT(65));
+    PAD(E, A, B, C, D, ROT(66));
+    PAD(D, E, A, B, C, ROT(67));
+    PAD(C, D, E, A, B, ROT(68));
+    PAD(B, C, D, E, A, ROT(69));
 
-    PAD(A, B, C, D, E, R(70));
-    PAD(E, A, B, C, D, R(71));
-    PAD(D, E, A, B, C, R(72));
-    PAD(C, D, E, A, B, R(73));
-    PAD(B, C, D, E, A, R(74));
+    PAD(A, B, C, D, E, ROT(70));
+    PAD(E, A, B, C, D, ROT(71));
+    PAD(D, E, A, B, C, ROT(72));
+    PAD(C, D, E, A, B, ROT(73));
+    PAD(B, C, D, E, A, ROT(74));
 
-    PAD(A, B, C, D, E, R(75));
-    PAD(E, A, B, C, D, R(76));
-    PAD(D, E, A, B, C, R(77));
-    PAD(C, D, E, A, B, R(78));
-    PAD(B, C, D, E, A, R(79));
+    PAD(A, B, C, D, E, ROT(75));
+    PAD(E, A, B, C, D, ROT(76));
+    PAD(D, E, A, B, C, ROT(77));
+    PAD(C, D, E, A, B, ROT(78));
+    PAD(B, C, D, E, A, ROT(79));
 
 #undef K
 #undef F
