@@ -19,6 +19,7 @@
     h = tmp1 + tmp2;                                \
 }
 
+
 static const uint64_t K[80] =
 {
     U64(0x428A2F98D728AE22),  U64(0x7137449123EF65CD),
@@ -74,6 +75,7 @@ static const uint8_t sha512_padding[SHA512_BUFFER_SIZE] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
+
 
 static void sha512_process(sha512_t *ctx, const uint8_t *data)
 {
@@ -137,6 +139,7 @@ static void sha512_process(sha512_t *ctx, const uint8_t *data)
     } while (i < 80);
 
 #else /* SHA512_MIN_SIZE */
+
     uint32_t i = 16;
 
     GET_UINT64_BE(W[0], data, 0);
