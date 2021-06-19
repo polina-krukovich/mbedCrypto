@@ -55,7 +55,7 @@ security_status_e SECURITY_API sha1_init(sha1_t *ctx);
  * @return security_status_e 
  */
 security_status_e SECURITY_API sha1_update(sha1_t *ctx, 
-                                        const uint8_t *data, uint32_t data_len);
+                                            const uint8_t *data, uint32_t data_len);
 
 /**
  * @brief Function finishes computations and produce final hash
@@ -76,6 +76,6 @@ security_status_e SECURITY_API sha1_finish(sha1_t *ctx, uint8_t *out);
  * @return security_status_e 
  */
 security_status_e SECURITY_API sha1(const uint8_t *data, 
-                                        uint32_t data_len, uint8_t *out);
+                                    uint32_t data_len, uint8_t *out);
 
 #endif /* SHA1_H */
