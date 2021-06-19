@@ -1,5 +1,31 @@
 #include "sha256.h"
 
+#define SHIFT_RIGHT(x, n)   ((x & MAX_WORD_VALUE) >> n)
+#define ROT_RIGHT(x, n)     (SHIFT_RIGHT(x, n) | (x << (32 - n)))
+
+#define SUB0(x)             (ROT_RIGHT(x, 7) ^ ROT_RIGHT(x, 18) ^  SHIFT_RIGHT(x, 3))
+#define SUB1(x)             (ROT_RIGHT(x, 17) ^ ROT_RIGHT(x, 19) ^  SHIFT_RIGHT(x, 10))
+#define SUB2(x)             (ROT_RIGHT(x, 2) ^ ROT_RIGHT(x, 13) ^ ROT_RIGHT(x, 22))
+#define SUB3(x)             (ROT_RIGHT(x, 6) ^ ROT_RIGHT(x, 11) ^ ROT_RIGHT(x, 25))
+
+#define F0(x, y, z)         ((x & y) | (z & (x | y)))
+#define F1(x, y, z)         (z ^ (x & (y ^ z)))
+
+#define ROT(t)                                  \
+(                                               \
+    W[t] = SUB1(W[t - 2]) + W[t - 7] +          \
+           SUB0(W[t - 15]) + W[t - 16]          \
+)
+
+#define PAD(a, b, c, d, e, f, g, h, x, K)       \
+{                                               \
+    tmp1 = h + SUB3(e) + F1(e, f, g) + K + x;   \
+    tmp2 = SUB2(a) + F0(a, b, c);               \
+    d += tmp1;                                  \
+    h = tmp1 + tmp2;                            \
+}
+
+
 static const uint8_t sha256_padding[SHA256_BUFFER_SIZE] =
 {
  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -27,32 +53,6 @@ static const uint32_t K[SHA256_BUFFER_SIZE] =
     0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208,
     0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2,
 };
-
-
-#define SHIFT_RIGHT(x, n)   ((x & MAX_WORD_VALUE) >> n)
-#define ROT_RIGHT(x, n)     (SHIFT_RIGHT(x, n) | (x << (32 - n)))
-
-#define SUB0(x)             (ROT_RIGHT(x, 7) ^ ROT_RIGHT(x, 18) ^  SHIFT_RIGHT(x, 3))
-#define SUB1(x)             (ROT_RIGHT(x, 17) ^ ROT_RIGHT(x, 19) ^  SHIFT_RIGHT(x, 10))
-#define SUB2(x)             (ROT_RIGHT(x, 2) ^ ROT_RIGHT(x, 13) ^ ROT_RIGHT(x, 22))
-#define SUB3(x)             (ROT_RIGHT(x, 6) ^ ROT_RIGHT(x, 11) ^ ROT_RIGHT(x, 25))
-
-#define F0(x, y, z)         ((x & y) | (z & (x | y)))
-#define F1(x, y, z)         (z ^ (x & (y ^ z)))
-
-#define ROT(t)                                  \
-(                                               \
-    W[t] = SUB1(W[t - 2]) + W[t - 7] +          \
-           SUB0(W[t - 15]) + W[t - 16]          \
-)
-
-#define PAD(a, b, c, d, e, f, g, h, x, K)       \
-{                                               \
-    tmp1 = h + SUB3(e) + F1(e, f, g) + K + x;   \
-    tmp2 = SUB2(a) + F0(a, b, c);               \
-    d += tmp1;                                  \
-    h = tmp1 + tmp2;                            \
-}
 
 
 static void sha256_process(sha256_t *ctx, const uint8_t *data)
