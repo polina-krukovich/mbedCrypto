@@ -5,7 +5,7 @@
 
 
 security_status_e hmac_sha512_init(hmac_sha512_t *ctx, const uint8_t *key, 
-                                                uint32_t key_len)
+                                    uint32_t key_len)
 {
 SECURITY_FUNCTION_BEGIN;
 
@@ -48,7 +48,7 @@ SECURITY_FUNCTION_BEGIN;
 
 SECURITY_FUNCTION_EXIT:
 
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || defined(SECURED_HMAC_SHA512)
+#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_HMAC_SHA512 == ENABLED)
     memset_safe(ipad_xor_arr, MAX_BYTE_VALUE, sizeof(ipad_xor_arr));
 #endif /* SECURED_HMAC_SHA512 */
 
@@ -104,14 +104,15 @@ SECURITY_FUNCTION_BEGIN;
     SECURITY_CHECK_RES(sha512_finish(&ctx->sha_ctx, out));
     
     SECURITY_CHECK_RES(sha512_init(&ctx->sha_ctx));
-    SECURITY_CHECK_RES(sha512_update(&ctx->sha_ctx, opad_xor_arr, HMAC_SHA512_BLOCK_SIZE));
+    SECURITY_CHECK_RES(sha512_update(&ctx->sha_ctx, opad_xor_arr, 
+                                    HMAC_SHA512_BLOCK_SIZE));
     SECURITY_CHECK_RES(sha512_update(&ctx->sha_ctx, out, HMAC_SHA512_HASH_SIZE));
     SECURITY_CHECK_RES(sha512_finish(&ctx->sha_ctx, out));
 
 
 SECURITY_FUNCTION_EXIT:
 
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || defined(SECURED_HMAC_SHA512)
+#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_HMAC_SHA512 == ENABLED)
     memset_safe(opad_xor_arr, MAX_BYTE_VALUE, sizeof(opad_xor_arr));
     if (SECURITY_FUNCTION_RET_VAR != SECURITY_STATUS_OK)
     {
@@ -124,7 +125,8 @@ SECURITY_FUNCTION_EXIT:
 
 
 security_status_e hmac_sha512(const uint8_t *key, uint32_t key_len, 
-                const uint8_t *data, uint32_t data_len, uint8_t *out)
+                                const uint8_t *data, uint32_t data_len, 
+                                uint8_t *out)
 {
 SECURITY_FUNCTION_BEGIN;
 
@@ -134,9 +136,10 @@ SECURITY_FUNCTION_BEGIN;
     SECURITY_CHECK_RES(hmac_sha512_update(&ctx, data, data_len));
     SECURITY_CHECK_RES(hmac_sha512_finish(&ctx, out));
 
+
 SECURITY_FUNCTION_EXIT:
 
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || defined(SECURED_HMAC_SHA512)
+#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_HMAC_SHA512 == ENABLED)
     memset_safe(&ctx, MAX_BYTE_VALUE, sizeof(ctx));
 #endif /* SECURED_HMAC_SHA512 */
 
