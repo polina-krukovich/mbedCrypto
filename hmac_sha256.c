@@ -3,6 +3,11 @@
 #define IPAD_BYTE           (U8(0x36))
 #define OPAD_BYTE           (U8(0x5C))
 
+#if (HMAC_SHA256_MIN_SIZE == ENABLED)
+#ifndef mem_xor
+    #error "mem_xor not defined. See mem_xor interface in security.h"
+#endif /* mem_xor */
+#endif /* HMAC_SHA256_MIN_SIZE */
 
 security_status_e hmac_sha256_init(hmac_sha256_t *ctx, const uint8_t *key, 
                                     uint32_t key_len)
@@ -31,6 +36,9 @@ SECURITY_FUNCTION_BEGIN;
     }
 
     /* xor IPAD and key */
+#if (HMAC_SHA256_MIN_SIZE == ENABLED)
+    mem_xor(ipad_xor_arr, ctx->key, HMAC_SHA256_BLOCK_SIZE);
+#else /* HMAC_SHA256_MIN_SIZE */
     for (uint32_t i = 0; i < HMAC_SHA256_BLOCK_SIZE;)
     {
         ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
@@ -41,10 +49,18 @@ SECURITY_FUNCTION_BEGIN;
         ++i;
         ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
         ++i;
+        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ++i;
+        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ++i;
+        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ++i;
+        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ++i;
     }
+#endif /* HMAC_SHA256_MIN_SIZE */
 
-    SECURITY_CHECK_RES(sha256_update(&ctx->sha_ctx, ipad_xor_arr, 
-                                    HMAC_SHA256_BLOCK_SIZE));
+    SECURITY_CHECK_RES(sha256_update(&ctx->sha_ctx, ipad_xor_arr, HMAC_SHA256_BLOCK_SIZE));
 
 
 SECURITY_FUNCTION_EXIT:
@@ -58,7 +74,7 @@ SECURITY_FUNCTION_EXIT:
 
 
 security_status_e hmac_sha256_update(hmac_sha256_t *ctx, const uint8_t *data, 
-                                        uint32_t data_len)
+                                    uint32_t data_len)
 {
 SECURITY_FUNCTION_BEGIN;
 
@@ -91,6 +107,9 @@ SECURITY_FUNCTION_BEGIN;
     SECURITY_CHECK_VALID_NOT_NULL(memset(opad_xor_arr, 
                                     OPAD_BYTE, sizeof(opad_xor_arr)));
     /* xor OPAD and key */
+#if (HMAC_SHA256_MIN_SIZE == ENABLED)
+    mem_xor(opad_xor_arr, ctx->key, HMAC_SHA256_BLOCK_SIZE);
+#else /* HMAC_SHA256_MIN_SIZE */
     for (uint32_t i = 0; i < HMAC_SHA256_BLOCK_SIZE;)
     {
         opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
@@ -101,7 +120,16 @@ SECURITY_FUNCTION_BEGIN;
         ++i;
         opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
         ++i;
+        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        ++i;
+        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        ++i;
+        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        ++i;
+        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        ++i;
     }
+#endif /* HMAC_SHA256_MIN_SIZE */
 
     SECURITY_CHECK_RES(sha256_finish(&ctx->sha_ctx, out));
     
@@ -126,8 +154,8 @@ SECURITY_FUNCTION_EXIT:
 
 
 security_status_e hmac_sha256(const uint8_t *key, uint32_t key_len, 
-                                const uint8_t *data, uint32_t data_len, 
-                                uint8_t *out)
+                            const uint8_t *data, uint32_t data_len, 
+                            uint8_t *out)
 {
 SECURITY_FUNCTION_BEGIN;
 
