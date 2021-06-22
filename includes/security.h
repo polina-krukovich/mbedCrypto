@@ -33,7 +33,8 @@
  */
 #ifndef memset_safe
 #define memset_safe                               memset
-#endif 
+
+#define mem_xor                                   mem_xor_secured
 
 #define MAX_BYTE_VALUE                            0xFF
 #define MAX_SHORT_VALUE                           0xFFFF
