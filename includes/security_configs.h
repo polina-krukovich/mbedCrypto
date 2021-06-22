@@ -221,48 +221,16 @@
  * @brief When this macro is enabled algorithm try to implementation that
  * takes less physical memory but much time.
  */
-#ifndef PBKDF2_HMAC_SHA1_MIN_SIZE
-	#define PBKDF2_HMAC_SHA1_MIN_SIZE                (ENABLED)
+#ifndef PBKDF2_MIN_SIZE
+	#define PBKDF2_MIN_SIZE                			 (ENABLED)
 #endif
 
 /**
  * @brief When this macro is enabled algorithm try to implementation that
  * takes less physical memory but much time.
  */
-#ifndef PBKDF2_HMAC_SHA256_MIN_SIZE
-	#define PBKDF2_HMAC_SHA256_MIN_SIZE              (ENABLED)
-#endif
-
-/**
- * @brief When this macro is enabled algorithm try to implementation that
- * takes less physical memory but much time.
- */
-#ifndef PBKDF2_HMAC_SHA512_MIN_SIZE
-	#define PBKDF2_HMAC_SHA512_MIN_SIZE              (ENABLED)
-#endif
-
-/**
- * @brief When this macro is enabled algorithm try to implementation that
- * takes less physical memory but much time.
- */
-#ifndef KBKDF_HMAC_SHA1_MIN_SIZE
-	#define KBKDF_HMAC_SHA1_MIN_SIZE                 (ENABLED)
-#endif
-
-/**
- * @brief When this macro is enabled algorithm try to implementation that
- * takes less physical memory but much time.
- */
-#ifndef KBKDF_HMAC_SHA256_MIN_SIZE
-	#define KBKDF_HMAC_SHA256_MIN_SIZE               (ENABLED)
-#endif
-
-/**
- * @brief When this macro is enabled algorithm try to implementation that
- * takes less physical memory but much time.
- */
-#ifndef KBKDF_HMAC_SHA512_MIN_SIZE
-	#define KBKDF_HMAC_SHA512_MIN_SIZE               (ENABLED)
+#ifndef KBKDF_MIN_SIZE
+	#define KBKDF_MIN_SIZE                 			 (ENABLED)
 #endif
 
 
