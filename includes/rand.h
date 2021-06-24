@@ -11,7 +11,7 @@
 **************************************************************************/
 /*!
 *   @file rand.h
-*   @brief File contains API for PRNG functions.
+*   @brief File contains API for rundom number and sequnces generating.
 *	@author Zontec
 *	@version 1.1
 *	@date 2021.06.19
@@ -22,17 +22,52 @@
 #include "security.h"
 
 /**
- * @brief PRNG function
- * 
+ * @brief Set new seed for random functions
+ * @param seed Seed to be set for random functions
+ */
+void srand(uint32_t seed);
+
+/**
+ * @brief Function generate determenistic rundom nambersed. It implements it 
+ * based on 4 ways:
+ * 1) If RAND_PRF macro is defined as RAND_PRF_SHA - SHA 256 with 
+ * counter(inc seed) is used
+ * 2) If RAND_PRF macro is defined as RAND_PRF_AES - AES 256 with 
+ * counter(inc seed) is used
+ * 3) If RAND_PRF macro is defined as RAND_PRF_FAST - fast option 
+ * based on POSIX rand function
  * @return int32_t random number
  */
 int32_t rand();
 
 /**
- * @brief Set new seed for PRNG
+ * @brief 
  * 
- * @param seed Seed to be set for PRNG
+ * @return int32_t 
  */
-void srand(uint32_t seed);
+int32_t secure_rand();
+
+#ifdef HW_TRNG || DOXYGEN
+
+/**
+ * @brief True rundom number generator
+ * 
+ * @return int32_t 
+ */
+int32_t trng_rand();
+
+#endif
+
+/**
+ * @brief 
+ * 
+ * @param dst 
+ * @param size 
+ * @param rnd_gen 
+ * @return int32_t 
+ */
+int32_t rand_array(uint8_t *dst, uint32_t size, int32_t (*rnd_gen)());
+
+
 
 #endif /* RAND_H */
