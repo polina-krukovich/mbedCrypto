@@ -35,6 +35,23 @@
 
 
 /**
+ * @brief Counter mode for Deterministic Random Bit Generator
+ */
+#define RAND_CTR_DRBG           					  (ENABLED)
+
+
+/**
+ * @brief Dual Elliptic Curve mode for Deterministic Random Bit Generator
+ */
+#define RAND_DUAL_EC_DRBG       					  (DISABLED)
+
+
+#if (RAND_CTR_DRBG + RAND_DUAL_EC_DRBG != 1)
+	#error "Only one option for RAND can be enabled"
+#endif
+
+
+/**
  * @brief PBKDF2_HMAC_SHA1 does enable or disable PBKDF2(PKCS #5 v2.0 - RFC 2898)
  *  with HMAC function based on SHA1. 
  */
