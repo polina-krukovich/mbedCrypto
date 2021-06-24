@@ -32,11 +32,11 @@
  * By default: memset
  */
 #ifndef memset_safe
-#define memset_safe                               memset
+    #define memset_safe                           memset
 #endif 
 
 #ifndef mem_xor
-#define mem_xor                                   mem_xor_secured
+    #define mem_xor                               mem_xor_secured
 #endif 
 
 #define MAX_BYTE_VALUE                            0xFF
