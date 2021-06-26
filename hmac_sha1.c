@@ -4,9 +4,9 @@
 #define OPAD_BYTE           (U8(0x5C))
 
 #if (HMAC_SHA1_MIN_SIZE == ENABLED)
-#ifndef mem_xor
-    #error "mem_xor not defined. See mem_xor interface in security.h"
-#endif /* mem_xor */
+    #ifndef mem_xor
+        #error "mem_xor not defined. See mem_xor interface in security.h"
+    #endif /* mem_xor */
 #endif /* HMAC_SHA1_MIN_SIZE */
 
 security_status_e hmac_sha1_init(hmac_sha1_t *ctx, const uint8_t *key, 
