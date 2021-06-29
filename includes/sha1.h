@@ -37,6 +37,10 @@ typedef struct sha1_t
 } sha1_t;
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Function inits sha1 context with default values
  * 
@@ -77,5 +81,9 @@ security_status_e SECURITY_API sha1_finish(sha1_t *ctx, uint8_t *out);
  */
 security_status_e SECURITY_API sha1(const uint8_t *data, 
                                     uint32_t data_len, uint8_t *out);
+
+#ifdef __cplusplus
+}
+#endif /*__cplusplus*/
 
 #endif /* SHA1_H */
