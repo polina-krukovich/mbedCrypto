@@ -59,7 +59,7 @@ static uint32_t _kbkdf_counter(kbkdf_hash_type_e hash_type, kbkdf_hmac_callbacks
                                uint8_t *key_out, const uint32_t key_out_len,
                                kbkdf_opts_t *opts)
 {
-    _SECURITY_FUNCTION_BEGIN;
+_SECURITY_FUNCTION_BEGIN;
 
     hmac_init hmac_init = hmac_callbacks.hmac_init;
     hmac_update hmac_update = hmac_callbacks.hmac_update;
@@ -187,7 +187,7 @@ static uint32_t _kbkdf_feedback(kbkdf_hash_type_e hash_type, kbkdf_hmac_callback
                                 uint8_t *key_out, const uint32_t key_out_len,
                                 kbkdf_opts_t *opts)
 {
-    _SECURITY_FUNCTION_BEGIN;
+_SECURITY_FUNCTION_BEGIN;
 
     hmac_init hmac_init = hmac_callbacks.hmac_init;
     hmac_update hmac_update = hmac_callbacks.hmac_update;
@@ -333,7 +333,7 @@ static uint32_t _kbkdf_double_pipeline(kbkdf_hash_type_e hash_type, kbkdf_hmac_c
                                        uint8_t *key_out, const uint32_t key_out_len,
                                        kbkdf_opts_t *opts)
 {
-    _SECURITY_FUNCTION_BEGIN;
+_SECURITY_FUNCTION_BEGIN;
 
     hmac_init hmac_init = hmac_callbacks.hmac_init;
     hmac_update hmac_update = hmac_callbacks.hmac_update;
@@ -493,8 +493,7 @@ security_status_e kbkdf(kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
                         uint8_t *key_out, const uint32_t key_out_len,
                         kbkdf_opts_t *opts)
 {
-
-    _SECURITY_FUNCTION_BEGIN;
+_SECURITY_FUNCTION_BEGIN;
 
     kbkdf_opts_t tmp_opts =
         {
@@ -533,6 +532,7 @@ security_status_e kbkdf(kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
     default:
         _SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL_NOT_IMPLEMENTED;
     }
+    
 _SECURITY_EXIT:
     _SECURITY_FUNCTION_END;
 }
