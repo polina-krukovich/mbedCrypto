@@ -24,6 +24,11 @@
 
 #if (PBKDF2_HMAC_SHA1 == ENABLED) || defined(DOXYGEN)
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief PBKDF2 function that uses HMAC SHA1
  * 
@@ -83,5 +88,9 @@ security_status_e pbkdf2_hmac_sha512(const uint8_t *password, uint32_t pass_len,
                         uint8_t *out, uint32_t out_len);
 
 #endif /* (PBKDF2_HMAC_SHA512 == ENABLED) */
+
+#ifdef __cplusplus
+}
+#endif /*__cplusplus*/
 
 #endif /* PBKDF2_H */
