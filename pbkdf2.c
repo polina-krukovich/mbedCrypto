@@ -6,7 +6,6 @@
 #define PBKDF2_HMAC_SHA512_BUFFER_SIZE          (128)
 #define PBKDF2_HMAC_MAX_BUFFER_SIZE             (PBKDF2_HMAC_SHA512_BUFFER_SIZE)
 
-
 typedef uint32_t (*hmac_init_t)(void *, const uint8_t *, uint32_t );
 typedef uint32_t (*hmac_update_t)(void *, const uint8_t *, uint32_t );
 typedef uint32_t (*hmac_finish_t)(void *, const uint8_t *);
@@ -71,14 +70,31 @@ SECURITY_FUNCTION_BEGIN;
             SECURITY_CHECK_RES(hmac_finish(ctx, U));
             SECURITY_CHECK_RES(hmac_init(ctx, password, pass_len));
             /* Ti = Ti xor Uj */
-#ifdef MEM_XOR
-            MEM_XOR(T, U, U_len);
-#else /* MEM_XOR */
+#if (PBKDF2_MIN_SIZE == ENABLED)
+
+    /* If mem_xor if defined */
+    #ifdef mem_xor
+            mem_xor(T, U, U_len);
+    #else   /* mem_xor */
             for(uint32_t j = 0; j < U_len; ++j)
             {
                 T[j] ^= U[j];
             }
-#endif /* MEM_XOR */
+    #endif /* mem_xor */
+
+#else /* PBKDF2_MIN_SIZE */
+        for(uint32_t j = 0; j < U_len;)
+        {
+            T[j] ^= U[j], ++j;
+            T[j] ^= U[j], ++j;
+            T[j] ^= U[j], ++j;
+            T[j] ^= U[j], ++j;
+            T[j] ^= U[j], ++j;
+            T[j] ^= U[j], ++j;
+            T[j] ^= U[j], ++j;
+            T[j] ^= U[j], ++j;
+        }
+#endif /* PBKDF2_MIN_SIZE */
         }
 
         use_len = (out_len < U_len) ? out_len : U_len;
