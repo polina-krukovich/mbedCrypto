@@ -40,6 +40,10 @@ typedef struct sha256_t
 } sha256_t;
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Function inits sha256 context with default values
  * 
@@ -80,5 +84,9 @@ security_status_e SECURITY_API sha256_finish(sha256_t *ctx, uint8_t *out);
  */
 security_status_e SECURITY_API sha256(const uint8_t *data, 
                                     uint32_t data_len, uint8_t *out);
+
+#ifdef __cplusplus
+}
+#endif /*__cplusplus*/
 
 #endif /* SHA256_H */
