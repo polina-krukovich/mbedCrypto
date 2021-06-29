@@ -40,6 +40,10 @@ typedef struct sha512_t
 } sha512_t;
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Function inits sha512 context with default values
  * 
@@ -80,5 +84,9 @@ security_status_e SECURITY_API sha512_finish(sha512_t *ctx, uint8_t *out);
  */
 security_status_e SECURITY_API sha512(const uint8_t *data, 
                                     uint32_t data_len, uint8_t *out);
+
+#ifdef __cplusplus
+}
+#endif /*__cplusplus*/
 
 #endif /* SHA512_H */
