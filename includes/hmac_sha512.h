@@ -33,6 +33,10 @@ typedef struct hmac_sha512_t
     uint8_t key[HMAC_SHA512_BLOCK_SIZE];
 } hmac_sha512_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Function implements the following functions step by step:
  * hmac_sha512_init, hmac_sha512_update, hmac_sha512_finish
@@ -80,5 +84,9 @@ security_status_e SECURITY_API hmac_sha512_update(hmac_sha512_t *ctx,
  * @return security_status_e 
  */
 security_status_e SECURITY_API hmac_sha512_finish(hmac_sha512_t *ctx, uint8_t *out);
+
+#ifdef __cplusplus
+}
+#endif /*__cplusplus*/
 
 #endif /* HMAC_SHA512_H */
