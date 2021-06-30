@@ -2,12 +2,12 @@
 
 #define BASE_SEED_SIZE      (64)
 
-union rand_seed_e
+union u32_e
 {
     uint32_t dw;
-    uint8_t seed[4];
+    uint16_t w;
+    uint8_t b[4];
 };
-
 
 static volatile uint8_t _seed[BASE_SEED_SIZE] = {0};
 
@@ -22,17 +22,23 @@ static void inc_seed()
     
 }
 
-
-
 void srand(uint32_t seed)
 {
-    union rand_seed_e tmp_seed;
+    union u32_e tmp_seed;
 
     tmp_seed.dw = seed;
-    _seed[0] = tmp_seed.seed[0];
-    _seed[1] = tmp_seed.seed[1];
-    _seed[2] = tmp_seed.seed[2];
-    _seed[3] = tmp_seed.seed[3];
+
+#if defined(PLATFORM_LE)
+    _seed[0] = tmp_seed.b[0];
+    _seed[1] = tmp_seed.b[1];
+    _seed[2] = tmp_seed.b[2];
+    _seed[3] = tmp_seed.b[3];
+#else
+    _seed[0] = tmp_seed.b[3];
+    _seed[1] = tmp_seed.b[2];
+    _seed[2] = tmp_seed.b[1];
+    _seed[3] = tmp_seed.b[0];
+#endif /* PLATFORM_LE */
 
     for (uint32_t i = 4; i < BASE_SEED_SIZE; ++i)
     {
@@ -70,6 +76,31 @@ int32_t rand()
     return res;
 }
 
+void rand_bytes(uint8_t *dst, uint32_t size)
+{
+    if (!size || !dst)
+    {
+        return;
+    }
+
+    uint8_t hash[SHA256_HASH_SIZE];
+    uint32_t blocks = size / SHA256_HASH_SIZE;
+    uint32_t left = size - blocks * SHA256_HASH_SIZE;
+
+    for (uint32_t i = 0; i < blocks; ++i, dst += SHA256_HASH_SIZE)
+    {
+        sha256(_seed, SHA256_HASH_SIZE, dst);
+        inc_seed();
+    }
+
+    if (left)
+    {
+        sha256(_seed, SHA256_HASH_SIZE, hash);
+        memcpy(dst, hash, left);
+        memset(hash, 0xFF, SHA256_HASH_SIZE);
+        inc_seed();
+    }
+}
 
 #elif (RAND_CTR_DRBG == ENABLED)
 
