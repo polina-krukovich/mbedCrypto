@@ -21,6 +21,10 @@
 
 #include "security.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Set new seed for random functions
  * @param seed Seed to be set for random functions
@@ -58,16 +62,12 @@ int32_t trng_rand();
 
 #endif
 
-/**
- * @brief 
- * 
- * @param dst 
- * @param size 
- * @param rnd_gen 
- * @return int32_t 
- */
-int32_t rand_array(uint8_t *dst, uint32_t size, int32_t (*rnd_gen)());
+void rand_bytes_ex(uint8_t *dst, uint32_t size, int32_t (*rnd_gen)());
 
+void rand_bytes(uint8_t *dst, uint32_t size);
 
+#ifdef __cplusplus
+}
+#endif /*__cplusplus*/
 
 #endif /* RAND_H */
