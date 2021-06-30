@@ -46,6 +46,42 @@ void srand(uint32_t seed)
     }
 }
 
+void rand_bytes_ex(uint8_t *dst, uint32_t size, int32_t (*rnd_gen)())
+{
+    union u32_e tmp;
+    uint32_t blocks = size >> 2;
+    uint32_t left = size & 3;
+    
+#if defined(PLATFORM_LE)
+    for (uint32_t i = 0; i < blocks; ++i, dst += 4)
+    {
+        tmp.dw = U32(rnd_gen());
+        dst[0] = tmp.b[0];
+        dst[1] = tmp.b[1];
+        dst[2] = tmp.b[2];
+        dst[3] = tmp.b[3];
+    }
+    while (left--)
+    {
+        dst[left] = tmp.b[left];
+    }
+#else
+    for (uint32_t i = 0; i < blocks; ++i, dst += 4)
+    {
+        tmp.dw = U32(rnd_gen());
+        dst[0] = tmp.b[3];
+        dst[1] = tmp.b[2];
+        dst[2] = tmp.b[1];
+        dst[3] = tmp.b[0];
+    }
+    uint32_t j = 0;
+    while (left--)
+    {
+        dst[0 + j++] = tmp.b[left];
+    }
+#endif /* PLATFORM_LE */
+
+}
 
 #if (RAND_PRNG_SHA256 == ENABLED)
 
