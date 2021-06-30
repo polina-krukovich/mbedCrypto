@@ -1,26 +1,93 @@
 #include "rand.h"
-#include "sha256.h"
 
-#define BASE_SEED_SIZE      (32)
+#define BASE_SEED_SIZE      (64)
 
-static volatile uint8_t _seed[BASE_SEED_SIZE] = 
+union rand_seed_e
 {
-    0x12, 0x22, 0xAF, 0xAC, 0xBA, 0xFC, 0xAC, 0x44,
-    0x12, 0x22, 0xAF, 0xAC, 0xBA, 0xFC, 0xCD, 0x00,
-    0x12, 0x22, 0xAF, 0x36, 0xBA, 0xFC, 0x11, 0xFF,
-    0x12, 0x22, 0xAF, 0xAC, 0xBA, 0xFC, 0x00, 0x5c
+    uint32_t dw;
+    uint8_t seed[4];
 };
+
+
+static volatile uint8_t _seed[BASE_SEED_SIZE] = {0};
+
+static void inc_seed()
+{
+    uint32_t i = 0;
+
+    while (++_seed[i] == 0 && i < BASE_SEED_SIZE)
+    {
+        ++i;
+    }
+    
+}
+
+
 
 void srand(uint32_t seed)
 {
-    *(UPTR32(_seed)) ^= (((seed * 214013L + 2531011L) >> 16) & 0x7fff);
-    *(UPTR32(_seed) + 1) ^= (seed * 211113L + 2531011L);
-    *(UPTR32(_seed) + 2) ^= (seed * 210213L + 9121019L);
-    *(UPTR32(_seed) + 3) ^= (seed * 331217L + 3291227L) + *(UPTR32(_seed));
-    *(UPTR32(_seed) + 4) ^= (seed * 214017L + 2531011L);
-    *(UPTR32(_seed) + 5) ^=  ~*(UPTR32(_seed) + 2) ^ ~ *(UPTR32(_seed) + 4);
-    *(UPTR32(_seed) + 6) ^=  *(UPTR32(_seed) + 6) + *(UPTR32(_seed) + 1);
-    *(UPTR32(_seed) + 7) += 0xFA13;
+    union rand_seed_e tmp_seed;
+
+    tmp_seed.dw = seed;
+    _seed[0] = tmp_seed.seed[0];
+    _seed[1] = tmp_seed.seed[1];
+    _seed[2] = tmp_seed.seed[2];
+    _seed[3] = tmp_seed.seed[3];
+
+    for (uint32_t i = 4; i < BASE_SEED_SIZE; ++i)
+    {
+        _seed[i] = _seed[i - 1] + _seed[i - 2];
+    }
+}
+
+
+#if (RAND_PRNG_SHA256 == ENABLED)
+
+#include "sha256.h"
+
+int32_t rand()
+{
+    uint8_t hash[SHA256_HASH_SIZE];
+    int32_t res = 0;
+
+    sha256(_seed, BASE_SEED_SIZE, hash);
+
+    res |= hash[0];
+    res <<= 8;
+
+    res |= hash[1];
+    res <<= 8;
+
+    res |= hash[2];
+    res <<= 8;
+
+    res |= hash[3];
+
+    inc_seed();
+
+    memset(hash, 0xFF, SHA256_HASH_SIZE);
+
+    return res;
+}
+
+
+#elif (RAND_CTR_DRBG == ENABLED)
+
+#endif
+
+
+
+
+#ifdef RAND_EXPERIMENTAL
+
+
+//holdrand = holdrand * 214013L + 2531011L
+void srand(uint32_t seed)
+{
+    for (uint32_t i = 0; i < BASE_SEED_SIZE; ++i)
+    {
+        _seed[i] = _seed[i] ^ ((seed >> (i & 3)) & 0xFF);
+    }
 }
 
 int32_t rand()
@@ -52,3 +119,5 @@ int32_t rand()
 #endif
     return res;
 }
+
+#endif /* RAND_EXPERIMENTAL */
