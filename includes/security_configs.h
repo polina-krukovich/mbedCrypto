@@ -34,10 +34,17 @@
 #endif /* SECURITY_LEVEL */
 
 
+
+/**
+ * @brief SHA256 as PRNG
+ */
+#define RAND_PRNG_SHA256           					  (ENABLED)
+
+
 /**
  * @brief Counter mode for Deterministic Random Bit Generator
  */
-#define RAND_CTR_DRBG           					  (ENABLED)
+#define RAND_CTR_DRBG           					  (DISABLED)
 
 
 /**
@@ -46,7 +53,7 @@
 #define RAND_DUAL_EC_DRBG       					  (DISABLED)
 
 
-#if (RAND_CTR_DRBG + RAND_DUAL_EC_DRBG != 1)
+#if (RAND_CTR_DRBG + RAND_DUAL_EC_DRBG + RAND_PRNG_SHA256 != 1)
 	#error "Only one option for RAND can be enabled"
 #endif
 
