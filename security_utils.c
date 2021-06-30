@@ -11,3 +11,9 @@ void mem_xor_secured(uint8_t *dst, const uint8_t *src, uint32_t size)
         dst[i] ^= src[i];
     }
 }
+
+uint32_t is_le()
+{
+    uint16_t d = 1;
+    return (d & 0xff);
+}

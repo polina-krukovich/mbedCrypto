@@ -9,6 +9,8 @@ extern "C" {
 
 void mem_xor_secured(uint8_t *dst, const uint8_t *src, uint32_t size);
 
+uint32_t is_le();
+
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
