@@ -508,13 +508,21 @@ SECURITY_FUNCTION_EXIT:
     SECURITY_FUNCTION_RETURN;
 }
 
-security_status_e aes_encrypt(const uint8_t *data, uint32_t data_len, aes_key_t *key, uint8_t *out)
+security_status_e aes_encrypt(aes_mode_e mode, const uint8_t *data, 
+                                uint32_t data_len, const uint8_t iv[AES_BLOCK_SIZE], 
+                                aes_key_t *key, uint8_t *out)
 {
 SECURITY_FUNCTION_BEGIN;
 
     SECURITY_CHECK_VALID_NOT_NULL(data);
     SECURITY_CHECK_VALID_NOT_NULL(key);
     SECURITY_CHECK_VALID_NOT_NULL(out);
+
+    const uint8_t new_iv[AES_BLOCK_SIZE] = {0};
+    if (iv)
+    {
+        memcpy(new_iv, iv, AES_BLOCK_SIZE);
+    }
 
     uint8_t data_block_left[AES_BLOCK_SIZE];
 
