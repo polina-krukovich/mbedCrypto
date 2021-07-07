@@ -13,6 +13,7 @@
 #include "sha256.h"
 #include "sha512.h"
 #include "pbkdf2.h"
+#include "rand.h"
 
 #include "hmac_sha1.h"
 #include "hmac_sha256.h"
@@ -319,6 +320,11 @@ void test_pbkdf2_hmac_sha512()
     assert(cnt == sha_test_len);
 }
 
+int abs(int a)
+{
+    return a >= 0 ? a : -a;
+}
+
 int main()
 {
     
@@ -333,6 +339,24 @@ int main()
     test_pbkdf2_hmac_sha1();
     test_pbkdf2_hmac_sha256();
     test_pbkdf2_hmac_sha512();
+
+    srand(312);
+    int cnt[10] = {0};
+
+    uint8_t data[10000];
+    printf("%d", is_le());  
+    rand_bytes_ex(data, 10000, rand);
+    for (int i = 0; i < 10000; i ++)
+    {
+        cnt[abs(data[i])%10]++;
+    }
+
+
+    for (int i = 0; i < 10; i++)
+    {
+        printf("%d ", cnt[i]);
+    }
+    printf("\n");
 
     uint8_t out[128];
     uint8_t out1[128];
