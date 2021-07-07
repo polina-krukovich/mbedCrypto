@@ -8,7 +8,7 @@ SRCS += hmac_sha256.c
 SRCS += hmac_sha512.c
 
 SRCS += pbkdf2.c
-#SRCS += kbkdf.c
+SRCS += kbkdf.c
 #SRCS += bignum.c
 #SRCS += rsa.c
 SRCS += rand.c
