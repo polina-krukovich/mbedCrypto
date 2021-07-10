@@ -41,21 +41,21 @@ SECURITY_FUNCTION_BEGIN;
 #else /* HMAC_SHA256_MIN_SIZE */
     for (uint32_t i = 0; i < HMAC_SHA256_BLOCK_SIZE;)
     {
-        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ipad_xor_arr[i] = (ipad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ipad_xor_arr[i] = (ipad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ipad_xor_arr[i] = (ipad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ipad_xor_arr[i] = (ipad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ipad_xor_arr[i] = (ipad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ipad_xor_arr[i] = (ipad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ipad_xor_arr[i] = (ipad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        ipad_xor_arr[i] = (uint8_t)(ipad_xor_arr[i] ^ ctx->key[i]);
+        ipad_xor_arr[i] = (ipad_xor_arr[i] ^ ctx->key[i]);
         ++i;
     }
 #endif /* HMAC_SHA256_MIN_SIZE */
@@ -112,21 +112,21 @@ SECURITY_FUNCTION_BEGIN;
 #else /* HMAC_SHA256_MIN_SIZE */
     for (uint32_t i = 0; i < HMAC_SHA256_BLOCK_SIZE;)
     {
-        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        opad_xor_arr[i] = (opad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        opad_xor_arr[i] = (opad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        opad_xor_arr[i] = (opad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        opad_xor_arr[i] = (opad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        opad_xor_arr[i] = (opad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        opad_xor_arr[i] = (opad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        opad_xor_arr[i] = (opad_xor_arr[i] ^ ctx->key[i]);
         ++i;
-        opad_xor_arr[i] = U8(opad_xor_arr[i] ^ ctx->key[i]);
+        opad_xor_arr[i] = (opad_xor_arr[i] ^ ctx->key[i]);
         ++i;
     }
 #endif /* HMAC_SHA256_MIN_SIZE */
