@@ -6,15 +6,9 @@
 #define PBKDF2_HMAC_SHA512_BUFFER_SIZE          (128)
 #define PBKDF2_HMAC_MAX_BUFFER_SIZE             (PBKDF2_HMAC_SHA512_BUFFER_SIZE)
 
-typedef uint32_t (*hmac_init_t)(void *, const uint8_t *, uint32_t );
-typedef uint32_t (*hmac_update_t)(void *, const uint8_t *, uint32_t );
-typedef uint32_t (*hmac_finish_t)(void *, const uint8_t *);
-
-
-
-static security_status_e pbkdf2_hmac(void *ctx, hmac_init_t hmac_init,
+static security_status_e _pbkdf2_hmac(void *ctx, hmac_init_t hmac_init,
                                         hmac_update_t hmac_update, 
-                                        hmac_finish_t hmac_finish,
+                                        hmac_final_t hmac_finish,
                                         uint32_t hmac_size, const uint8_t *password, 
                                         uint32_t pass_len, const uint8_t *salt, 
                                         uint32_t salt_len, uint32_t iters, 
@@ -151,7 +145,7 @@ SECURITY_FUNCTION_BEGIN;
     hmac_sha1_t hmac;
 
     SECURITY_CHECK_RES(
-        pbkdf2_hmac(&hmac, hmac_sha1_init, hmac_sha1_update, hmac_sha1_finish,
+        _pbkdf2_hmac(&hmac, hmac_sha1_init, hmac_sha1_update, hmac_sha1_finish,
                 HMAC_SHA1_HASH_SIZE, password, pass_len, salt, salt_len, iters,
                 out, out_len)
     );
@@ -184,7 +178,7 @@ SECURITY_FUNCTION_BEGIN;
     hmac_sha256_t hmac;
 
     SECURITY_CHECK_RES(
-        pbkdf2_hmac(&hmac, hmac_sha256_init, hmac_sha256_update, hmac_sha256_finish,
+        _pbkdf2_hmac(&hmac, hmac_sha256_init, hmac_sha256_update, hmac_sha256_finish,
                 HMAC_SHA256_HASH_SIZE, password, pass_len, salt, salt_len, iters,
                 out, out_len)
     );
@@ -217,7 +211,7 @@ SECURITY_FUNCTION_BEGIN;
     hmac_sha512_t hmac;
 
     SECURITY_CHECK_RES(
-        pbkdf2_hmac(&hmac, hmac_sha512_init, hmac_sha512_update, hmac_sha512_finish,
+        _pbkdf2_hmac(&hmac, hmac_sha512_init, hmac_sha512_update, hmac_sha512_finish,
                 HMAC_SHA512_HASH_SIZE, password, pass_len, salt, salt_len, iters,
                 out, out_len)
     );
