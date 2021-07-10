@@ -46,7 +46,6 @@ SECURITY_FUNCTION_BEGIN;
 
     SECURITY_CHECK_VALID_NOT_NULL(memset(ctr, 0x00, ctr_len));
 
-    SECURITY_CHECK_RES(hmac_init(ctx, password, pass_len));
     /* by default ctr = 1 */
     /* LE is used */
     ctr[3] = 1;
@@ -54,15 +53,17 @@ SECURITY_FUNCTION_BEGIN;
     while (out_len != 0)
     {
         /* salt||ctr */
+        SECURITY_CHECK_RES(hmac_init(ctx, password, pass_len));
         SECURITY_CHECK_RES(hmac_update(ctx, salt, salt_len));
         SECURITY_CHECK_RES(hmac_update(ctx, ctr, ctr_len));
         SECURITY_CHECK_RES(hmac_finish(ctx, T));
         
         
-        SECURITY_CHECK_RES(hmac_init(ctx, password, pass_len));
     
         SECURITY_CHECK_VALID_NOT_NULL(memcpy(U, T, U_len));
 
+        SECURITY_CHECK_RES(hmac_init(ctx, password, pass_len));
+        
         for(uint32_t i = 1; i < iters; ++i)
         {   
             /* Uj= HMAC(P, Uj-1) */
