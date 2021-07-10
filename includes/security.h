@@ -27,6 +27,12 @@
 #include "security_defines.h"
 #include "security_configs.h"
 
+
+
+typedef uint32_t (*hmac_init_t)(void * __restrict, const uint8_t * __restrict, uint32_t );
+typedef uint32_t (*hmac_update_t)(void * __restrict, const uint8_t * __restrict, uint32_t );
+typedef uint32_t (*hmac_final_t)(void * __restrict, const uint8_t * __restrict);
+
 /**
  * @brief Should be defined a safe function for memset with no return value.
  * By default: memset
