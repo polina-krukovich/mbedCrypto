@@ -33,27 +33,13 @@ typedef enum kbkdf_hash_type_e
 } kbkdf_hash_type_e;
 
 /**
- * @brief HMAC init callback
- */
-typedef uint32_t(*hmac_init)(void *ctx, const uint8_t *key, const uint32_t key_size);
-/**
- * @brief HMAC init update
- */
-typedef uint32_t(*hmac_update)(void *ctx, 
-                                const uint8_t *data, const uint32_t data_size);
-/**
- * @brief HMAC init final
- */
-typedef uint32_t(*hmac_final)(void *ctx, uint8_t *hmac);
-
-/**
  * @brief Struct contains callbacks for hmac functions that used in KBKDF
  */
 typedef struct kbkdf_hmac_callbacks_t
 {
-    hmac_init hmac_init;
-    hmac_update hmac_update;
-    hmac_final hmac_final;
+    hmac_init_t hmac_init;
+    hmac_update_t hmac_update;
+    hmac_final_t hmac_final;
 } kbkdf_hmac_callbacks_t;
 
 /**
@@ -98,7 +84,7 @@ extern "C" {
 * @param[in] opts Counter options
 * @return security_status_e
 */
-security_status_e kbkdf(kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
+security_status_e kbkdf(void *prf_ctx, kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
                         kbkdf_hmac_callbacks_t hmac_callbacks,
                         const uint8_t* key_in, const uint32_t key_in_len,
                         const uint8_t* iv_in, const uint32_t iv_in_len,
