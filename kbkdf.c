@@ -53,17 +53,18 @@ static void _shift_array_right(uint8_t *array, uint32_t length, uint32_t shift, 
     }
 }
 
-static uint32_t _kbkdf_counter(kbkdf_hash_type_e hash_type, kbkdf_hmac_callbacks_t hmac_callbacks,
+static uint32_t _kbkdf_counter(void *ctx, kbkdf_hash_type_e hash_type, 
+                               kbkdf_hmac_callbacks_t hmac_callbacks,
                                const uint8_t *key_in, const uint32_t key_in_len,
                                uint8_t *fixed_input, const uint32_t fixed_input_len,
                                uint8_t *key_out, const uint32_t key_out_len,
                                kbkdf_opts_t *opts)
 {
-_SECURITY_FUNCTION_BEGIN;
+SECURITY_FUNCTION_BEGIN;
 
-    hmac_init hmac_init = hmac_callbacks.hmac_init;
-    hmac_update hmac_update = hmac_callbacks.hmac_update;
-    hmac_final hmac_final = hmac_callbacks.hmac_final;
+    hmac_init_t hmac_init = hmac_callbacks.hmac_init;
+    hmac_update_t hmac_update = hmac_callbacks.hmac_update;
+    hmac_final_t hmac_final = hmac_callbacks.hmac_final;
 
     uint32_t hmac_size;
     uint32_t full_blocks;
@@ -78,8 +79,8 @@ _SECURITY_FUNCTION_BEGIN;
 
     if (opts->ctr_rlen > RLEN)
     {
-        _SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL;
-        goto _SECURITY_EXIT;
+        SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL;
+        goto SECURITY_FUNCTION_EXIT;
     }
 
     hmac_size = kbkdf_hash_size[hash_type];
@@ -98,11 +99,11 @@ _SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(i, ctr, 0);
         ctr[4] = 0;
 
-        _SECURITY_VALID_RES(hmac_init(key_in, key_in_len));
+        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
 
         if (rpos > 0)
         {
-            _SECURITY_VALID_RES(hmac_update(fixed_input, rpos));
+            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, rpos));
         }
         if (opts->ctr_rlen > 0)
         {
@@ -113,17 +114,17 @@ _SECURITY_FUNCTION_BEGIN;
                                     (fixed_input[rpos] & BIT_MASK_LEFT(rpos_modulo)));
                 ctr[4] |= fixed_input[rpos] & BIT_MASK_RIGHT(8 - rpos_modulo);
             }
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), 
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), 
                                 opts->ctr_rlen + ((rpos_modulo > 0) ? 1 : 0)));
         }
         if ((rpos_fixed != fixed_input_len) &&
-            (_SECURITY_FUNCTION_RET_VAR = hmac_update(fixed_input + rpos_fixed, 
+            (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + rpos_fixed, 
                                             fixed_input_len - rpos_fixed) != SECURITY_STATUS_OK))
         {
-            goto _SECURITY_EXIT;
+            goto SECURITY_FUNCTION_EXIT;
         }
 
-        _SECURITY_VALID_RES(hmac_final(key_out));
+        SECURITY_CHECK_RES(hmac_final(ctx, key_out));
         key_out_last = key_out;
     }
     if (leftover)
@@ -133,11 +134,11 @@ _SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(full_blocks + 1, ctr, 0);
         ctr[4] = 0;
 
-        _SECURITY_VALID_RES(hmac_init(key_in, key_in_len));
+        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
 
         if (rpos > 0)
         {
-            _SECURITY_VALID_RES(hmac_update(fixed_input, rpos));
+            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, rpos));
         }
         if (opts->ctr_rlen > 0)
         {
@@ -148,20 +149,20 @@ _SECURITY_FUNCTION_BEGIN;
                                     (fixed_input[rpos] & BIT_MASK_LEFT(rpos_modulo)));
                 ctr[4] |= fixed_input[rpos] & BIT_MASK_RIGHT(8 - rpos_modulo);
             }
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), 
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), 
                             opts->ctr_rlen + ((rpos_modulo > 0) ? 1 : 0)));
         }
         if ((rpos_fixed != fixed_input_len) &&
-            (_SECURITY_FUNCTION_RET_VAR = hmac_update(fixed_input + rpos_fixed, 
+            (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + rpos_fixed, 
                                             fixed_input_len - rpos_fixed) != SECURITY_STATUS_OK))
         {
-            goto _SECURITY_EXIT;
+            goto SECURITY_FUNCTION_EXIT;
         }
 
-        _SECURITY_VALID_RES(hmac_final(last_block));
+        SECURITY_CHECK_RES(hmac_final(ctx, last_block));
 
-        _SECURITY_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
-        _SECURITY_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
+        SECURITY_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
+        SECURITY_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
 
         if (modulo)
         {
@@ -176,22 +177,23 @@ _SECURITY_FUNCTION_BEGIN;
         }
     }
 
-_SECURITY_EXIT:
-    _SECURITY_FUNCTION_END;
+SECURITY_FUNCTION_EXIT:
+    SECURITY_FUNCTION_RETURN;
 }
 
-static uint32_t _kbkdf_feedback(kbkdf_hash_type_e hash_type, kbkdf_hmac_callbacks_t hmac_callbacks,
+static uint32_t _kbkdf_feedback(void *ctx, kbkdf_hash_type_e hash_type, 
+                                kbkdf_hmac_callbacks_t hmac_callbacks,
                                 const uint8_t *key_in, const uint32_t key_in_len,
                                 const uint8_t *iv_in, const uint32_t iv_in_len,
                                 uint8_t *fixed_input, const uint32_t fixed_input_len,
                                 uint8_t *key_out, const uint32_t key_out_len,
                                 kbkdf_opts_t *opts)
 {
-_SECURITY_FUNCTION_BEGIN;
+SECURITY_FUNCTION_BEGIN;
 
-    hmac_init hmac_init = hmac_callbacks.hmac_init;
-    hmac_update hmac_update = hmac_callbacks.hmac_update;
-    hmac_final hmac_final = hmac_callbacks.hmac_final;
+    hmac_init_t hmac_init = hmac_callbacks.hmac_init;
+    hmac_update_t hmac_update = hmac_callbacks.hmac_update;
+    hmac_final_t hmac_final = hmac_callbacks.hmac_final;
 
     const uint8_t *k_i_1 = iv_in;
     uint32_t k_i_1_len = 0;
@@ -205,8 +207,8 @@ _SECURITY_FUNCTION_BEGIN;
 
     if (opts->ctr_rlen > RLEN)
     {
-        _SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL;
-        goto _SECURITY_EXIT;
+        SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL;
+        goto SECURITY_FUNCTION_EXIT;
     }
 
     hmac_size = kbkdf_hash_size[hash_type];
@@ -226,40 +228,40 @@ _SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(i, ctr, 0);
         ctr[4] = 0;
 
-        _SECURITY_VALID_RES(hmac_init(key_in, key_in_len));
+        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
         if ((opts->ctr_rpos == -1) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
         if ((k_i_1_len > 0) && 
-            (_SECURITY_FUNCTION_RET_VAR = hmac_update(k_i_1, k_i_1_len) != SECURITY_STATUS_OK))
+            (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, k_i_1, k_i_1_len) != SECURITY_STATUS_OK))
         {
-            goto _SECURITY_EXIT;
+            goto SECURITY_FUNCTION_EXIT;
         }
 
         if ((opts->ctr_rpos == 0) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
         if ((opts->ctr_rpos > 0) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(fixed_input, opts->ctr_rpos / 8));
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
             if ((opts->ctr_rpos != (int64_t)fixed_input_len) &&
-                (_SECURITY_FUNCTION_RET_VAR = hmac_update(fixed_input + opts->ctr_rpos / 8, 
+                (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + opts->ctr_rpos / 8, 
                             fixed_input_len - opts->ctr_rpos / 8) != SECURITY_STATUS_OK))
             {
-                goto _SECURITY_EXIT;
+                goto SECURITY_FUNCTION_EXIT;
             }
         }
         else
         {
-            _SECURITY_VALID_RES(hmac_update(fixed_input, fixed_input_len));
+            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
         }
-        _SECURITY_VALID_RES(hmac_final(key_out));
+        SECURITY_CHECK_RES(hmac_final(ctx, key_out));
 
         k_i_1 = key_out;
         k_i_1_len = hmac_size;
@@ -272,43 +274,43 @@ _SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(full_blocks + 1, ctr, 0);
         ctr[4] = 0;
 
-        _SECURITY_VALID_RES(hmac_init(key_in, key_in_len));
+        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
         if ((opts->ctr_rpos == -1) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
         // K(i) := PRF (KI, I_V | Ki-1)
         if ((k_i_1_len > 0) && 
-            (_SECURITY_FUNCTION_RET_VAR = hmac_update(k_i_1, k_i_1_len) != SECURITY_STATUS_OK))
+            (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, k_i_1, k_i_1_len) != SECURITY_STATUS_OK))
         {
-            goto _SECURITY_EXIT;
+            goto SECURITY_FUNCTION_EXIT;
         }
         if ((opts->ctr_rpos == 0) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
         if ((opts->ctr_rpos > 0) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(fixed_input, opts->ctr_rpos / 8));
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
             if ((opts->ctr_rpos != (int64_t)fixed_input_len) &&
-                (_SECURITY_FUNCTION_RET_VAR = hmac_update(fixed_input + opts->ctr_rpos / 8, 
+                (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + opts->ctr_rpos / 8, 
                             fixed_input_len - opts->ctr_rpos / 8) != SECURITY_STATUS_OK))
             {
-                goto _SECURITY_EXIT;
+                goto SECURITY_FUNCTION_EXIT;
             }
         }
         else
         {
-            _SECURITY_VALID_RES(hmac_update(fixed_input, fixed_input_len));
+            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
         }
-        _SECURITY_VALID_RES(hmac_final(last_block));
+        SECURITY_CHECK_RES(hmac_final(ctx, last_block));
 
-        _SECURITY_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
-        _SECURITY_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
+        SECURITY_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
+        SECURITY_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
 
         if (modulo)
         {
@@ -323,21 +325,22 @@ _SECURITY_FUNCTION_BEGIN;
         }
     }
 
-_SECURITY_EXIT:
-    _SECURITY_FUNCTION_END;
+SECURITY_FUNCTION_EXIT:
+    SECURITY_FUNCTION_RETURN;
 }
 
-static uint32_t _kbkdf_double_pipeline(kbkdf_hash_type_e hash_type, kbkdf_hmac_callbacks_t hmac_callbacks,
+static uint32_t _kbkdf_double_pipeline(void *ctx, kbkdf_hash_type_e hash_type, 
+                                       kbkdf_hmac_callbacks_t hmac_callbacks,
                                        const uint8_t *key_in, const uint32_t key_in_len,
                                        uint8_t *fixed_input, const uint32_t fixed_input_len,
                                        uint8_t *key_out, const uint32_t key_out_len,
                                        kbkdf_opts_t *opts)
 {
-_SECURITY_FUNCTION_BEGIN;
+SECURITY_FUNCTION_BEGIN;
 
-    hmac_init hmac_init = hmac_callbacks.hmac_init;
-    hmac_update hmac_update = hmac_callbacks.hmac_update;
-    hmac_final hmac_final = hmac_callbacks.hmac_final;
+    hmac_init_t hmac_init = hmac_callbacks.hmac_init;
+    hmac_update_t hmac_update = hmac_callbacks.hmac_update;
+    hmac_final_t hmac_final = hmac_callbacks.hmac_final;
 
     uint32_t hmac_size;
     uint32_t full_blocks;
@@ -353,8 +356,8 @@ _SECURITY_FUNCTION_BEGIN;
 
     if (opts->ctr_rlen > RLEN)
     {
-        _SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL;
-        goto _SECURITY_EXIT;
+        SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL;
+        goto SECURITY_FUNCTION_EXIT;
     }
 
     A_i_1 = fixed_input;
@@ -375,44 +378,44 @@ _SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(i, ctr, 0);
         ctr[4] = 0;
 
-        _SECURITY_VALID_RES(hmac_init(key_in, key_in_len));
-        _SECURITY_VALID_RES(hmac_update(A_i_1, A_len));
-        _SECURITY_VALID_RES(hmac_final(A_i));
+        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
+        SECURITY_CHECK_RES(hmac_update(ctx, A_i_1, A_len));
+        SECURITY_CHECK_RES(hmac_final(ctx, A_i));
 
-        _SECURITY_VALID_RES(hmac_init(key_in, key_in_len));
-        _SECURITY_VALID_RES(hmac_update(A_i, hmac_size));
+        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
+        SECURITY_CHECK_RES(hmac_update(ctx, A_i, hmac_size));
 
         if ((opts->ctr_rpos == -1) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
 
         if ((opts->ctr_rpos == 0) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
 
         if ((opts->ctr_rpos > 0) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(fixed_input, opts->ctr_rpos / 8));
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
 
             if ((opts->ctr_rpos != (int64_t)fixed_input_len) &&
-                (_SECURITY_FUNCTION_RET_VAR = hmac_update(fixed_input +
+                (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input +
                             opts->ctr_rpos / 8,
                             fixed_input_len - opts->ctr_rpos / 8) != SECURITY_STATUS_OK))
             {
-                goto _SECURITY_EXIT;
+                goto SECURITY_FUNCTION_EXIT;
             }
         }
         else
         {
-            _SECURITY_VALID_RES(hmac_update(fixed_input, fixed_input_len));
+            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
         }
-        _SECURITY_VALID_RES(hmac_final(key_out));
+        SECURITY_CHECK_RES(hmac_final(ctx, key_out));
 
         A_i_1 = &A[0];
         A_len = hmac_size;
@@ -425,48 +428,48 @@ _SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(full_blocks + 1, ctr, 0);
         ctr[4] = 0;
 
-        _SECURITY_VALID_RES(hmac_init(key_in, key_in_len));
-        _SECURITY_VALID_RES(hmac_update(A_i_1, A_len));
+        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
+        SECURITY_CHECK_RES(hmac_update(ctx, A_i_1, A_len));
         {
-            goto _SECURITY_EXIT;
+            goto SECURITY_FUNCTION_EXIT;
         }
-        _SECURITY_VALID_RES(hmac_final(A_i));
+        SECURITY_CHECK_RES(hmac_final(ctx, A_i));
 
-        _SECURITY_VALID_RES(hmac_init(key_in, key_in_len));
+        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
 
         if ((opts->ctr_rpos == -1) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
-        _SECURITY_VALID_RES(hmac_update(A_i, A_len));
+        SECURITY_CHECK_RES(hmac_update(ctx, A_i, A_len));
 
         if ((opts->ctr_rpos == 0) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
 
         if ((opts->ctr_rpos > 0) &&
             (opts->ctr_rlen > 0))
         {
-            _SECURITY_VALID_RES(hmac_update(fixed_input, opts->ctr_rpos / 8));
-            _SECURITY_VALID_RES(hmac_update(ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
+            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
             if ((opts->ctr_rpos != (int64_t)fixed_input_len) &&
-                (_SECURITY_FUNCTION_RET_VAR = hmac_update(fixed_input + opts->ctr_rpos / 8, 
+                (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + opts->ctr_rpos / 8, 
                             fixed_input_len - opts->ctr_rpos / 8) != SECURITY_STATUS_OK))
             {
-                goto _SECURITY_EXIT;
+                goto SECURITY_FUNCTION_EXIT;
             }
         }
         else
         {
-            _SECURITY_VALID_RES(hmac_update(fixed_input, fixed_input_len));
+            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
         }
-        _SECURITY_VALID_RES(hmac_final(last_block));
+        SECURITY_CHECK_RES(hmac_final(ctx, last_block));
 
-        _SECURITY_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
-        _SECURITY_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
+        SECURITY_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
+        SECURITY_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
 
         if (modulo)
         {
@@ -481,11 +484,11 @@ _SECURITY_FUNCTION_BEGIN;
         }
     }
 
-_SECURITY_EXIT:
-    _SECURITY_FUNCTION_END;
+SECURITY_FUNCTION_EXIT:
+    SECURITY_FUNCTION_RETURN;
 }
 
-security_status_e kbkdf(kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
+security_status_e kbkdf(void *prf_ctx, kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
                         kbkdf_hmac_callbacks_t hmac_callbacks,
                         const uint8_t *key_in, const uint32_t key_in_len,
                         const uint8_t *iv_in, const uint32_t iv_in_len,
@@ -493,21 +496,21 @@ security_status_e kbkdf(kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
                         uint8_t *key_out, const uint32_t key_out_len,
                         kbkdf_opts_t *opts)
 {
-_SECURITY_FUNCTION_BEGIN;
+SECURITY_FUNCTION_BEGIN;
 
     kbkdf_opts_t tmp_opts =
         {
             .ctr_rlen = 4,
             .ctr_rpos = 0
         };
-    _SECURITY_CHECK_VALID_NOT_NULL(key_in);
-    _SECURITY_CHECK_VALID_NOT_NULL(iv_in);
-    _SECURITY_CHECK_VALID_NOT_NULL(fixed_input);
-    _SECURITY_CHECK_VALID_NOT_NULL(key_out);
+    SECURITY_CHECK_VALID_NOT_NULL(key_in);
+    SECURITY_CHECK_VALID_NOT_NULL(iv_in);
+    SECURITY_CHECK_VALID_NOT_NULL(fixed_input);
+    SECURITY_CHECK_VALID_NOT_NULL(key_out);
 
-    _SECURITY_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_final);
-    _SECURITY_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_init);
-    _SECURITY_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_update);
+    SECURITY_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_final);
+    SECURITY_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_init);
+    SECURITY_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_update);
 
     if (opts != NULL)
     {
@@ -518,21 +521,26 @@ _SECURITY_FUNCTION_BEGIN;
     switch (mode)
     {
     case KBKDF_MODE_COUNTER:
-        _SECURITY_VALID_RES(_kbkdf_counter(hash_type, hmac_callbacks, key_in, key_in_len, fixed_input,
+        SECURITY_CHECK_RES(_kbkdf_counter(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, fixed_input,
                                 fixed_input_len, key_out, key_out_len, &tmp_opts));
         break;
     case KBKDF_MODE_FEEDBACK:
-        _SECURITY_VALID_RES(_kbkdf_feedback(hash_type, hmac_callbacks, key_in, key_in_len, iv_in, iv_in_len,
+        SECURITY_CHECK_RES(_kbkdf_feedback(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, iv_in, iv_in_len,
                                  fixed_input, fixed_input_len, key_out, key_out_len, &tmp_opts));
         break;
     case KBKDF_MODE_DOUBLE_PIPELINE:
-        _SECURITY_VALID_RES(_kbkdf_double_pipeline(hash_type, hmac_callbacks, key_in, key_in_len, fixed_input,
+        SECURITY_CHECK_RES(_kbkdf_double_pipeline(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, fixed_input,
                                         fixed_input_len, key_out, key_out_len, &tmp_opts));
         break;
     default:
-        _SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL_NOT_IMPLEMENTED;
+        SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL_NOT_IMPLEMENTED;
     }
     
-_SECURITY_EXIT:
-    _SECURITY_FUNCTION_END;
+SECURITY_FUNCTION_EXIT:
+
+#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_KBKDF == ENABLED)
+
+#endif /* SECURED_KBKDF */
+
+    SECURITY_FUNCTION_RETURN;
 }
