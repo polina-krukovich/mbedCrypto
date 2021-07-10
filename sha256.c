@@ -17,16 +17,16 @@
            SUB0(W[t - 15]) + W[t - 16]          \
 )
 
-#define PAD(a, b, c, d, e, f, g, h, x, K)       \
+#define PAD(a, b, c, d, e, f, g, h, x, _K)       \
 {                                               \
-    tmp1 = h + SUB3(e) + F1(e, f, g) + K + x;   \
+    tmp1 = h + SUB3(e) + F1(e, f, g) + _K + x;   \
     tmp2 = SUB2(a) + F0(a, b, c);               \
     d += tmp1;                                  \
     h = tmp1 + tmp2;                            \
 }
 
 
-static const uint8_t sha256_padding[SHA256_BUFFER_SIZE] =
+static const uint8_t _sha256_padding[SHA256_BUFFER_SIZE] =
 {
  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -34,7 +34,7 @@ static const uint8_t sha256_padding[SHA256_BUFFER_SIZE] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static const uint32_t K[SHA256_BUFFER_SIZE] =
+static const uint32_t _K[SHA256_BUFFER_SIZE] =
 {
     0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
     0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
@@ -88,26 +88,26 @@ static void sha256_process(sha256_t *ctx, const uint8_t *data)
 
     for (uint32_t i = 0; i < 16; i+= 8)
     {
-        PAD(A, B, C, D, E, F, G, H, W[i + 0], K[i + 0]);
-        PAD(H, A, B, C, D, E, F, G, W[i + 1], K[i + 1]);
-        PAD(G, H, A, B, C, D, E, F, W[i + 2], K[i + 2]);
-        PAD(F, G, H, A, B, C, D, E, W[i + 3], K[i + 3]);
-        PAD(E, F, G, H, A, B, C, D, W[i + 4], K[i + 4]);
-        PAD(D, E, F, G, H, A, B, C, W[i + 5], K[i + 5]);
-        PAD(C, D, E, F, G, H, A, B, W[i + 6], K[i + 6]);
-        PAD(B, C, D, E, F, G, H, A, W[i + 7], K[i + 7]);
+        PAD(A, B, C, D, E, F, G, H, W[i + 0], _K[i + 0]);
+        PAD(H, A, B, C, D, E, F, G, W[i + 1], _K[i + 1]);
+        PAD(G, H, A, B, C, D, E, F, W[i + 2], _K[i + 2]);
+        PAD(F, G, H, A, B, C, D, E, W[i + 3], _K[i + 3]);
+        PAD(E, F, G, H, A, B, C, D, W[i + 4], _K[i + 4]);
+        PAD(D, E, F, G, H, A, B, C, W[i + 5], _K[i + 5]);
+        PAD(C, D, E, F, G, H, A, B, W[i + 6], _K[i + 6]);
+        PAD(B, C, D, E, F, G, H, A, W[i + 7], _K[i + 7]);
     }
 
     for (uint32_t i = 16; i < 64; i += 8)
     {
-        PAD(A, B, C, D, E, F, G, H, ROT(i + 0), K[i + 0]);
-        PAD(H, A, B, C, D, E, F, G, ROT(i + 1), K[i + 1]);
-        PAD(G, H, A, B, C, D, E, F, ROT(i + 2), K[i + 2]);
-        PAD(F, G, H, A, B, C, D, E, ROT(i + 3), K[i + 3]);
-        PAD(E, F, G, H, A, B, C, D, ROT(i + 4), K[i + 4]);
-        PAD(D, E, F, G, H, A, B, C, ROT(i + 5), K[i + 5]);
-        PAD(C, D, E, F, G, H, A, B, ROT(i + 6), K[i + 6]);
-        PAD(B, C, D, E, F, G, H, A, ROT(i + 7), K[i + 7]);
+        PAD(A, B, C, D, E, F, G, H, ROT(i + 0), _K[i + 0]);
+        PAD(H, A, B, C, D, E, F, G, ROT(i + 1), _K[i + 1]);
+        PAD(G, H, A, B, C, D, E, F, ROT(i + 2), _K[i + 2]);
+        PAD(F, G, H, A, B, C, D, E, ROT(i + 3), _K[i + 3]);
+        PAD(E, F, G, H, A, B, C, D, ROT(i + 4), _K[i + 4]);
+        PAD(D, E, F, G, H, A, B, C, ROT(i + 5), _K[i + 5]);
+        PAD(C, D, E, F, G, H, A, B, ROT(i + 6), _K[i + 6]);
+        PAD(B, C, D, E, F, G, H, A, ROT(i + 7), _K[i + 7]);
     }
 
 #else /* SHA256_MIN_SIZE */
@@ -129,77 +129,77 @@ static void sha256_process(sha256_t *ctx, const uint8_t *data)
     GET_UINT32_BE(W[14], data, 56);
     GET_UINT32_BE(W[15], data, 60);
     
-    PAD(A, B, C, D, E, F, G, H, W[0], K[0]);
-    PAD(H, A, B, C, D, E, F, G, W[1], K[1]);
-    PAD(G, H, A, B, C, D, E, F, W[2], K[2]);
-    PAD(F, G, H, A, B, C, D, E, W[3], K[3]);
-    PAD(E, F, G, H, A, B, C, D, W[4], K[4]);
-    PAD(D, E, F, G, H, A, B, C, W[5], K[5]);
-    PAD(C, D, E, F, G, H, A, B, W[6], K[6]);
-    PAD(B, C, D, E, F, G, H, A, W[7], K[7]);
+    PAD(A, B, C, D, E, F, G, H, W[0], _K[0]);
+    PAD(H, A, B, C, D, E, F, G, W[1], _K[1]);
+    PAD(G, H, A, B, C, D, E, F, W[2], _K[2]);
+    PAD(F, G, H, A, B, C, D, E, W[3], _K[3]);
+    PAD(E, F, G, H, A, B, C, D, W[4], _K[4]);
+    PAD(D, E, F, G, H, A, B, C, W[5], _K[5]);
+    PAD(C, D, E, F, G, H, A, B, W[6], _K[6]);
+    PAD(B, C, D, E, F, G, H, A, W[7], _K[7]);
 
-    PAD(A, B, C, D, E, F, G, H, W[8], K[8]);
-    PAD(H, A, B, C, D, E, F, G, W[9], K[9]);
-    PAD(G, H, A, B, C, D, E, F, W[10], K[10]);
-    PAD(F, G, H, A, B, C, D, E, W[11], K[11]);
-    PAD(E, F, G, H, A, B, C, D, W[12], K[12]);
-    PAD(D, E, F, G, H, A, B, C, W[13], K[13]);
-    PAD(C, D, E, F, G, H, A, B, W[14], K[14]);
-    PAD(B, C, D, E, F, G, H, A, W[15], K[15]);
+    PAD(A, B, C, D, E, F, G, H, W[8], _K[8]);
+    PAD(H, A, B, C, D, E, F, G, W[9], _K[9]);
+    PAD(G, H, A, B, C, D, E, F, W[10], _K[10]);
+    PAD(F, G, H, A, B, C, D, E, W[11], _K[11]);
+    PAD(E, F, G, H, A, B, C, D, W[12], _K[12]);
+    PAD(D, E, F, G, H, A, B, C, W[13], _K[13]);
+    PAD(C, D, E, F, G, H, A, B, W[14], _K[14]);
+    PAD(B, C, D, E, F, G, H, A, W[15], _K[15]);
 
-    PAD(A, B, C, D, E, F, G, H, ROT(16), K[16]);
-    PAD(H, A, B, C, D, E, F, G, ROT(17), K[17]);
-    PAD(G, H, A, B, C, D, E, F, ROT(18), K[18]);
-    PAD(F, G, H, A, B, C, D, E, ROT(19), K[19]);
-    PAD(E, F, G, H, A, B, C, D, ROT(20), K[20]);
-    PAD(D, E, F, G, H, A, B, C, ROT(21), K[21]);
-    PAD(C, D, E, F, G, H, A, B, ROT(22), K[22]);
-    PAD(B, C, D, E, F, G, H, A, ROT(23), K[23]);
+    PAD(A, B, C, D, E, F, G, H, ROT(16), _K[16]);
+    PAD(H, A, B, C, D, E, F, G, ROT(17), _K[17]);
+    PAD(G, H, A, B, C, D, E, F, ROT(18), _K[18]);
+    PAD(F, G, H, A, B, C, D, E, ROT(19), _K[19]);
+    PAD(E, F, G, H, A, B, C, D, ROT(20), _K[20]);
+    PAD(D, E, F, G, H, A, B, C, ROT(21), _K[21]);
+    PAD(C, D, E, F, G, H, A, B, ROT(22), _K[22]);
+    PAD(B, C, D, E, F, G, H, A, ROT(23), _K[23]);
 
-    PAD(A, B, C, D, E, F, G, H, ROT(24), K[24]);
-    PAD(H, A, B, C, D, E, F, G, ROT(25), K[25]);
-    PAD(G, H, A, B, C, D, E, F, ROT(26), K[26]);
-    PAD(F, G, H, A, B, C, D, E, ROT(27), K[27]);
-    PAD(E, F, G, H, A, B, C, D, ROT(28), K[28]);
-    PAD(D, E, F, G, H, A, B, C, ROT(29), K[29]);
-    PAD(C, D, E, F, G, H, A, B, ROT(30), K[30]);
-    PAD(B, C, D, E, F, G, H, A, ROT(31), K[31]);
+    PAD(A, B, C, D, E, F, G, H, ROT(24), _K[24]);
+    PAD(H, A, B, C, D, E, F, G, ROT(25), _K[25]);
+    PAD(G, H, A, B, C, D, E, F, ROT(26), _K[26]);
+    PAD(F, G, H, A, B, C, D, E, ROT(27), _K[27]);
+    PAD(E, F, G, H, A, B, C, D, ROT(28), _K[28]);
+    PAD(D, E, F, G, H, A, B, C, ROT(29), _K[29]);
+    PAD(C, D, E, F, G, H, A, B, ROT(30), _K[30]);
+    PAD(B, C, D, E, F, G, H, A, ROT(31), _K[31]);
 
-    PAD(A, B, C, D, E, F, G, H, ROT(32), K[32]);
-    PAD(H, A, B, C, D, E, F, G, ROT(33), K[33]);
-    PAD(G, H, A, B, C, D, E, F, ROT(34), K[34]);
-    PAD(F, G, H, A, B, C, D, E, ROT(35), K[35]);
-    PAD(E, F, G, H, A, B, C, D, ROT(36), K[36]);
-    PAD(D, E, F, G, H, A, B, C, ROT(37), K[37]);
-    PAD(C, D, E, F, G, H, A, B, ROT(38), K[38]);
-    PAD(B, C, D, E, F, G, H, A, ROT(39), K[39]);
+    PAD(A, B, C, D, E, F, G, H, ROT(32), _K[32]);
+    PAD(H, A, B, C, D, E, F, G, ROT(33), _K[33]);
+    PAD(G, H, A, B, C, D, E, F, ROT(34), _K[34]);
+    PAD(F, G, H, A, B, C, D, E, ROT(35), _K[35]);
+    PAD(E, F, G, H, A, B, C, D, ROT(36), _K[36]);
+    PAD(D, E, F, G, H, A, B, C, ROT(37), _K[37]);
+    PAD(C, D, E, F, G, H, A, B, ROT(38), _K[38]);
+    PAD(B, C, D, E, F, G, H, A, ROT(39), _K[39]);
     
-    PAD(A, B, C, D, E, F, G, H, ROT(40), K[40]);
-    PAD(H, A, B, C, D, E, F, G, ROT(41), K[41]);
-    PAD(G, H, A, B, C, D, E, F, ROT(42), K[42]);
-    PAD(F, G, H, A, B, C, D, E, ROT(43), K[43]);
-    PAD(E, F, G, H, A, B, C, D, ROT(44), K[44]);
-    PAD(D, E, F, G, H, A, B, C, ROT(45), K[45]);
-    PAD(C, D, E, F, G, H, A, B, ROT(46), K[46]);
-    PAD(B, C, D, E, F, G, H, A, ROT(47), K[47]);
+    PAD(A, B, C, D, E, F, G, H, ROT(40), _K[40]);
+    PAD(H, A, B, C, D, E, F, G, ROT(41), _K[41]);
+    PAD(G, H, A, B, C, D, E, F, ROT(42), _K[42]);
+    PAD(F, G, H, A, B, C, D, E, ROT(43), _K[43]);
+    PAD(E, F, G, H, A, B, C, D, ROT(44), _K[44]);
+    PAD(D, E, F, G, H, A, B, C, ROT(45), _K[45]);
+    PAD(C, D, E, F, G, H, A, B, ROT(46), _K[46]);
+    PAD(B, C, D, E, F, G, H, A, ROT(47), _K[47]);
 
-    PAD(A, B, C, D, E, F, G, H, ROT(48), K[48]);
-    PAD(H, A, B, C, D, E, F, G, ROT(49), K[49]);
-    PAD(G, H, A, B, C, D, E, F, ROT(50), K[50]);
-    PAD(F, G, H, A, B, C, D, E, ROT(51), K[51]);
-    PAD(E, F, G, H, A, B, C, D, ROT(52), K[52]);
-    PAD(D, E, F, G, H, A, B, C, ROT(53), K[53]);
-    PAD(C, D, E, F, G, H, A, B, ROT(54), K[54]);
-    PAD(B, C, D, E, F, G, H, A, ROT(55), K[55]);
+    PAD(A, B, C, D, E, F, G, H, ROT(48), _K[48]);
+    PAD(H, A, B, C, D, E, F, G, ROT(49), _K[49]);
+    PAD(G, H, A, B, C, D, E, F, ROT(50), _K[50]);
+    PAD(F, G, H, A, B, C, D, E, ROT(51), _K[51]);
+    PAD(E, F, G, H, A, B, C, D, ROT(52), _K[52]);
+    PAD(D, E, F, G, H, A, B, C, ROT(53), _K[53]);
+    PAD(C, D, E, F, G, H, A, B, ROT(54), _K[54]);
+    PAD(B, C, D, E, F, G, H, A, ROT(55), _K[55]);
 
-    PAD(A, B, C, D, E, F, G, H, ROT(56), K[56]);
-    PAD(H, A, B, C, D, E, F, G, ROT(57), K[57]);
-    PAD(G, H, A, B, C, D, E, F, ROT(58), K[58]);
-    PAD(F, G, H, A, B, C, D, E, ROT(59), K[59]);
-    PAD(E, F, G, H, A, B, C, D, ROT(60), K[60]);
-    PAD(D, E, F, G, H, A, B, C, ROT(61), K[61]);
-    PAD(C, D, E, F, G, H, A, B, ROT(62), K[62]);
-    PAD(B, C, D, E, F, G, H, A, ROT(63), K[63]);
+    PAD(A, B, C, D, E, F, G, H, ROT(56), _K[56]);
+    PAD(H, A, B, C, D, E, F, G, ROT(57), _K[57]);
+    PAD(G, H, A, B, C, D, E, F, ROT(58), _K[58]);
+    PAD(F, G, H, A, B, C, D, E, ROT(59), _K[59]);
+    PAD(E, F, G, H, A, B, C, D, ROT(60), _K[60]);
+    PAD(D, E, F, G, H, A, B, C, ROT(61), _K[61]);
+    PAD(C, D, E, F, G, H, A, B, ROT(62), _K[62]);
+    PAD(B, C, D, E, F, G, H, A, ROT(63), _K[63]);
 
 #endif
 
@@ -337,7 +337,7 @@ SECURITY_FUNCTION_BEGIN;
     last = ctx->total[0] & 0x3F;
     padn = (last < 56) ? (56 - last) : (120 - last);
 
-    SECURITY_CHECK_RES(sha256_update(ctx, sha256_padding, padn));
+    SECURITY_CHECK_RES(sha256_update(ctx, _sha256_padding, padn));
     SECURITY_CHECK_RES(sha256_update(ctx, msglen, 8));
 
     PUT_UINT32_BE(ctx->h0, out, 0);

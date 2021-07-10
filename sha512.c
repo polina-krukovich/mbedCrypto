@@ -11,16 +11,16 @@
 #define F0(x, y, z)         ((x & y) | (z & (x | y)))
 #define F1(x, y, z)         (z ^ (x & (y ^ z)))
 
-#define PAD(a, b, c, d, e, f, g, h, x, K)           \
+#define PAD(a, b, c, d, e, f, g, h, x, _K)           \
 {                                                   \
-    tmp1 = h + SUB3(e) + F1(e, f, g) + K + x;       \
+    tmp1 = h + SUB3(e) + F1(e, f, g) + _K + x;       \
     tmp2 = SUB2(a) + F0(a, b, c);                   \
     d += tmp1;                                      \
     h = tmp1 + tmp2;                                \
 }
 
 
-static const uint64_t K[80] =
+static const uint64_t _K[80] =
 {
     U64(0x428A2F98D728AE22),  U64(0x7137449123EF65CD),
     U64(0xB5C0FBCFEC4D3B2F),  U64(0xE9B5DBA58189DBBC),
@@ -64,7 +64,7 @@ static const uint64_t K[80] =
     U64(0x5FCB6FAB3AD6FAEC),  U64(0x6C44198C4A475817)
 };
 
-static const uint8_t sha512_padding[SHA512_BUFFER_SIZE] =
+static const uint8_t _sha512_padding[SHA512_BUFFER_SIZE] =
 {
  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -77,7 +77,7 @@ static const uint8_t sha512_padding[SHA512_BUFFER_SIZE] =
 };
 
 
-static void sha512_process(sha512_t *ctx, const uint8_t *data)
+static void _sha512_process(sha512_t *ctx, const uint8_t *data)
 {
     uint64_t tmp1;
     uint64_t tmp2;
@@ -120,21 +120,21 @@ static void sha512_process(sha512_t *ctx, const uint8_t *data)
 
     do
     {
-        PAD(A, B, C, D, E, F, G, H, W[i], K[i]); 
+        PAD(A, B, C, D, E, F, G, H, W[i], _K[i]); 
         ++i;
-        PAD(H, A, B, C, D, E, F, G, W[i], K[i]); 
+        PAD(H, A, B, C, D, E, F, G, W[i], _K[i]); 
         ++i;
-        PAD(G, H, A, B, C, D, E, F, W[i], K[i]); 
+        PAD(G, H, A, B, C, D, E, F, W[i], _K[i]); 
         ++i;
-        PAD(F, G, H, A, B, C, D, E, W[i], K[i]); 
+        PAD(F, G, H, A, B, C, D, E, W[i], _K[i]); 
         ++i;
-        PAD(E, F, G, H, A, B, C, D, W[i], K[i]); 
+        PAD(E, F, G, H, A, B, C, D, W[i], _K[i]); 
         ++i;
-        PAD(D, E, F, G, H, A, B, C, W[i], K[i]); 
+        PAD(D, E, F, G, H, A, B, C, W[i], _K[i]); 
         ++i;
-        PAD(C, D, E, F, G, H, A, B, W[i], K[i]); 
+        PAD(C, D, E, F, G, H, A, B, W[i], _K[i]); 
         ++i;
-        PAD(B, C, D, E, F, G, H, A, W[i], K[i]); 
+        PAD(B, C, D, E, F, G, H, A, W[i], _K[i]); 
         ++i;
     } while (i < 80);
 
@@ -159,43 +159,43 @@ static void sha512_process(sha512_t *ctx, const uint8_t *data)
     GET_UINT64_BE(W[14], data, 112);
     GET_UINT64_BE(W[15], data, 120);
 
-#define TMP_BLOCK \
+#define TMP_BLOC_K \
 { \
     W[i] = SUB1(W[i - 2]) + W[i - 7] + SUB0(W[i - 15]) + W[i - 16]; \
     ++i; \
 }  
     while (i < 80)
     {
-        TMP_BLOCK;
-        TMP_BLOCK;
-        TMP_BLOCK;
-        TMP_BLOCK;
-        TMP_BLOCK;
-        TMP_BLOCK;
-        TMP_BLOCK;
-        TMP_BLOCK;
+        TMP_BLOC_K;
+        TMP_BLOC_K;
+        TMP_BLOC_K;
+        TMP_BLOC_K;
+        TMP_BLOC_K;
+        TMP_BLOC_K;
+        TMP_BLOC_K;
+        TMP_BLOC_K;
     }
-#undef TMP_BLOCK
+#undef TMP_BLOC_K
     
     i = 0;
 
     do
     {
-        PAD(A, B, C, D, E, F, G, H, W[i], K[i]); 
+        PAD(A, B, C, D, E, F, G, H, W[i], _K[i]); 
         ++i;
-        PAD(H, A, B, C, D, E, F, G, W[i], K[i]); 
+        PAD(H, A, B, C, D, E, F, G, W[i], _K[i]); 
         ++i;
-        PAD(G, H, A, B, C, D, E, F, W[i], K[i]); 
+        PAD(G, H, A, B, C, D, E, F, W[i], _K[i]); 
         ++i;
-        PAD(F, G, H, A, B, C, D, E, W[i], K[i]); 
+        PAD(F, G, H, A, B, C, D, E, W[i], _K[i]); 
         ++i;
-        PAD(E, F, G, H, A, B, C, D, W[i], K[i]); 
+        PAD(E, F, G, H, A, B, C, D, W[i], _K[i]); 
         ++i;
-        PAD(D, E, F, G, H, A, B, C, W[i], K[i]); 
+        PAD(D, E, F, G, H, A, B, C, W[i], _K[i]); 
         ++i;
-        PAD(C, D, E, F, G, H, A, B, W[i], K[i]); 
+        PAD(C, D, E, F, G, H, A, B, W[i], _K[i]); 
         ++i;
-        PAD(B, C, D, E, F, G, H, A, W[i], K[i]); 
+        PAD(B, C, D, E, F, G, H, A, W[i], _K[i]); 
         ++i;
     } while (i < 80);
 
@@ -276,7 +276,7 @@ SECURITY_FUNCTION_BEGIN;
     {
         SECURITY_CHECK_VALID_NOT_NULL(memcpy((void *)(ctx->buffer + left), 
                                         data, fill));
-        sha512_process(ctx, ctx->buffer);
+        _sha512_process(ctx, ctx->buffer);
         data += fill;
         data_len -= fill;
         left = 0;
@@ -285,7 +285,7 @@ SECURITY_FUNCTION_BEGIN;
     /* if not a complite package */
     while (data_len >= SHA512_BUFFER_SIZE)
     {
-        sha512_process(ctx, data);
+        _sha512_process(ctx, data);
         data += SHA512_BUFFER_SIZE;
         data_len -= SHA512_BUFFER_SIZE;
     }
@@ -330,7 +330,7 @@ SECURITY_FUNCTION_BEGIN;
     last = (uint32_t)(ctx->total[0] & 0x7F);
     padn = (last < 112) ? (112 - last) : (240 - last);
 
-    SECURITY_CHECK_RES(sha512_update(ctx, sha512_padding, padn));
+    SECURITY_CHECK_RES(sha512_update(ctx, _sha512_padding, padn));
     SECURITY_CHECK_RES(sha512_update(ctx, msglen, 16));
 
     PUT_UINT64_BE(ctx->h0, out, 0);

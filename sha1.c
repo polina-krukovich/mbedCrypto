@@ -17,7 +17,7 @@
 )
 
 
-static const uint8_t sha1_padding[SHA1_BUFFER_SIZE] =
+static const uint8_t _sha1_padding[SHA1_BUFFER_SIZE] =
 {
  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -25,7 +25,7 @@ static const uint8_t sha1_padding[SHA1_BUFFER_SIZE] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static void sha1_process(sha1_t *ctx, const uint8_t *data)
+static void _sha1_process(sha1_t *ctx, const uint8_t *data)
 {
     uint32_t temp;
     uint32_t W[16];
@@ -321,7 +321,7 @@ SECURITY_FUNCTION_BEGIN;
     {
         SECURITY_CHECK_VALID_NOT_NULL(memcpy((void *)(ctx->buffer + left), 
                                         data, fill));
-        sha1_process(ctx, ctx->buffer);
+        _sha1_process(ctx, ctx->buffer);
         data += fill;
         data_len -= fill;
         left = 0;
@@ -330,7 +330,7 @@ SECURITY_FUNCTION_BEGIN;
     /* if not a complite package */
     while (data_len >= SHA1_BUFFER_SIZE)
     {
-        sha1_process(ctx, data);
+        _sha1_process(ctx, data);
         data += SHA1_BUFFER_SIZE;
         data_len  -= SHA1_BUFFER_SIZE;
     }
@@ -375,7 +375,7 @@ SECURITY_FUNCTION_BEGIN;
     last = ctx->total[0] & 0x3F;
     padn = (last < 56) ? (56 - last) : (120 - last);
 
-    SECURITY_CHECK_RES(sha1_update(ctx, sha1_padding, padn));
+    SECURITY_CHECK_RES(sha1_update(ctx, _sha1_padding, padn));
     SECURITY_CHECK_RES(sha1_update(ctx, msglen, 8));
 
     PUT_UINT32_BE(ctx->h0, out, 0);
