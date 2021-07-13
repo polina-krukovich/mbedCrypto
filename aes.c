@@ -77,7 +77,7 @@ static INLINE uint8_t _xtime(uint8_t x)
     return ((x << 1) ^ (((x >> 7) & 1) * 0x1B));
 }
 
-static uint8_t _gf_mult(uint8_t a, uint8_t b)
+static INLINE uint8_t _gf_mult(uint8_t a, uint8_t b)
 {
     uint8_t c = 0;
     uint8_t d = b;
@@ -85,14 +85,16 @@ static uint8_t _gf_mult(uint8_t a, uint8_t b)
     for (uint8_t i = 0; i < 8; ++i)
     {
         if (a & 1) 
+        {
             c ^= d;
+        }
         a >>= 1;
         d = _xtime(d);
     }
     return c;
 }
 
-static void _coef_mult(uint8_t a[4], uint8_t b[4], uint8_t d[4]) 
+static INLINE void _coef_mult(uint8_t a[4], uint8_t b[4], uint8_t d[4]) 
 {
 	d[0] = _gf_mult(a[0], b[0]) ^ _gf_mult(a[3], b[1]) ^ _gf_mult(a[2], b[2]) ^ _gf_mult(a[1], b[3]);
 	d[1] = _gf_mult(a[1], b[0]) ^ _gf_mult(a[0], b[1]) ^ _gf_mult(a[3], b[2]) ^ _gf_mult(a[2], b[3]);
@@ -283,15 +285,9 @@ static INLINE void _add_round_key(uint32_t round, uint8_t state[AES_BLOCK_SIZE],
 	}
 }
 
-security_status_e aes_encrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
+static void _aes_encrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
                                 uint8_t out[AES_BLOCK_SIZE])
 {
-SECURITY_FUNCTION_BEGIN;
-
-    SECURITY_CHECK_VALID_NOT_NULL(in);
-    SECURITY_CHECK_VALID_NOT_NULL(out);
-    SECURITY_CHECK_VALID_NOT_NULL(key);
-
     uint8_t state[AES_BLOCK_SIZE];
     aes_type_e aes_type = key->aes_type;
     uint8_t *w = key->w;
@@ -327,20 +323,11 @@ SECURITY_FUNCTION_BEGIN;
         out[i + 8] = state[k + 2];
         out[i + 12] = state[k + 3];
 	}
-
-SECURITY_FUNCTION_EXIT:
-    SECURITY_FUNCTION_RETURN;
 }   
 
-security_status_e aes_decrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
+static void _aes_decrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
                                 uint8_t out[AES_BLOCK_SIZE])
 {
-SECURITY_FUNCTION_BEGIN;
-
-    SECURITY_CHECK_VALID_NOT_NULL(in);
-    SECURITY_CHECK_VALID_NOT_NULL(out);
-    SECURITY_CHECK_VALID_NOT_NULL(key);
-
     uint8_t state[AES_BLOCK_SIZE];
     aes_type_e aes_type = key->aes_type;
     uint8_t *w = key->w;
@@ -377,60 +364,8 @@ SECURITY_FUNCTION_BEGIN;
         out[i + 8] = state[k + 2];
         out[i + 12] = state[k + 3];
 	}
-
-SECURITY_FUNCTION_EXIT:
-    SECURITY_FUNCTION_RETURN;
 }
 
-security_status_e aes_cbc_encrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
-                                        const uint8_t iv[AES_BLOCK_SIZE], uint8_t out[AES_BLOCK_SIZE])
-{
-    uint8_t cbc_in[AES_BLOCK_SIZE];
-
-    for (uint32_t i = 0; i < AES_BLOCK_SIZE; ++i)
-    {
-        cbc_in[i] = in[i] ^ iv[i];
-    }
-    aes_encrypt_block(key, cbc_in, out);
-    memcpy(iv, out, AES_BLOCK_SIZE);
-}
-
-security_status_e aes_cfb_encrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
-                                        const uint8_t iv[AES_BLOCK_SIZE], uint8_t out[AES_BLOCK_SIZE])
-{
-    aes_encrypt_block(key, iv, out);
-
-    for (uint32_t i = 0; i < AES_BLOCK_SIZE; ++i)
-    {
-        out[i] = out[i] ^ in[i];
-    }
-    memcpy(iv, out, AES_BLOCK_SIZE);
-}
-
-security_status_e aes_ofb_encrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
-                                        const uint8_t iv[AES_BLOCK_SIZE], uint8_t out[AES_BLOCK_SIZE])
-{
-    aes_encrypt_block(key, iv, out);
-    
-    memcpy(iv, out, AES_BLOCK_SIZE);
-
-    for (uint32_t i = 0; i < AES_BLOCK_SIZE; ++i)
-    {
-        out[i] = out[i] ^ in[i];
-    }
-}
-
-security_status_e aes_cbc_decrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
-                                        const uint8_t iv[AES_BLOCK_SIZE], uint8_t out[AES_BLOCK_SIZE])
-{
-    uint8_t cbc_in[AES_BLOCK_SIZE];
-
-    for (uint32_t i = 0; i < AES_BLOCK_SIZE; ++i)
-    {
-        cbc_in[i] = in[i] ^ iv[i];
-    }
-    aes_decrypt_block(key, cbc_in, out);
-}
 
 security_status_e aes_key_init(aes_type_e aes_type, aes_key_t *aes_key)
 {
@@ -508,89 +443,187 @@ SECURITY_FUNCTION_EXIT:
     SECURITY_FUNCTION_RETURN;
 }
 
-security_status_e aes_encrypt(aes_mode_e mode, const uint8_t *data, 
-                                uint32_t data_len, const uint8_t iv[AES_BLOCK_SIZE], 
-                                aes_key_t *key, uint8_t *out)
+security_status_e aes_ecb_encrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
+                                        uint8_t out[AES_BLOCK_SIZE])
 {
 SECURITY_FUNCTION_BEGIN;
-
-    SECURITY_CHECK_VALID_NOT_NULL(data);
+    
     SECURITY_CHECK_VALID_NOT_NULL(key);
+    SECURITY_CHECK_VALID_NOT_NULL(in);
     SECURITY_CHECK_VALID_NOT_NULL(out);
 
-    const uint8_t new_iv[AES_BLOCK_SIZE] = {0};
-    if (iv)
-    {
-        memcpy(new_iv, iv, AES_BLOCK_SIZE);
-    }
-
-    uint8_t data_block_left[AES_BLOCK_SIZE];
-
-    uint32_t blocks = data_len / AES_BLOCK_SIZE;
-    uint32_t left_over = data_len % AES_BLOCK_SIZE;
-
-    SECURITY_CHECK_VALID_NOT_NULL(memset(data_block_left, 0x00, AES_BLOCK_SIZE));
-
-    for (uint32_t i = 0; i < blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
-    {
-        aes_encrypt_block(key, data, out);
-    }
-    if (left_over != 0 || data_len == 0)
-    {
-        if (left_over != 0)
-        {
-            SECURITY_CHECK_VALID_NOT_NULL(memcpy(data_block_left, data, left_over));
-        }
-        aes_encrypt_block(key, data_block_left, out);
-    }
+    _aes_encrypt_block(key, in, out);
 
 SECURITY_FUNCTION_EXIT:
     SECURITY_FUNCTION_RETURN;
+    
 }
 
-security_status_e aes_decrypt(const uint8_t *c_data, uint32_t c_data_len, aes_key_t *key, uint8_t *out)
+security_status_e aes_ecb_decrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
+                                    uint8_t out[AES_BLOCK_SIZE])
 {
-    SECURITY_FUNCTION_BEGIN;
-
-    SECURITY_CHECK_VALID_NOT_NULL(c_data);
+SECURITY_FUNCTION_BEGIN;
+    
     SECURITY_CHECK_VALID_NOT_NULL(key);
+    SECURITY_CHECK_VALID_NOT_NULL(in);
     SECURITY_CHECK_VALID_NOT_NULL(out);
 
-    uint8_t data_block_left[AES_BLOCK_SIZE];
-
-    uint32_t blocks = c_data_len / AES_BLOCK_SIZE;
-    uint32_t left_over = c_data_len % AES_BLOCK_SIZE;
-
-    SECURITY_CHECK_VALID_NOT_NULL(memset(data_block_left, 0x00, AES_BLOCK_SIZE));
-
-    for (uint32_t i = 0; i < blocks; ++i, c_data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
-    {
-        aes_decrypt_block(key, c_data, out);
-    }
-    if (left_over != 0 || c_data_len == 0)
-    {
-        if (left_over != 0)
-        {
-            SECURITY_CHECK_VALID_NOT_NULL(memcpy(data_block_left, c_data, left_over));
-        }
-        aes_decrypt_block(key, data_block_left, out);
-    }
+    _aes_decrypt_block(key, in, out);
 
 SECURITY_FUNCTION_EXIT:
     SECURITY_FUNCTION_RETURN;
 }
 
-security_status_e aes_encrypt_ex(aes_type_e aes_type, aes_key_expansion_hash_type_e key_exp_hash_type, 
+static void _aes_ecb_encrypt_ex(aes_key_t *key,
                                 const uint8_t *data, uint32_t data_len, 
+                                const uint8_t *iv, uint32_t iv_len, 
+                                uint8_t *out)
+{
+
+    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint32_t full_blocks = data_len >> 4;
+    uint32_t left_data = data_len & 15;
+
+    for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    {
+        _aes_encrypt_block(key, data, out);
+    }
+    if (left_data)
+    {
+        memcpy(buf, data, left_data);
+        _aes_encrypt_block(key, buf, out);
+    }
+}
+
+static void _aes_cbc_encrypt_ex(aes_key_t *key,
+                                const uint8_t *data, uint32_t data_len, 
+                                const uint8_t *iv, uint32_t iv_len, 
+                                uint8_t *out)
+{
+    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint32_t full_blocks = data_len >> 4;
+    uint32_t left_data = data_len & 15;
+
+    for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    {
+        for (uint32_t j = 0; j < 16; j++)
+        {
+            buf[j] = data[j] ^ iv[j];
+        }
+        _aes_encrypt_block(key, buf, out);
+    }
+    if (left_data)
+    {
+        memcpy(buf, data, left_data);
+        for (uint32_t j = 0; j < 16; j++)
+        {
+            buf[j] = data[j] ^ iv[j];
+        }
+        _aes_encrypt_block(key, buf, out);
+    }
+}
+
+
+static void _aes_ofb_encrypt_ex(aes_key_t *key,
+                                const uint8_t *data, uint32_t data_len, 
+                                const uint8_t *iv, uint32_t iv_len, 
+                                uint8_t *out)
+{
+    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint32_t full_blocks = data_len >> 4;
+    uint32_t left_data = data_len & 15;
+
+    for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    {
+        _aes_encrypt_block(key, iv, buf);
+
+        for (uint32_t j = 0; j < 16; j++)
+        {
+            out[j] = buf[j] ^ data[j];
+        }
+    }
+    if (left_data)
+    {
+        _aes_encrypt_block(key, iv, buf);
+
+        for (uint32_t j = 0; j < left_data; j++)
+        {
+            out[j] = buf[j] ^ data[j];
+        }
+    }
+}
+
+static void _aes_cfb_encrypt_ex(aes_key_t *key,
+                                const uint8_t *data, uint32_t data_len, 
+                                const uint8_t *iv, uint32_t iv_len, 
+                                uint8_t *out)
+{
+    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint32_t full_blocks = data_len >> 4;
+    uint32_t left_data = data_len & 15;
+
+    for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    {
+        _aes_encrypt_block(key, iv, buf);
+
+        for (uint32_t j = 0; j < 16; j++)
+        {
+            out[j] = buf[j] ^ data[j];
+        }
+    }
+    if (left_data)
+    {
+        _aes_encrypt_block(key, iv, buf);
+
+        for (uint32_t j = 0; j < left_data; j++)
+        {
+            out[j] = buf[j] ^ data[j];
+        }
+    }
+}
+
+security_status_e aes_encrypt(aes_mode_e aes_mode, aes_type_e aes_type,
+                                aes_key_expansion_hash_type_e key_exp_hash_type, 
+                                const uint8_t *data, uint32_t data_len, 
+                                const uint8_t *iv, uint32_t iv_len, 
                                 uint8_t *key, uint32_t key_len, uint8_t *out)
 {
-    SECURITY_FUNCTION_BEGIN;
+SECURITY_FUNCTION_BEGIN;
     
     aes_key_t aes_key;
-
+    
     SECURITY_CHECK_RES(aes_key_init(aes_type, &aes_key));
     SECURITY_CHECK_RES(aes_key_expand(key_exp_hash_type, key, key_len, &aes_key));
-    SECURITY_CHECK_RES(aes_encrypt(data, data_len, &aes_key, out));
+
+    switch (aes_mode)
+    {
+    case AES_ECB:
+        _aes_ecb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        break;
+    case AES_CBC:
+        _aes_cbc_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        break;
+    case AES_OFB:
+        _aes_ofb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        break;
+    case AES_CFB:
+        _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        break;
+    case AES_CTR:
+        _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        break;
+    case AES_GCM:
+        _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        break;
+    case AES_AEAD:
+        _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        break;
+    case AES_XTS:
+        _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        break;
+    default:
+        break;
+    }
  
 SECURITY_FUNCTION_EXIT:
     aes_key_free(&aes_key);
