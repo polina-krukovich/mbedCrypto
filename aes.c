@@ -511,13 +511,14 @@ static void _aes_cbc_encrypt_ex(aes_key_t *key,
             buf[j] = data[j] ^ iv[j];
         }
         _aes_encrypt_block(key, buf, out);
+        memcpy(buf, out, AES_BLOCK_SIZE);
     }
     if (left_data)
     {
         memcpy(buf, data, left_data);
         for (uint32_t j = 0; j < 16; j++)
         {
-            buf[j] = data[j] ^ iv[j];
+            buf[j] ^= iv[j];
         }
         _aes_encrypt_block(key, buf, out);
     }
@@ -536,11 +537,13 @@ static void _aes_ofb_encrypt_ex(aes_key_t *key,
     for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
     {
         _aes_encrypt_block(key, iv, buf);
+        memcpy(iv, buf, AES_BLOCK_SIZE);
 
         for (uint32_t j = 0; j < 16; j++)
         {
             out[j] = buf[j] ^ data[j];
         }
+        
     }
     if (left_data)
     {
@@ -570,6 +573,9 @@ static void _aes_cfb_encrypt_ex(aes_key_t *key,
         {
             out[j] = buf[j] ^ data[j];
         }
+        memcpy(iv, buf, AES_BLOCK_SIZE);
+
+
     }
     if (left_data)
     {
@@ -582,6 +588,90 @@ static void _aes_cfb_encrypt_ex(aes_key_t *key,
     }
 }
 
+static void _aes_ctr_encrypt_ex(aes_key_t *key,
+                                const uint8_t *data, uint32_t data_len, 
+                                const uint8_t *iv, uint32_t iv_len, 
+                                uint8_t *out)
+{
+    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint32_t full_blocks = data_len >> 4;
+    uint32_t left_data = data_len & 15;
+
+    for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    {
+        _aes_encrypt_block(key, iv, buf);
+
+        for (uint32_t j = 0; j < 16; j++)
+        {
+            out[j] = buf[j] ^ data[j];
+        }
+        memcpy(iv, buf, AES_BLOCK_SIZE);
+
+        for (uint32_t j = 0; j < 16; ++j)
+        {
+            while ((++iv[j]) == 0);
+        }
+
+    }
+    if (left_data)
+    {
+        _aes_encrypt_block(key, iv, buf);
+
+        for (uint32_t j = 0; j < left_data; j++)
+        {
+            out[j] = buf[j] ^ data[j];
+        }
+    }
+}
+
+
+static void _aes_xts_encrypt_ex(aes_key_t *key,
+                                const uint8_t *data, uint32_t data_len, 
+                                const uint8_t *iv, uint32_t iv_len, 
+                                uint8_t *out)
+{
+    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint8_t T[AES_BLOCK_SIZE] = {0};
+    uint32_t full_blocks = data_len >> 4;
+    uint32_t left_data = data_len & 15;
+
+    _aes_encrypt_block(key, iv, T);
+
+    for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    {
+        for (uint32_t j = 0; j < 16; j++)
+        {
+            buf[j] = data[j] ^ T[j];
+        }
+
+        _aes_encrypt_block(key, buf, out);
+
+        for (uint32_t j = 0; j < 16; j++)
+        {
+            out[j] ^= T[j];
+        }
+
+        memcpy(T, out, 16);
+    }
+    if (left_data)
+    {
+        memcpy(buf, data, left_data);
+        for (uint32_t j = 0; j < 16; j++)
+        {
+            buf[j] = data[j] ^ T[j];
+        }
+
+        _aes_encrypt_block(key, buf, out);
+
+        for (uint32_t j = 0; j < 16; j++)
+        {
+            out[j] ^= T[j];
+        }
+
+        memcpy(T, out, 16);
+
+    }
+}
 security_status_e aes_encrypt(aes_mode_e aes_mode, aes_type_e aes_type,
                                 aes_key_expansion_hash_type_e key_exp_hash_type, 
                                 const uint8_t *data, uint32_t data_len, 
@@ -610,7 +700,7 @@ SECURITY_FUNCTION_BEGIN;
         _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
     case AES_CTR:
-        _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        _aes_ctr_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
     case AES_GCM:
         _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
@@ -619,7 +709,7 @@ SECURITY_FUNCTION_BEGIN;
         _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
     case AES_XTS:
-        _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        _aes_xts_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
     default:
         break;
