@@ -567,7 +567,11 @@ static void _aes_ofb_encrypt_ex(aes_key_t *key,
     }
     if (left_data)
     {
-        _aes_encrypt_block(key, iv, buf);
+        uint8_t tmp[AES_BLOCK_SIZE] = {0};
+
+        _aes_encrypt_block(key, buf, tmp);
+
+        memcpy(buf, tmp, AES_BLOCK_SIZE);
 
         for (uint32_t j = 0; j < left_data; j++)
         {
