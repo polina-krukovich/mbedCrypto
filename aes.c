@@ -491,7 +491,14 @@ static void _aes_ecb_encrypt_ex(aes_key_t *key,
 
     if (left_data)
     {
+        uint8_t pad = 16 - left_data;
+
         memcpy(buf, data, left_data);
+
+        for (uint32_t i = left_data; i <= AES_BLOCK_SIZE; ++i)
+        {
+            buf[i] = pad;
+        }
         _aes_encrypt_block(key, buf, out);
     }
 }
@@ -518,10 +525,17 @@ static void _aes_cbc_encrypt_ex(aes_key_t *key,
     }
 
     if (left_data)
-    {
-        for (uint32_t j = 0; j < left_data; ++j)
+    {   
+        uint8_t pad = 16 - left_data;
+
+        for (uint32_t i = left_data; i <= AES_BLOCK_SIZE; ++i)
         {
-            buf[j] ^= data[j];
+            buf[i] ^= pad;
+        }
+
+        for (uint32_t i = 0; i < left_data; ++i)
+        {
+            buf[i] ^= data[i];
         }
         _aes_encrypt_block(key, buf, out);
     }
@@ -537,14 +551,17 @@ static void _aes_ofb_encrypt_ex(aes_key_t *key,
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-    for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    memcpy(buf, iv, AES_BLOCK_SIZE);
+
+    for (uint32_t i = 0; i < full_blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
     {
-        _aes_encrypt_block(key, iv, buf);
-        memcpy(iv, buf, AES_BLOCK_SIZE);
+        _aes_encrypt_block(key, buf, out);
+
+        memcpy(buf, out, AES_BLOCK_SIZE);
 
         for (uint32_t j = 0; j < 16; j++)
         {
-            out[j] = buf[j] ^ data[j];
+            out[j] ^= data[j];
         }
         
     }
@@ -568,25 +585,27 @@ static void _aes_cfb_encrypt_ex(aes_key_t *key,
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-    for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    memcpy(buf, iv, AES_BLOCK_SIZE);
+
+    for (uint32_t i = 0; i < full_blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
     {
-        _aes_encrypt_block(key, iv, buf);
+        _aes_encrypt_block(key, buf, out);
 
-        for (uint32_t j = 0; j < 16; j++)
+        for (uint32_t j = 0; j < 16; ++j)
         {
-            out[j] = buf[j] ^ data[j];
+            buf[j] = data[j] ^ out[j];
         }
-        memcpy(iv, buf, AES_BLOCK_SIZE);
-
-
+        memcpy(out, buf, AES_BLOCK_SIZE);
     }
     if (left_data)
     {
-        _aes_encrypt_block(key, iv, buf);
+        uint8_t tmp[AES_BLOCK_SIZE] = {0};
+
+        _aes_encrypt_block(key, buf, tmp);
 
         for (uint32_t j = 0; j < left_data; j++)
         {
-            out[j] = buf[j] ^ data[j];
+            out[j] = tmp[j] ^ data[j];
         }
     }
 }
@@ -759,12 +778,14 @@ SECURITY_FUNCTION_BEGIN;
     case AES_GCM:
         _aes_gcm_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
+        /*
     case AES_AEAD:
         _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
     case AES_XTS:
         _aes_xts_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
+        */
     default:
         break;
     }
