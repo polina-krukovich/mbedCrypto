@@ -552,13 +552,17 @@ static void _aes_cbc_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_
     }
 }
 
-/*
 
-static void _aes_ofb_encrypt_ex(aes_key_t *key,
-                                const uint8_t *data, uint32_t data_len, 
-                                const uint8_t *iv, uint32_t iv_len, 
-                                uint8_t *out)
+static void _aes_ofb_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_t *aes_out)
 {
+    /* Aliases */
+    uint8_t *data = aes_in->data;
+    uint8_t *iv = aes_in->iv;
+    uint8_t *out = aes_out->out;
+    uint32_t data_len = aes_in->data_len;
+    uint32_t iv_len = aes_in->iv_len;
+
+    /* Local data */
     uint8_t buf[AES_BLOCK_SIZE] = {0};
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
@@ -592,11 +596,16 @@ static void _aes_ofb_encrypt_ex(aes_key_t *key,
     }
 }
 
-static void _aes_cfb_encrypt_ex(aes_key_t *key,
-                                const uint8_t *data, uint32_t data_len, 
-                                const uint8_t *iv, uint32_t iv_len, 
-                                uint8_t *out)
+static void _aes_cfb_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_t *aes_out)
 {
+    /* Aliases */
+    uint8_t *data = aes_in->data;
+    uint8_t *iv = aes_in->iv;
+    uint8_t *out = aes_out->out;
+    uint32_t data_len = aes_in->data_len;
+    uint32_t iv_len = aes_in->iv_len;
+
+    /* Local data */
     uint8_t buf[AES_BLOCK_SIZE] = {0};
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
@@ -625,6 +634,7 @@ static void _aes_cfb_encrypt_ex(aes_key_t *key,
         }
     }
 }
+/*
 
 static void _aes_ctr_encrypt_ex(aes_key_t *key,
                                 const uint8_t *data, uint32_t data_len, 
@@ -782,16 +792,16 @@ SECURITY_FUNCTION_BEGIN;
     case AES_CBC:
         _aes_cbc_encrypt_ex(&aes_key, in, out);
         break;
-/*
-    case AES_OFB:
-        _aes_ofb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
-        break;
     case AES_CFB:
-        _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        _aes_cfb_encrypt_ex(&aes_key, in, out);
+        break;
+    case AES_OFB:
+        _aes_ofb_encrypt_ex(&aes_key, in, out);
         break;
     case AES_CTR:
         _aes_ctr_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
+        
     case AES_GCM:
         _aes_gcm_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
