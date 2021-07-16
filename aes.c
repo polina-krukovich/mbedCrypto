@@ -623,33 +623,36 @@ static void _aes_ctr_encrypt_ex(aes_key_t *key,
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-/*
-    for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    memcpy(buf, iv, AES_BLOCK_SIZE);
+
+    for (uint32_t i = 0; i < full_blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
     {
-        _aes_encrypt_block(key, iv, buf);
+        _aes_encrypt_block(key, buf, out);
 
         for (uint32_t j = 0; j < 16; j++)
         {
-            out[j] = buf[j] ^ data[j];
+            out[j] ^= data[j];
         }
-        memcpy(iv, buf, AES_BLOCK_SIZE);
 
-        for (uint32_t j = 0; j < 16; ++j)
+        for (int32_t j = 15; j >= 0; --j)
         {
-            while ((++iv[j]) == 0);
+            if ((++buf[j]) == 0)
+                continue;
+            break;
         }
-
     }
     if (left_data)
     {
-        _aes_encrypt_block(key, iv, buf);
+        uint8_t tmp[AES_BLOCK_SIZE] = {0};
 
-        for (uint32_t j = 0; j < left_data; j++)
+        _aes_encrypt_block(key, buf, tmp);
+
+        for (uint32_t i = 0; i < left_data; ++i)
         {
-            out[j] = buf[j] ^ data[j];
+            out[i] = tmp[i] ^ data[i];
         }
     }
-    */
+    
 }
 
 
@@ -711,9 +714,11 @@ static void _aes_gcm_encrypt_ex(aes_key_t *key,
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-    _aes_encrypt_block(key, iv, T);
 
-    for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    memcpy(buf, iv, AES_BLOCK_SIZE);
+
+
+    for (uint32_t i = 0; i < full_blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
     {
         for (uint32_t j = 0; j < 16; j++)
         {
