@@ -474,12 +474,14 @@ SECURITY_FUNCTION_EXIT:
     SECURITY_FUNCTION_RETURN;
 }
 
-static void _aes_ecb_encrypt_ex(aes_key_t *key,
-                                const uint8_t *data, uint32_t data_len, 
-                                const uint8_t *iv, uint32_t iv_len, 
-                                uint8_t *out)
+static void _aes_ecb_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_t *aes_out)
 {
+    /* Aliases */
+    uint8_t *data = aes_in->data;
+    uint8_t *out = aes_out->out;
+    uint32_t data_len = aes_in->data_len;
 
+    /* Local data */
     uint8_t buf[AES_BLOCK_SIZE] = {0};
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
@@ -491,8 +493,9 @@ static void _aes_ecb_encrypt_ex(aes_key_t *key,
 
     if (left_data)
     {
+        /* PKCS7 padding */
         uint8_t pad = 16 - left_data;
-
+        /* Copy data left */
         memcpy(buf, data, left_data);
 
         for (uint32_t i = left_data; i <= AES_BLOCK_SIZE; ++i)
@@ -502,7 +505,7 @@ static void _aes_ecb_encrypt_ex(aes_key_t *key,
         _aes_encrypt_block(key, buf, out);
     }
 }
-
+/*
 static void _aes_cbc_encrypt_ex(aes_key_t *key,
                                 const uint8_t *data, uint32_t data_len, 
                                 const uint8_t *iv, uint32_t iv_len, 
@@ -520,7 +523,9 @@ static void _aes_cbc_encrypt_ex(aes_key_t *key,
         {
             buf[j] = data[j] ^ buf[j];
         }
+
         _aes_encrypt_block(key, buf, out);
+
         memcpy(buf, out, AES_BLOCK_SIZE);
     }
 
@@ -714,64 +719,60 @@ static void _aes_gcm_encrypt_ex(aes_key_t *key,
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-
     memcpy(buf, iv, AES_BLOCK_SIZE);
 
+    _aes_encrypt_block(key, buf, T);
 
+    
     for (uint32_t i = 0; i < full_blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
     {
-        for (uint32_t j = 0; j < 16; j++)
+        for (int32_t j = 15; j >= 0; --j)
         {
-            buf[j] = data[j] ^ T[j];
+            if ((++buf[j]) == 0)
+                continue;
+            break;
         }
 
         _aes_encrypt_block(key, buf, out);
 
         for (uint32_t j = 0; j < 16; j++)
         {
-            out[j] ^= T[j];
+            out[j] ^= data[j];
         }
 
-        memcpy(T, out, 16);
     }
+
     if (left_data)
     {
-        memcpy(buf, data, left_data);
-        for (uint32_t j = 0; j < 16; j++)
+        uint8_t tmp[AES_BLOCK_SIZE] = {0};
+
+        _aes_encrypt_block(key, buf, tmp);
+
+        for (uint32_t i = 0; i < left_data; ++i)
         {
-            buf[j] = data[j] ^ T[j];
+            out[i] = tmp[i] ^ data[i];
         }
-
-        _aes_encrypt_block(key, buf, out);
-
-        for (uint32_t j = 0; j < 16; j++)
-        {
-            out[j] ^= T[j];
-        }
-
-        memcpy(T, out, 16);
-
     }
-} 
 
+} 
+*/
 security_status_e aes_encrypt(aes_mode_e aes_mode, aes_type_e aes_type,
                                 aes_key_expansion_hash_type_e key_exp_hash_type, 
-                                const uint8_t *data, uint32_t data_len, 
-                                const uint8_t *iv, uint32_t iv_len, 
-                                uint8_t *key, uint32_t key_len, uint8_t *out)
+                                aes_input_t *in, aes_output_t *out)
 {
 SECURITY_FUNCTION_BEGIN;
     
     aes_key_t aes_key;
     
     SECURITY_CHECK_RES(aes_key_init(aes_type, &aes_key));
-    SECURITY_CHECK_RES(aes_key_expand(key_exp_hash_type, key, key_len, &aes_key));
+    SECURITY_CHECK_RES(aes_key_expand(key_exp_hash_type, in->key, in->key_len, &aes_key));
 
     switch (aes_mode)
     {
     case AES_ECB:
-        _aes_ecb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+        _aes_ecb_encrypt_ex(&aes_key, in, out);
         break;
+        /*
     case AES_CBC:
         _aes_cbc_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
@@ -787,7 +788,6 @@ SECURITY_FUNCTION_BEGIN;
     case AES_GCM:
         _aes_gcm_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
-        /*
     case AES_AEAD:
         _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
         break;
