@@ -1,12 +1,14 @@
 #include "rand.h"
+
+
+#if (MEASURE_ENTROPY == ENABLED)
+
 #include <math.h>
 
-#define BASE_SEED_SIZE      (64)
 #define ENTROPY_TESTS       (1000000)
 #define ENTROPY_MOD         (1000)
-#define INF                 (1000000000)
 
-double get_entropy(int (*rnd)())
+double get_entropy(rnd_callback_t rnd)
 {
     uint32_t cnt[ENTROPY_MOD] = {0};
     double sum = 0;
@@ -28,6 +30,7 @@ double get_entropy(int (*rnd)())
     sum *= -1;
     return sum;
 }
+#endif /* MEASURE_ENTROPY */
 
 union u32_e
 {
@@ -46,7 +49,6 @@ static void inc_seed()
     {
         ++i;
     }
-    
 }
 
 void srand(uint32_t seed)
@@ -70,6 +72,21 @@ void srand(uint32_t seed)
     for (uint32_t i = 4; i < BASE_SEED_SIZE; ++i)
     {
         _seed[i] = _seed[i - 1] + _seed[i - 2];
+    }
+}
+
+void srand_bytes(uint8_t *seed, uint32_t seed_len)
+{
+    if (seed_len > BASE_SEED_SIZE) 
+    {
+        seed_len = BASE_SEED_SIZE;
+    }
+
+    memcpy(_seed, seed, seed_len);
+
+    if (seed_len < BASE_SEED_SIZE)
+    {
+        memset(_seed, BASE_SEED_SIZE - seed_len, BASE_SEED_SIZE - seed_len);
     }
 }
 
