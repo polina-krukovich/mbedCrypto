@@ -46,7 +46,8 @@ void srand(uint32_t seed);
 /**
  * @brief Set new seed with a byte array for random functions
  * @param seed Seed to be set for random functions
- * @param seed_len Seed length. Shouldn't be more than BASE_SEED_SIZE. If seed len less than BASE_SEED_SIZE
+ * @param seed_len Seed length. Shouldn't be more than BASE_SEED_SIZE. In that case seed will be full
+ * filled with only first BASE_SEED_SIZE numebrs. If seed len less than BASE_SEED_SIZE
  * will be padded as PKCS7 standart
  */
 void srand_bytes(uint8_t *seed, uint32_t seed_len);
