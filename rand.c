@@ -1,6 +1,33 @@
 #include "rand.h"
+#include <math.h>
 
 #define BASE_SEED_SIZE      (64)
+#define ENTROPY_TESTS       (1000000)
+#define ENTROPY_MOD         (1000)
+#define INF                 (1000000000)
+
+double get_entropy(int (*rnd)())
+{
+    uint32_t cnt[ENTROPY_MOD] = {0};
+    double sum = 0;
+
+    for(uint32_t i = 0; i < ENTROPY_TESTS; ++i)
+    {
+        cnt[rnd() % ENTROPY_MOD]++;
+    }
+
+    for (uint32_t i = 0; i < ENTROPY_MOD; ++i)
+    {
+        if (cnt[i] == 0)
+        {
+            continue;
+        }
+        double p = (double)(cnt[i]) / (double)(ENTROPY_TESTS);
+        sum += (p * log2(p));
+    }
+    sum *= -1;
+    return sum;
+}
 
 union u32_e
 {
