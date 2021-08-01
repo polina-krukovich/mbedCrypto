@@ -90,21 +90,33 @@ void srand_bytes(uint8_t *seed, uint32_t seed_len)
     }
 }
 
-void rand_bytes_ex(uint8_t *dst, uint32_t size, int32_t (*rnd_gen)())
+void rand_bytes(uint8_t *dst, uint32_t size)
+{
+   rand_bytes_ex(dst, size, NULL);
+}
+
+void rand_bytes_ex(uint8_t *dst, uint32_t size, rnd_callback_t rnd)
 {
     union u32_e tmp;
+    rnd_callback_t lrand = rnd;
     uint32_t blocks = size >> 2;
     uint32_t left = size & 3;
     
+    if (lrand == NULL)
+    {
+        lrand = rand;
+    }
+
 #if defined(PLATFORM_LE)
     for (uint32_t i = 0; i < blocks; ++i, dst += 4)
     {
-        tmp.dw = U32(rnd_gen());
+        tmp.dw = U32(lrand());
         dst[0] = tmp.b[0];
         dst[1] = tmp.b[1];
         dst[2] = tmp.b[2];
         dst[3] = tmp.b[3];
     }
+    /* Full fill left bytes */
     while (left--)
     {
         dst[left] = tmp.b[left];
@@ -112,22 +124,23 @@ void rand_bytes_ex(uint8_t *dst, uint32_t size, int32_t (*rnd_gen)())
 #else
     for (uint32_t i = 0; i < blocks; ++i, dst += 4)
     {
-        tmp.dw = U32(rnd_gen());
+        tmp.dw = U32(lrand());
         dst[0] = tmp.b[3];
         dst[1] = tmp.b[2];
         dst[2] = tmp.b[1];
         dst[3] = tmp.b[0];
     }
+
     uint32_t j = 0;
+    /* Full fill left bytes */
     while (left--)
     {
         dst[0 + j++] = tmp.b[left];
     }
+
 #endif /* PLATFORM_LE */
 
 }
-
-#if (RAND_PRNG_SHA256 == ENABLED)
 
 #include "sha256.h"
 
@@ -155,36 +168,6 @@ int32_t rand()
 
     return res;
 }
-
-void rand_bytes(uint8_t *dst, uint32_t size)
-{
-    if (!size || !dst)
-    {
-        return;
-    }
-
-    uint8_t hash[SHA256_HASH_SIZE];
-    uint32_t blocks = size / SHA256_HASH_SIZE;
-    uint32_t left = size - blocks * SHA256_HASH_SIZE;
-
-    for (uint32_t i = 0; i < blocks; ++i, dst += SHA256_HASH_SIZE)
-    {
-        sha256(_seed, SHA256_HASH_SIZE, dst);
-        inc_seed();
-    }
-
-    if (left)
-    {
-        sha256(_seed, SHA256_HASH_SIZE, hash);
-        memcpy(dst, hash, left);
-        memset(hash, 0xFF, SHA256_HASH_SIZE);
-        inc_seed();
-    }
-}
-
-#elif (RAND_CTR_DRBG == ENABLED)
-
-#endif
 
 
 
