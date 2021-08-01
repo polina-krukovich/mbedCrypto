@@ -21,9 +21,21 @@
 
 #include "security.h"
 
+#define BASE_SEED_SIZE      (64)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+typedef int32_t (*rnd_callback_t)();
+
+/**
+ * @brief Count entropy for a specialized random generator
+ * @param rnd Function that entropy should be counted for
+ * @return Counted entropy
+ */
+double get_entropy(rnd_callback_t rnd);
 
 /**
  * @brief Set new seed for random functions
@@ -32,42 +44,37 @@ extern "C" {
 void srand(uint32_t seed);
 
 /**
- * @brief Function generate determenistic rundom nambersed. It implements it 
- * based on 4 ways:
- * 1) If RAND_PRF macro is defined as RAND_PRF_SHA - SHA 256 with 
- * counter(inc seed) is used
- * 2) If RAND_PRF macro is defined as RAND_PRF_AES - AES 256 with 
- * counter(inc seed) is used
- * 3) If RAND_PRF macro is defined as RAND_PRF_FAST - fast option 
- * based on POSIX rand function
- * @return int32_t random number
+ * @brief Set new seed with a byte array for random functions
+ * @param seed Seed to be set for random functions
+ * @param seed_len Seed length. Shouldn't be more than BASE_SEED_SIZE. If seed len less than BASE_SEED_SIZE
+ * will be padded as PKCS7 standart
+ */
+void srand_bytes(uint8_t *seed, uint32_t seed_len);
+
+/**
+ * @brief Function generate deterministic random number
+ * @return Random number
  */
 int32_t rand();
 
 /**
- * @brief 
- * 
- * @return int32_t 
+ * @brief Function generate an array of bytes
+ * @param dst Destination array random bytes to be saved
+ * @param size Number of random bytes to be generated
+ * @param rnd Random number function generator
  */
-int32_t secure_rand();
-
-#ifdef HW_TRNG || DOXYGEN
+void rand_bytes_ex(uint8_t *dst, uint32_t size, rnd_callback_t rnd);
 
 /**
- * @brief True rundom number generator
- * 
- * @return int32_t 
+ * @brief Function generate an array of bytes
+ * @param dst Destination array random bytes to be saved
+ * @param size Number of random bytes to be generated
  */
-int32_t trng_rand();
-
-#endif
-
-void rand_bytes_ex(uint8_t *dst, uint32_t size, int32_t (*rnd_gen)());
-
 void rand_bytes(uint8_t *dst, uint32_t size);
+
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif /* __cplusplus */
 
 #endif /* RAND_H */
