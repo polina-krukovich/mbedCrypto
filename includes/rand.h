@@ -62,7 +62,7 @@ int32_t rand();
  * @brief Function generate an array of bytes
  * @param dst Destination array random bytes to be saved
  * @param size Number of random bytes to be generated
- * @param rnd Random number function generator
+ * @param rnd Random number function generator. If rnd is NULL default rand() is used.
  */
 void rand_bytes_ex(uint8_t *dst, uint32_t size, rnd_callback_t rnd);
 
