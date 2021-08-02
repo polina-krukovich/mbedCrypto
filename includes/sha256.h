@@ -87,6 +87,6 @@ security_status_e SECURITY_API sha256(const uint8_t *data,
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif /* __cplusplus */
 
 #endif /* SHA256_H */

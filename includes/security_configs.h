@@ -11,13 +11,11 @@
 **************************************************************************/
 /*!
 *   @file security_configs.h
-*   @brief File contains configurations for the security library. 
-*          Some steps can be performed explicitly.
+*   @brief File contains configuarations for a library.
 *	@author Zontec
 *	@version 1.1
-*	@date 2021.06.18
+*	@date 2021.07.02
 */
-
 
 #ifndef SECURITY_CONFIGS_H
 #define SECURITY_CONFIGS_H

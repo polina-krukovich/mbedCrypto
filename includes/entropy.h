@@ -10,29 +10,25 @@
 * furnished to do so, subject to the following conditions:
 **************************************************************************/
 /*!
-*   @file security_utils.h
-*   @brief File contains utils for library functions.
+*   @file entropy.h
+*   @brief File contains entropy API functions.
 *	@author Zontec
 *	@version 1.1
 *	@date 2021.07.02
 */
 
-#ifndef SECURITY_UTILS_H
-#define SECURITY_UTILS_H
-
-#include "security.h"
+#ifndef ENTROPY_H
+#define ENTROPY_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void mem_xor_secured(uint8_t *dst, const uint8_t *src, uint32_t size);
 
-uint32_t is_le();
 
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* SECURITY_UTILS_H */
+#endif /* ENTROPY_H */

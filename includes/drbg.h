@@ -10,29 +10,28 @@
 * furnished to do so, subject to the following conditions:
 **************************************************************************/
 /*!
-*   @file security_utils.h
-*   @brief File contains utils for library functions.
+*   @file drbg.h
+*   @brief File contains API for rundom number and sequnces generating.
 *	@author Zontec
 *	@version 1.1
-*	@date 2021.07.02
+*	@date 2021.06.19
 */
 
-#ifndef SECURITY_UTILS_H
-#define SECURITY_UTILS_H
+#ifndef DRBG_H
+#define DRBG_H
 
 #include "security.h"
+
+#define BASE_SEED_SIZE      (64)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void mem_xor_secured(uint8_t *dst, const uint8_t *src, uint32_t size);
-
-uint32_t is_le();
 
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* SECURITY_UTILS_H */
+#endif /* DRBG_H */

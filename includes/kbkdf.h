@@ -11,7 +11,7 @@
 **************************************************************************/
 /*!
 *   @file kbkdf.h
-*   @brief File contains API for KBKDf function.
+*   @brief File contains API for KBKDF function.
 *	@author Zontec
 *	@version 1.1
 *	@date 2021.06.19
@@ -94,6 +94,6 @@ security_status_e kbkdf(void *prf_ctx, kbkdf_mode_e mode, kbkdf_hash_type_e hash
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif /* __cplusplus */
 
 #endif /* KBKDF_H */

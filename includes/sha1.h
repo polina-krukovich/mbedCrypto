@@ -82,8 +82,9 @@ security_status_e SECURITY_API sha1_finish(sha1_t *ctx, uint8_t *out);
 security_status_e SECURITY_API sha1(const uint8_t *data, 
                                     uint32_t data_len, uint8_t *out);
 
+
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif /* __cplusplus */
 
 #endif /* SHA1_H */

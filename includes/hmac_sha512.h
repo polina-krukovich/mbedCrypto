@@ -11,7 +11,7 @@
 **************************************************************************/
 /*!
 *   @file hmac_sha512.h
-*   @brief File contains HMAC_SHA512 API functions.
+*   @brief File contains HMAC SHA512 API functions.
 *	@author Zontec
 *	@version 1.1
 *	@date 2021.06.19
@@ -87,6 +87,6 @@ security_status_e SECURITY_API hmac_sha512_finish(hmac_sha512_t *ctx, uint8_t *o
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif /* __cplusplus */
 
 #endif /* HMAC_SHA512_H */

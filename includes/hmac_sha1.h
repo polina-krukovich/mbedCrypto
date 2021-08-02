@@ -11,7 +11,7 @@
 **************************************************************************/
 /*!
 *   @file hmac_sha1.h
-*   @brief File contains HMAC_SHA1 API functions.
+*   @brief File contains HMAC SHA1 API functions.
 *	@author Zontec
 *	@version 1.1
 *	@date 2021.06.19
@@ -88,6 +88,6 @@ security_status_e SECURITY_API hmac_sha1_finish(hmac_sha1_t *ctx, uint8_t *out);
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif /* __cplusplus */
 
 #endif /* HMAC_SHA1_H */
