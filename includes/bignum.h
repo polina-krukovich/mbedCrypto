@@ -1,5 +1,23 @@
-#ifndef __BIGNUM_H__
-#define __BIGNUM_H__
+/****************************INFORMATION***********************************
+* Copyright (c) 2021 Zontec
+* Email: dehibeo@gmail.com
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+**************************************************************************/
+/*!
+*   @file bignum.h
+*   @brief File contains big number API functions.
+*	@author Zontec
+*	@version 1.1
+*	@date 2021.07.02
+*/
+#ifndef BIGNUM_H
+#define BIGNUM_H
 
 #include <stdio.h>
 #include <stdint.h>
@@ -15,6 +33,9 @@ typedef struct bignum_t
     uint32_t size;
     bignum_uint *p;
 } bignum_t;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void bignum_init(bignum_t *x);
 
@@ -42,4 +63,8 @@ char *bignum_to_dec_string(const bignum_t *x);
 
 char *bignum_to_hex_string(const bignum_t *x);
 
-#endif /*__BIGNUM_H__*/
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* BIGNUM_H */
