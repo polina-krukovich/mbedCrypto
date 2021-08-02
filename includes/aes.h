@@ -1,9 +1,32 @@
+/****************************INFORMATION***********************************
+* Copyright (c) 2021 Zontec
+* Email: dehibeo@gmail.com
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+**************************************************************************/
+/*!
+*   @file aes.h
+*   @brief File contains AES API functions.
+*	@author Zontec
+*	@version 1.1
+*	@date 2021.07.02
+*/
+
 #ifndef AES_H
 #define AES_H
 
 #include "security.h"
 
 #define AES_BLOCK_SIZE              (16)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum aes_type_e
 {
@@ -68,5 +91,10 @@ security_status_e aes_ecb_encrypt_ex(aes_type_e aes_type, aes_key_expansion_hash
                                 uint8_t *key, uint32_t key_len, uint8_t *out);
 
 void aes_key_free(aes_key_t *aes_key);
+
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* AES_H */
