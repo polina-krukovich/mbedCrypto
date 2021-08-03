@@ -1,3 +1,6 @@
 [submodule "libs"]
 	path = libs
 	url = https://github.com/libtom/libtommath
+[submodule "lib/libtommath"]
+	path = lib/libtommath
+	url = https://github.com/libtom/libtommath
