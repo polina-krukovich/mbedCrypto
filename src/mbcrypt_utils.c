@@ -10,14 +10,14 @@
 * furnished to do so, subject to the following conditions:
 **************************************************************************/
 /*!
-*   @file security_utils.c
-*   @brief File contains security utils implementation.
+*   @file mbcrypt_utils.c
+*   @brief File contains mbcrypt utils implementation.
 *	@author Zontec
 *	@version 1.1
 *	@date 2021.07.04
 */
 
-#include "security_utils.h"
+#include "mbcrypt_utils.h"
 
 void mem_xor_secured(uint8_t *dst, const uint8_t *src, uint32_t size)
 {
@@ -36,3 +36,4 @@ uint32_t is_le()
     uint16_t d = 1;
     return (d & 0xff);
 }
+

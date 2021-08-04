@@ -386,111 +386,111 @@ static void _aes_decrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE],
 }
 
 
-security_status_e aes_key_init(aes_type_e aes_type, aes_key_t *aes_key)
+mbcrypt_status_e aes_key_init(aes_type_e aes_type, aes_key_t *aes_key)
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
 
-    SECURITY_CHECK_VALID_NOT_NULL(aes_key);
+    MBCRYPT_CHECK_VALID_NOT_NULL(aes_key);
 
     if (aes_type != AES128 && 
         aes_type != AES192 && 
         aes_type != AES256)
     {
-        SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
-        goto SECURITY_FUNCTION_EXIT;
+        MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
+        goto MBCRYPT_FUNCTION_EXIT;
     }
 
     aes_key->aes_type = aes_type;
     aes_key->w = malloc(4 * Nb * (Nr + 1));
 
-    SECURITY_CHECK_VALID_NOT_NULL(aes_key->w);
+    MBCRYPT_CHECK_VALID_NOT_NULL(aes_key->w);
 
-SECURITY_FUNCTION_EXIT:
-    SECURITY_FUNCTION_RETURN;
+MBCRYPT_FUNCTION_EXIT:
+    MBCRYPT_FUNCTION_RETURN;
 }
 
-security_status_e aes_key_expand(aes_key_expansion_hash_type_e key_exp_hash_type,
+mbcrypt_status_e aes_key_expand(aes_key_expansion_hash_type_e key_exp_hash_type,
                                     const uint8_t *key_in, uint32_t key_in_len, aes_key_t *key_out)
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
     
-    SECURITY_CHECK_VALID_NOT_NULL(key_out);
-    SECURITY_CHECK_VALID_NOT_NULL(key_in);
+    MBCRYPT_CHECK_VALID_NOT_NULL(key_out);
+    MBCRYPT_CHECK_VALID_NOT_NULL(key_in);
     
     uint8_t tmp_key[AES_MAX_KEY_SIZE * 2];
     uint32_t aes_type = key_out->aes_type;
 
-    SECURITY_CHECK_VALID_NOT_NULL(memset(tmp_key, 0x00, sizeof(tmp_key)));
+    MBCRYPT_CHECK_VALID_NOT_NULL(memset(tmp_key, 0x00, sizeof(tmp_key)));
 
     if (key_exp_hash_type == AES_KEY_EXPANSION_SHA1 && 
         (key_out->aes_type == AES192 || key_out->aes_type == AES256))
     {
-        SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
-        goto SECURITY_FUNCTION_EXIT;
+        MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
+        goto MBCRYPT_FUNCTION_EXIT;
     }
 
     switch (key_exp_hash_type)
     {
     case AES_KEY_EXPANSION_SHA1:
-        SECURITY_CHECK_RES(sha1(key_in, key_in_len, tmp_key));
+        MBCRYPT_CHECK_RES(sha1(key_in, key_in_len, tmp_key));
         break;
     case AES_KEY_EXPANSION_SHA256:
-        SECURITY_CHECK_RES(sha256(key_in, key_in_len, tmp_key));
+        MBCRYPT_CHECK_RES(sha256(key_in, key_in_len, tmp_key));
         break;
     case AES_KEY_EXPANSION_SHA512:
-        SECURITY_CHECK_RES(sha512(key_in, key_in_len, tmp_key));
+        MBCRYPT_CHECK_RES(sha512(key_in, key_in_len, tmp_key));
         break;
     case AES_KEY_EXPANSION_NOT_REQUIRED:
         if (key_in_len != Nk * 4)
         {
-            SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
-            goto SECURITY_FUNCTION_EXIT;
+            MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
+            goto MBCRYPT_FUNCTION_EXIT;
         }
         else 
         {
-            SECURITY_CHECK_VALID_NOT_NULL(memcpy(tmp_key, key_in, key_in_len));
+            MBCRYPT_CHECK_VALID_NOT_NULL(memcpy(tmp_key, key_in, key_in_len));
         }
         break;
     default:
-        SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
-        goto SECURITY_FUNCTION_EXIT;
+        MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
+        goto MBCRYPT_FUNCTION_EXIT;
         break;
     }
     _aes_expand_key(key_out->aes_type, tmp_key, key_out->w);
 
-SECURITY_FUNCTION_EXIT:
-    SECURITY_FUNCTION_RETURN;
+MBCRYPT_FUNCTION_EXIT:
+    MBCRYPT_FUNCTION_RETURN;
 }
 
-security_status_e aes_ecb_encrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
+mbcrypt_status_e aes_ecb_encrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
                                         uint8_t out[AES_BLOCK_SIZE])
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
     
-    SECURITY_CHECK_VALID_NOT_NULL(key);
-    SECURITY_CHECK_VALID_NOT_NULL(in);
-    SECURITY_CHECK_VALID_NOT_NULL(out);
+    MBCRYPT_CHECK_VALID_NOT_NULL(key);
+    MBCRYPT_CHECK_VALID_NOT_NULL(in);
+    MBCRYPT_CHECK_VALID_NOT_NULL(out);
 
     _aes_encrypt_block(key, in, out);
 
-SECURITY_FUNCTION_EXIT:
-    SECURITY_FUNCTION_RETURN;
+MBCRYPT_FUNCTION_EXIT:
+    MBCRYPT_FUNCTION_RETURN;
     
 }
 
-security_status_e aes_ecb_decrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
+mbcrypt_status_e aes_ecb_decrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
                                     uint8_t out[AES_BLOCK_SIZE])
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
     
-    SECURITY_CHECK_VALID_NOT_NULL(key);
-    SECURITY_CHECK_VALID_NOT_NULL(in);
-    SECURITY_CHECK_VALID_NOT_NULL(out);
+    MBCRYPT_CHECK_VALID_NOT_NULL(key);
+    MBCRYPT_CHECK_VALID_NOT_NULL(in);
+    MBCRYPT_CHECK_VALID_NOT_NULL(out);
 
     _aes_decrypt_block(key, in, out);
 
-SECURITY_FUNCTION_EXIT:
-    SECURITY_FUNCTION_RETURN;
+MBCRYPT_FUNCTION_EXIT:
+    MBCRYPT_FUNCTION_RETURN;
 }
 
 static void _aes_ecb_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_t *aes_out)
@@ -804,16 +804,16 @@ static void _aes_gcm_encrypt_ex(aes_key_t *key,
 
 } 
 */
-security_status_e aes_encrypt(aes_mode_e aes_mode, aes_type_e aes_type,
+mbcrypt_status_e aes_encrypt(aes_mode_e aes_mode, aes_type_e aes_type,
                                 aes_key_expansion_hash_type_e key_exp_hash_type, 
                                 aes_input_t *in, aes_output_t *out)
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
     
     aes_key_t aes_key;
     
-    SECURITY_CHECK_RES(aes_key_init(aes_type, &aes_key));
-    SECURITY_CHECK_RES(aes_key_expand(key_exp_hash_type, in->key, in->key_len, &aes_key));
+    MBCRYPT_CHECK_RES(aes_key_init(aes_type, &aes_key));
+    MBCRYPT_CHECK_RES(aes_key_expand(key_exp_hash_type, in->key, in->key_len, &aes_key));
 
     switch (aes_mode)
     {
@@ -847,9 +847,9 @@ SECURITY_FUNCTION_BEGIN;
         break;
     }
  
-SECURITY_FUNCTION_EXIT:
+MBCRYPT_FUNCTION_EXIT:
     aes_key_free(&aes_key);
-    SECURITY_FUNCTION_RETURN;   
+    MBCRYPT_FUNCTION_RETURN;   
 }
 
 void aes_key_free(aes_key_t *aes_key)

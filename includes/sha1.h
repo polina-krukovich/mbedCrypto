@@ -20,7 +20,7 @@
 #ifndef SHA1_H
 #define SHA1_H
 
-#include "security.h"
+#include "mbcrypt.h"
 
 #define SHA1_HASH_SIZE              (20)
 #define SHA1_BUFFER_SIZE            (64)
@@ -45,9 +45,9 @@ extern "C" {
  * @brief Function inits sha1 context with default values
  * 
  * @param[in,out] ctx SHA context to be initialized
- * @return security_status_e 
+ * @return mbcrypt_status_e 
  */
-security_status_e SECURITY_API sha1_init(sha1_t *ctx);
+mbcrypt_status_e MBCRYPT_API sha1_init(sha1_t *ctx);
 
 /**
  * @brief Function updates the context with new hash computations based on 
@@ -56,9 +56,9 @@ security_status_e SECURITY_API sha1_init(sha1_t *ctx);
  * @param[in,out] ctx SHA1 context
  * @param[in] data Input data to be hashed
  * @param[in] data_len Input data len
- * @return security_status_e 
+ * @return mbcrypt_status_e 
  */
-security_status_e SECURITY_API sha1_update(sha1_t *ctx, 
+mbcrypt_status_e MBCRYPT_API sha1_update(sha1_t *ctx, 
                                             const uint8_t *data, uint32_t data_len);
 
 /**
@@ -66,9 +66,9 @@ security_status_e SECURITY_API sha1_update(sha1_t *ctx,
  * 
  * @param[in] ctx SHA1 context
  * @param[out] out Output hash. Should be at least allocated SHA1_HASH_SIZE memory
- * @return security_status_e 
+ * @return mbcrypt_status_e 
  */
-security_status_e SECURITY_API sha1_finish(sha1_t *ctx, uint8_t *out);
+mbcrypt_status_e MBCRYPT_API sha1_finish(sha1_t *ctx, uint8_t *out);
 
 /**
  * @brief Function implements step be step three functions: 
@@ -77,9 +77,9 @@ security_status_e SECURITY_API sha1_finish(sha1_t *ctx, uint8_t *out);
  * @param[in] data Input data to be hashed
  * @param[in] data_len Input data len
  * @param[out] out Output hash. Should be at least allocated SHA1_HASH_SIZE memory
- * @return security_status_e 
+ * @return mbcrypt_status_e 
  */
-security_status_e SECURITY_API sha1(const uint8_t *data, 
+mbcrypt_status_e MBCRYPT_API sha1(const uint8_t *data, 
                                     uint32_t data_len, uint8_t *out);
 
 

@@ -20,7 +20,7 @@
 #ifndef AES_H
 #define AES_H
 
-#include "security.h"
+#include "mbcrypt.h"
 
 #define AES_BLOCK_SIZE              (16)
 
@@ -81,12 +81,12 @@ typedef struct aes_output_t
     uint32_t tag_len;
 } aes_output_t;
 
-security_status_e aes_key_init(aes_type_e aes_type, aes_key_t *aes_key);
+mbcrypt_status_e aes_key_init(aes_type_e aes_type, aes_key_t *aes_key);
 
-security_status_e aes_key_expand(aes_key_expansion_hash_type_e key_exp_hash_type,
+mbcrypt_status_e aes_key_expand(aes_key_expansion_hash_type_e key_exp_hash_type,
                                     const uint8_t *key_in, uint32_t key_in_len, aes_key_t *key_out);
 
-security_status_e aes_ecb_encrypt_ex(aes_type_e aes_type, aes_key_expansion_hash_type_e key_exp_hash_type, 
+mbcrypt_status_e aes_ecb_encrypt_ex(aes_type_e aes_type, aes_key_expansion_hash_type_e key_exp_hash_type, 
                                 const uint8_t *data, uint32_t data_len, 
                                 uint8_t *key, uint32_t key_len, uint8_t *out);
 

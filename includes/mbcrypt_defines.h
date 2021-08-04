@@ -10,15 +10,15 @@
 * furnished to do so, subject to the following conditions:
 **************************************************************************/
 /*!
-*   @file security_defines.h
-*   @brief File contains key definitions for security configuration file.
+*   @file mbcrypt_defines.h
+*   @brief File contains key definitions for mbcrypt configuration file.
 *	@author Zontec
 *	@version 1.1
 *	@date 2021.06.18
 */
 
-#ifndef SECURITY_DEFINES_H
-#define SECURITY_DEFINES_H
+#ifndef MBCRYPT_DEFINES_H
+#define MBCRYPT_DEFINES_H
 
 
 #ifndef ENABLED
@@ -32,29 +32,29 @@
 
 
 /**
- * @brief MIN_SECURITY_LEVEL has no any additional protection for crypto algorithms.
+ * @brief MIN_MBCRYPT_LEVEL has no any additional protection for crypto algorithms.
  */
-#ifndef MIN_SECURITY_LEVEL
-    #define MIN_SECURITY_LEVEL      (0)
+#ifndef MIN_MBCRYPT_LEVEL
+    #define MIN_MBCRYPT_LEVEL      (0)
 #endif
 
 
 /**
- * @brief MID_SECURITY_LEVEL provides some basic protection that has no big influence
+ * @brief MID_MBCRYPT_LEVEL provides some basic protection that has no big influence
  * on algorithms performance.
  */
-#ifndef MID_SECURITY_LEVEL
-    #define MID_SECURITY_LEVEL      (1)
+#ifndef MID_MBCRYPT_LEVEL
+    #define MID_MBCRYPT_LEVEL      (1)
 #endif
 
 
 /**
- * @brief MAX_SECURITY_LEVEL provides all available 
+ * @brief MAX_MBCRYPT_LEVEL provides all available 
  * protection for any crypto function.
  */
-#ifndef MAX_SECURITY_LEVEL
-    #define MAX_SECURITY_LEVEL      (2)
+#ifndef MAX_MBCRYPT_LEVEL
+    #define MAX_MBCRYPT_LEVEL      (2)
 #endif
 
 
-#endif /* SECURITY_DEFINES_H */
+#endif /* MBCRYPT_DEFINES_H */

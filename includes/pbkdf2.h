@@ -20,7 +20,7 @@
 #ifndef PBKDF2_H
 #define PBKDF2_H
 
-#include "security.h"
+#include "mbcrypt.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,9 +39,9 @@ extern "C" {
  * @param[in] iters Number of iterations should be performed for key derivation
  * @param[out] out Derived key. Array should be out_len size at least
  * @param[in] out_len Key len in bytes.
- * @return security_status_e 
+ * @return mbcrypt_status_e 
  */
-security_status_e pbkdf2_hmac_sha1(const uint8_t *password, uint32_t pass_len,
+mbcrypt_status_e pbkdf2_hmac_sha1(const uint8_t *password, uint32_t pass_len,
                         const uint8_t *salt, uint32_t salt_len, uint32_t iters, 
                         uint8_t *out, uint32_t out_len);
 
@@ -60,9 +60,9 @@ security_status_e pbkdf2_hmac_sha1(const uint8_t *password, uint32_t pass_len,
  * @param[in] iters Number of iterations should be performed for key derivation
  * @param[out] out Derived key. Array should be out_len size at least
  * @param[in] out_len Key len in bytes.
- * @return security_status_e 
+ * @return mbcrypt_status_e 
  */
-security_status_e pbkdf2_hmac_sha256(const uint8_t *password, uint32_t pass_len,
+mbcrypt_status_e pbkdf2_hmac_sha256(const uint8_t *password, uint32_t pass_len,
                         const uint8_t *salt, uint32_t salt_len, uint32_t iters, 
                         uint8_t *out, uint32_t out_len);
 
@@ -81,9 +81,9 @@ security_status_e pbkdf2_hmac_sha256(const uint8_t *password, uint32_t pass_len,
  * @param[in] iters Number of iterations should be performed for key derivation
  * @param[out] out Derived key. Array should be out_len size at least
  * @param[in] out_len Key len in bytes.
- * @return security_status_e 
+ * @return mbcrypt_status_e 
  */
-security_status_e pbkdf2_hmac_sha512(const uint8_t *password, uint32_t pass_len,
+mbcrypt_status_e pbkdf2_hmac_sha512(const uint8_t *password, uint32_t pass_len,
                         const uint8_t *salt, uint32_t salt_len, uint32_t iters, 
                         uint8_t *out, uint32_t out_len);
 

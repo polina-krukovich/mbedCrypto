@@ -20,7 +20,7 @@
 #ifndef SHA256_H
 #define SHA256_H
 
-#include "security.h"
+#include "mbcrypt.h"
 
 #define SHA256_HASH_SIZE              (32)
 #define SHA256_BUFFER_SIZE            (64)
@@ -48,9 +48,9 @@ extern "C" {
  * @brief Function inits sha256 context with default values
  * 
  * @param[in,out] ctx SHA context to be initialized
- * @return security_status_e 
+ * @return mbcrypt_status_e 
  */
-security_status_e SECURITY_API sha256_init(sha256_t *ctx);
+mbcrypt_status_e MBCRYPT_API sha256_init(sha256_t *ctx);
 
 /**
  * @brief Function updates the context with new hash computations based on 
@@ -59,9 +59,9 @@ security_status_e SECURITY_API sha256_init(sha256_t *ctx);
  * @param[in,out] ctx SHA256 context
  * @param[in] data Input data to be hashed
  * @param[in] data_len Input data len
- * @return security_status_e 
+ * @return mbcrypt_status_e 
  */
-security_status_e SECURITY_API sha256_update(sha256_t *ctx, 
+mbcrypt_status_e MBCRYPT_API sha256_update(sha256_t *ctx, 
                                             const uint8_t *data, uint32_t data_len);
 
 /**
@@ -69,9 +69,9 @@ security_status_e SECURITY_API sha256_update(sha256_t *ctx,
  * 
  * @param[in] ctx SHA256 context
  * @param[out] out Output hash. Should be at least allocated SHA256_HASH_SIZE memory
- * @return security_status_e 
+ * @return mbcrypt_status_e 
  */
-security_status_e SECURITY_API sha256_finish(sha256_t *ctx, uint8_t *out);
+mbcrypt_status_e MBCRYPT_API sha256_finish(sha256_t *ctx, uint8_t *out);
 
 /**
  * @brief Function implements step be step three functions: 
@@ -80,9 +80,9 @@ security_status_e SECURITY_API sha256_finish(sha256_t *ctx, uint8_t *out);
  * @param[in] data Input data to be hashed
  * @param[in] data_len Input data len
  * @param[out] out Output hash. Should be at least allocated SHA256_HASH_SIZE memory
- * @return security_status_e 
+ * @return mbcrypt_status_e 
  */
-security_status_e SECURITY_API sha256(const uint8_t *data, 
+mbcrypt_status_e MBCRYPT_API sha256(const uint8_t *data, 
                                     uint32_t data_len, uint8_t *out);
 
 #ifdef __cplusplus

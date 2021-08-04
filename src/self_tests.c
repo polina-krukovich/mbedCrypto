@@ -8,18 +8,12 @@
 #include <openssl/pkcs7.h>
 #include <openssl/aes.h>
 #include <assert.h>
-#include "aes.h"
+
 #include "sha1.h"
 #include "sha256.h"
 #include "sha512.h"
-#include "pbkdf2.h"
-#include "drbg.h"
 
-#include "hmac_sha1.h"
-#include "hmac_sha256.h"
-#include "hmac_sha512.h"
-#include "kbkdf.h"
-#include "pbkdf2.h"
+#include "hmac.h"
 
 
 void print_arr(uint8_t *data, uint32_t data_len)
@@ -52,17 +46,17 @@ const uint8_t sha_test_len = sizeof(sha_test)/DATA_SIZE;
 #define TEST_HMAC_SHA1
 #define TEST_HMAC_SHA256
 #define TEST_HMAC_SHA512
-#define TEST_PBKDF2
-#define TEST_KBKDF
-#define TEST_DRBG
-#define TEST_ENTROPY
-#define TEST_RSA
-#define TEST_AES
-#define TEST_RC4
-#define TEST_BLOWFISH
-#define TEST_CHACHA
-#define TEST_SALSA20
-#define TEST_DH
+//#define TEST_PBKDF2
+//#define TEST_KBKDF
+//#define TEST_DRBG
+//#define TEST_ENTROPY
+//#define TEST_RSA
+//#define TEST_AES
+//#define TEST_RC4
+//#define TEST_BLOWFISH
+//#define TEST_CHACHA
+//#define TEST_SALSA20
+//#define TEST_DH
 
 
 
@@ -170,41 +164,21 @@ void test_sha512()
 
 #if defined(TEST_HMAC_SHA1)
 
-hmac_sha1_t hmac1;
-
-uint32_t hmac1_init(uint8_t *key, uint32_t key_len)
-{
-     hmac_sha1_init(&hmac1, key, key_len);
-     return 0;
-
-}
-
-uint32_t hmac1_update(uint8_t *data, uint32_t data_len)
-{
-     hmac_sha1_update(&hmac1, data, data_len);
-     return 0;
-
-}
-
-uint32_t hmac1_final(uint8_t *hmac)
-{
-     hmac_sha1_finish(&hmac1, hmac);
-     return 0;
-}
-
 void test_hmac_sha1()
 {
     printf("HMAC_SHA1 test\n");
-    uint8_t *out[SHA1_HASH_SIZE];
-    uint8_t *out1[SHA1_HASH_SIZE];
+    uint8_t *out[32];
+    uint8_t *out1[32];
     int cnt = 0;
     for(int i = 0; i < sha_test_len; i++)
     {
-        hmac_sha1_t ctx;
-        hmac_sha1_init(&ctx, sha_test[i], strlen(sha_test[i]));
+        hmac_t ctx;
+        sha1_t sha;
+        hash_callbacks_t cbs = {&sha, sha1_init, sha1_update, sha1_finish};
+        hmac_init(&ctx, HASH_TYPE_SHA1, &cbs, sha_test[i], strlen(sha_test[i]));
         for (int j = 0; j < strlen(sha_test[i]); j++)
-            hmac_sha1_update(&ctx, &sha_test[i][j], 1);
-        hmac_sha1_finish(&ctx, out);
+            hmac_update(&ctx, &sha_test[i][j], 1);
+        hmac_final(&ctx, out);
         
         print_arr(out, SHA1_HASH_SIZE);
         uint32_t len;
@@ -229,16 +203,18 @@ void test_hmac_sha1()
 void test_hmac_sha256()
 {
     printf("HMAC_sha256 test\n");
-    uint8_t *out[SHA256_HASH_SIZE];
-    uint8_t *out1[SHA256_HASH_SIZE];
+    uint8_t *out[128];
+    uint8_t *out1[128];
     int cnt = 0;
     for(int i = 0; i < sha_test_len; i++)
     {
-        hmac_sha256_t ctx;
-        hmac_sha256_init(&ctx, sha_test[i], strlen(sha_test[i]));
+        sha256_t sha;
+        hash_callbacks_t cbs = {&sha, sha256_init, sha256_update, sha256_finish};
+        hmac_t ctx;
+        hmac_init(&ctx, HASH_TYPE_SHA256, &cbs, sha_test[i], strlen(sha_test[i]));
         for (int j = 0; j < strlen(sha_test[i]); j++)
-            hmac_sha256_update(&ctx, &sha_test[i][j], 1);
-        hmac_sha256_finish(&ctx, out);
+            hmac_update(&ctx, &sha_test[i][j], 1);
+        hmac_final(&ctx, out);
         
         print_arr(out, SHA256_HASH_SIZE);
         uint32_t len;
@@ -263,16 +239,19 @@ void test_hmac_sha256()
 void test_hmac_sha512()
 {
     printf("HMAC_sha512 test\n");
-    uint8_t *out[SHA512_HASH_SIZE];
-    uint8_t *out1[SHA512_HASH_SIZE];
+    uint8_t *out[128];
+    uint8_t *out1[128];
     int cnt = 0;
     for(int i = 0; i < sha_test_len; i++)
     {
-        hmac_sha512_t ctx;
-        hmac_sha512_init(&ctx, sha_test[i], strlen(sha_test[i]));
+
+        sha512_t sha;
+        hash_callbacks_t cbs = {&sha, sha512_init, sha512_update, sha512_finish};
+        hmac_t ctx;
+        hmac_init(&ctx, HASH_TYPE_SHA512, &cbs,sha_test[i], strlen(sha_test[i]));
         for (int j = 0; j < strlen(sha_test[i]); j++)
-            hmac_sha512_update(&ctx, &sha_test[i][j], 1);
-        hmac_sha512_finish(&ctx, out);
+            hmac_update(&ctx, &sha_test[i][j], 1);
+        hmac_final(&ctx, out);
         
         print_arr(out, SHA512_HASH_SIZE);
         uint32_t len;

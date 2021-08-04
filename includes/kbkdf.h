@@ -20,7 +20,7 @@
 #ifndef KBKDF_H
 #define KBKDF_H
 
-#include "security.h"
+#include "mbcrypt.h"
 
 /**
  * @brief Hash type to be used in KBKDF
@@ -82,9 +82,9 @@ extern "C" {
 * @param[out] key_out Start address of the KBKDF key
 * @param[in] key_out_len Required output key length
 * @param[in] opts Counter options
-* @return security_status_e
+* @return mbcrypt_status_e
 */
-security_status_e kbkdf(void *prf_ctx, kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
+mbcrypt_status_e kbkdf(void *prf_ctx, kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
                         kbkdf_hmac_callbacks_t hmac_callbacks,
                         const uint8_t* key_in, const uint32_t key_in_len,
                         const uint8_t* iv_in, const uint32_t iv_in_len,

@@ -209,9 +209,9 @@ int32_t rand()
     int32_t res = 0;
 #if (RAND_FAST == ENABLED)
     uint8_t hash[SHA256_HASH_SIZE];
-    security_status_e sec_ret = 0;
+    mbcrypt_status_e sec_ret = 0;
     
-    ASSERT(sha256(_seed, BASE_SEED_SIZE, hash) == SECURITY_STATUS_OK, "SHA256 return status not OK!")
+    ASSERT(sha256(_seed, BASE_SEED_SIZE, hash) == MBCRYPT_STATUS_OK, "SHA256 return status not OK!")
     
     res = (U32(hash[3]) << 24) | (U32(hash[23]) << 16) 
         | (U32(hash[7]) << 8) | (U32(hash[16]));

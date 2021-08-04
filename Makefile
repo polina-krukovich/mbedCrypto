@@ -1,23 +1,23 @@
+SRC_DIR=src
+SRCS =  $(SRC_DIR)/self_tests.c				\
+		$(SRC_DIR)/mbcrypt_utils.c			\
+		$(SRC_DIR)/sha1.c 					\
+		$(SRC_DIR)/sha256.c 				\
+		$(SRC_DIR)/sha512.c					\
+		$(SRC_DIR)/hmac.c					\
+#		$(SRC_DIR)/pbkdf2.c					\
+#		$(SRC_DIR)/kbkdf.c					\
 
-SRCS += sha1.c
-SRCS += sha256.c
-SRCS += sha512.c
 
-SRCS += hmac_sha1.c
-SRCS += hmac_sha256.c
-SRCS += hmac_sha512.c
-
-SRCS += pbkdf2.c
-SRCS += kbkdf.c
-#SRCS += bignum.c
 #SRCS += rsa.c
-SRCS += rand.c
-SRCS += aes.c
-SRCS += security_utils.c
+#SRCS += drbg.c
+#SRCS += aes.c
+#SRCS += rc4.c
+#SRCS += entropy.c
 
 all:
 	@rm -f run_tests.out
-	@gcc -w -g self_tests.c $(SRCS) -I./includes/ -lcrypto -lssl -o run_tests.out
+	@gcc -w -g  $(SRCS) -I./includes/ -lcrypto -lssl -o run_tests.out
 
 	@echo "Compilation done!"
 

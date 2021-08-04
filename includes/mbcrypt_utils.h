@@ -10,17 +10,17 @@
 * furnished to do so, subject to the following conditions:
 **************************************************************************/
 /*!
-*   @file security_utils.h
+*   @file mbcrypt_utils.h
 *   @brief File contains utils for library functions.
 *	@author Zontec
 *	@version 1.1
 *	@date 2021.07.02
 */
 
-#ifndef SECURITY_UTILS_H
-#define SECURITY_UTILS_H
+#ifndef MBCRYPT_UTILS_H
+#define MBCRYPT_UTILS_H
 
-#include "security.h"
+#include "mbcrypt.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,4 +35,4 @@ uint32_t is_le();
 }
 #endif /* __cplusplus */
 
-#endif /* SECURITY_UTILS_H */
+#endif /* MBCRYPT_UTILS_H */

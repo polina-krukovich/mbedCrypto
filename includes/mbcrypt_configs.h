@@ -10,26 +10,26 @@
 * furnished to do so, subject to the following conditions:
 **************************************************************************/
 /*!
-*   @file security_configs.h
+*   @file mbcrypt_configs.h
 *   @brief File contains configuarations for a library.
 *	@author Zontec
 *	@version 1.1
 *	@date 2021.07.02
 */
 
-#ifndef SECURITY_CONFIGS_H
-#define SECURITY_CONFIGS_H
+#ifndef MBCRYPT_CONFIGS_H
+#define MBCRYPT_CONFIGS_H
 
-#include "security_defines.h"
+#include "mbcrypt_defines.h"
 
 
 /**
- * @brief SECURITY_LEVEL provides the library which way it should implement 
+ * @brief MBCRYPT_LEVEL provides the library which way it should implement 
  * algorithms. In some cases higher level provides higher time consumption.
  */
-#ifndef SECURITY_LEVEL
-	#define SECURITY_LEVEL                            (MIN_SECURITY_LEVEL)
-#endif /* SECURITY_LEVEL */
+#ifndef MBCRYPT_LEVEL
+	#define MBCRYPT_LEVEL                            (MIN_MBCRYPT_LEVEL)
+#endif /* MBCRYPT_LEVEL */
 
 
 
@@ -84,7 +84,7 @@
 
 
 /**
- * @brief When SECURED_SHA1 is enabled algorithm get rid of security 
+ * @brief When SECURED_SHA1 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_SHA1
@@ -93,7 +93,7 @@
 
 
 /**
- * @brief When SECURED_SHA256 is enabled algorithm get rid of security 
+ * @brief When SECURED_SHA256 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_SHA256
@@ -102,7 +102,7 @@
 
 
 /**
- * @brief When SECURED_SHA512 is enabled algorithm get rid of security 
+ * @brief When SECURED_SHA512 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_SHA512
@@ -111,7 +111,7 @@
 
 
 /**
- * @brief When SECURED_HMAC_SHA1 is enabled algorithm get rid of security 
+ * @brief When SECURED_HMAC_SHA1 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_HMAC_SHA1
@@ -120,7 +120,7 @@
 
 
 /**
- * @brief When SECURED_HMAC_SHA256 is enabled algorithm get rid of security 
+ * @brief When SECURED_HMAC_SHA256 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_HMAC_SHA256
@@ -129,7 +129,7 @@
 
 
 /**
- * @brief When SECURED_HMAC_SHA512 is enabled algorithm get rid of security 
+ * @brief When SECURED_HMAC_SHA512 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_HMAC_SHA512
@@ -138,7 +138,7 @@
 
 
 /**
- * @brief When SECURED_PBKDF2_HMAC_SHA1 is enabled algorithm get rid of security 
+ * @brief When SECURED_PBKDF2_HMAC_SHA1 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_PBKDF2_HMAC_SHA1
@@ -147,7 +147,7 @@
 
 
 /**
- * @brief When SECURED_PBKDF2_HMAC_SHA256 is enabled algorithm get rid of security 
+ * @brief When SECURED_PBKDF2_HMAC_SHA256 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_PBKDF2_HMAC_SHA256
@@ -156,7 +156,7 @@
 
 
 /**
- * @brief When SECURED_PBKDF2_HMAC_SHA512 is enabled algorithm get rid of security 
+ * @brief When SECURED_PBKDF2_HMAC_SHA512 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_PBKDF2_HMAC_SHA512
@@ -165,7 +165,7 @@
 
 
 /**
- * @brief When SECURED_KBKDF_HMAC_SHA1 is enabled algorithm get rid of security 
+ * @brief When SECURED_KBKDF_HMAC_SHA1 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_KBKDF_HMAC_SHA1
@@ -174,7 +174,7 @@
 
 
 /**
- * @brief When SECURED_KBKDF_HMAC_SHA256 is enabled algorithm get rid of security 
+ * @brief When SECURED_KBKDF_HMAC_SHA256 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_KBKDF_HMAC_SHA256
@@ -183,7 +183,7 @@
 
 
 /**
- * @brief When SECURED_KBKDF_HMAC_SHA512 is enabled algorithm get rid of security 
+ * @brief When SECURED_KBKDF_HMAC_SHA512 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
 #ifndef SECURED_KBKDF_HMAC_SHA512
@@ -256,4 +256,4 @@
 #endif
 
 
-#endif /* SECURITY_CONFIGS_H */
+#endif /* MBCRYPT_CONFIGS_H */

@@ -20,7 +20,7 @@
 #ifndef DRBG_H
 #define DRBG_H
 
-#include "security.h"
+#include "mbcrypt.h"
 
 #define BASE_SEED_SIZE      (64)
 

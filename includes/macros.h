@@ -11,7 +11,7 @@
 **************************************************************************/
 /*!
 *   @file macros.h
-*   @brief File contains macros for security library.
+*   @brief File contains macros for mbcrypt library.
 *	@author Zontec
 *	@version 1.1
 *	@date 2021.06.19

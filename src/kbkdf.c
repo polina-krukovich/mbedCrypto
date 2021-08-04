@@ -79,7 +79,7 @@ static uint32_t _kbkdf_counter(void *ctx, kbkdf_hash_type_e hash_type,
                                uint8_t *key_out, const uint32_t key_out_len,
                                kbkdf_opts_t *opts)
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
 
     hmac_init_t hmac_init = hmac_callbacks.hmac_init;
     hmac_update_t hmac_update = hmac_callbacks.hmac_update;
@@ -98,8 +98,8 @@ SECURITY_FUNCTION_BEGIN;
 
     if (opts->ctr_rlen > RLEN)
     {
-        SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL;
-        goto SECURITY_FUNCTION_EXIT;
+        MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL;
+        goto MBCRYPT_FUNCTION_EXIT;
     }
 
     hmac_size = kbkdf_hash_size[hash_type];
@@ -118,11 +118,11 @@ SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(i, ctr, 0);
         ctr[4] = 0;
 
-        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
+        MBCRYPT_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
 
         if (rpos > 0)
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, rpos));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, fixed_input, rpos));
         }
         if (opts->ctr_rlen > 0)
         {
@@ -133,17 +133,17 @@ SECURITY_FUNCTION_BEGIN;
                                     (fixed_input[rpos] & BIT_MASK_LEFT(rpos_modulo)));
                 ctr[4] |= fixed_input[rpos] & BIT_MASK_RIGHT(8 - rpos_modulo);
             }
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), 
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), 
                                 opts->ctr_rlen + ((rpos_modulo > 0) ? 1 : 0)));
         }
         if ((rpos_fixed != fixed_input_len) &&
-            (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + rpos_fixed, 
-                                            fixed_input_len - rpos_fixed) != SECURITY_STATUS_OK))
+            (MBCRYPT_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + rpos_fixed, 
+                                            fixed_input_len - rpos_fixed) != MBCRYPT_STATUS_OK))
         {
-            goto SECURITY_FUNCTION_EXIT;
+            goto MBCRYPT_FUNCTION_EXIT;
         }
 
-        SECURITY_CHECK_RES(hmac_final(ctx, key_out));
+        MBCRYPT_CHECK_RES(hmac_final(ctx, key_out));
         key_out_last = key_out;
     }
     if (leftover)
@@ -153,11 +153,11 @@ SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(full_blocks + 1, ctr, 0);
         ctr[4] = 0;
 
-        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
+        MBCRYPT_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
 
         if (rpos > 0)
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, rpos));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, fixed_input, rpos));
         }
         if (opts->ctr_rlen > 0)
         {
@@ -168,20 +168,20 @@ SECURITY_FUNCTION_BEGIN;
                                     (fixed_input[rpos] & BIT_MASK_LEFT(rpos_modulo)));
                 ctr[4] |= fixed_input[rpos] & BIT_MASK_RIGHT(8 - rpos_modulo);
             }
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), 
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), 
                             opts->ctr_rlen + ((rpos_modulo > 0) ? 1 : 0)));
         }
         if ((rpos_fixed != fixed_input_len) &&
-            (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + rpos_fixed, 
-                                            fixed_input_len - rpos_fixed) != SECURITY_STATUS_OK))
+            (MBCRYPT_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + rpos_fixed, 
+                                            fixed_input_len - rpos_fixed) != MBCRYPT_STATUS_OK))
         {
-            goto SECURITY_FUNCTION_EXIT;
+            goto MBCRYPT_FUNCTION_EXIT;
         }
 
-        SECURITY_CHECK_RES(hmac_final(ctx, last_block));
+        MBCRYPT_CHECK_RES(hmac_final(ctx, last_block));
 
-        SECURITY_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
-        SECURITY_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
+        MBCRYPT_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
+        MBCRYPT_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
 
         if (modulo)
         {
@@ -196,8 +196,8 @@ SECURITY_FUNCTION_BEGIN;
         }
     }
 
-SECURITY_FUNCTION_EXIT:
-    SECURITY_FUNCTION_RETURN;
+MBCRYPT_FUNCTION_EXIT:
+    MBCRYPT_FUNCTION_RETURN;
 }
 
 static uint32_t _kbkdf_feedback(void *ctx, kbkdf_hash_type_e hash_type, 
@@ -208,7 +208,7 @@ static uint32_t _kbkdf_feedback(void *ctx, kbkdf_hash_type_e hash_type,
                                 uint8_t *key_out, const uint32_t key_out_len,
                                 kbkdf_opts_t *opts)
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
 
     hmac_init_t hmac_init = hmac_callbacks.hmac_init;
     hmac_update_t hmac_update = hmac_callbacks.hmac_update;
@@ -226,8 +226,8 @@ SECURITY_FUNCTION_BEGIN;
 
     if (opts->ctr_rlen > RLEN)
     {
-        SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL;
-        goto SECURITY_FUNCTION_EXIT;
+        MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL;
+        goto MBCRYPT_FUNCTION_EXIT;
     }
 
     hmac_size = kbkdf_hash_size[hash_type];
@@ -247,40 +247,40 @@ SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(i, ctr, 0);
         ctr[4] = 0;
 
-        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
+        MBCRYPT_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
         if ((opts->ctr_rpos == -1) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
         if ((k_i_1_len > 0) && 
-            (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, k_i_1, k_i_1_len) != SECURITY_STATUS_OK))
+            (MBCRYPT_FUNCTION_RET_VAR = hmac_update(ctx, k_i_1, k_i_1_len) != MBCRYPT_STATUS_OK))
         {
-            goto SECURITY_FUNCTION_EXIT;
+            goto MBCRYPT_FUNCTION_EXIT;
         }
 
         if ((opts->ctr_rpos == 0) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
         if ((opts->ctr_rpos > 0) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
             if ((opts->ctr_rpos != (int64_t)fixed_input_len) &&
-                (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + opts->ctr_rpos / 8, 
-                            fixed_input_len - opts->ctr_rpos / 8) != SECURITY_STATUS_OK))
+                (MBCRYPT_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + opts->ctr_rpos / 8, 
+                            fixed_input_len - opts->ctr_rpos / 8) != MBCRYPT_STATUS_OK))
             {
-                goto SECURITY_FUNCTION_EXIT;
+                goto MBCRYPT_FUNCTION_EXIT;
             }
         }
         else
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
         }
-        SECURITY_CHECK_RES(hmac_final(ctx, key_out));
+        MBCRYPT_CHECK_RES(hmac_final(ctx, key_out));
 
         k_i_1 = key_out;
         k_i_1_len = hmac_size;
@@ -293,43 +293,43 @@ SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(full_blocks + 1, ctr, 0);
         ctr[4] = 0;
 
-        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
+        MBCRYPT_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
         if ((opts->ctr_rpos == -1) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
         // K(i) := PRF (KI, I_V | Ki-1)
         if ((k_i_1_len > 0) && 
-            (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, k_i_1, k_i_1_len) != SECURITY_STATUS_OK))
+            (MBCRYPT_FUNCTION_RET_VAR = hmac_update(ctx, k_i_1, k_i_1_len) != MBCRYPT_STATUS_OK))
         {
-            goto SECURITY_FUNCTION_EXIT;
+            goto MBCRYPT_FUNCTION_EXIT;
         }
         if ((opts->ctr_rpos == 0) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
         if ((opts->ctr_rpos > 0) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
             if ((opts->ctr_rpos != (int64_t)fixed_input_len) &&
-                (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + opts->ctr_rpos / 8, 
-                            fixed_input_len - opts->ctr_rpos / 8) != SECURITY_STATUS_OK))
+                (MBCRYPT_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + opts->ctr_rpos / 8, 
+                            fixed_input_len - opts->ctr_rpos / 8) != MBCRYPT_STATUS_OK))
             {
-                goto SECURITY_FUNCTION_EXIT;
+                goto MBCRYPT_FUNCTION_EXIT;
             }
         }
         else
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
         }
-        SECURITY_CHECK_RES(hmac_final(ctx, last_block));
+        MBCRYPT_CHECK_RES(hmac_final(ctx, last_block));
 
-        SECURITY_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
-        SECURITY_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
+        MBCRYPT_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
+        MBCRYPT_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
 
         if (modulo)
         {
@@ -344,8 +344,8 @@ SECURITY_FUNCTION_BEGIN;
         }
     }
 
-SECURITY_FUNCTION_EXIT:
-    SECURITY_FUNCTION_RETURN;
+MBCRYPT_FUNCTION_EXIT:
+    MBCRYPT_FUNCTION_RETURN;
 }
 
 static uint32_t _kbkdf_double_pipeline(void *ctx, kbkdf_hash_type_e hash_type, 
@@ -355,7 +355,7 @@ static uint32_t _kbkdf_double_pipeline(void *ctx, kbkdf_hash_type_e hash_type,
                                        uint8_t *key_out, const uint32_t key_out_len,
                                        kbkdf_opts_t *opts)
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
 
     hmac_init_t hmac_init = hmac_callbacks.hmac_init;
     hmac_update_t hmac_update = hmac_callbacks.hmac_update;
@@ -375,8 +375,8 @@ SECURITY_FUNCTION_BEGIN;
 
     if (opts->ctr_rlen > RLEN)
     {
-        SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL;
-        goto SECURITY_FUNCTION_EXIT;
+        MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL;
+        goto MBCRYPT_FUNCTION_EXIT;
     }
 
     A_i_1 = fixed_input;
@@ -397,44 +397,44 @@ SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(i, ctr, 0);
         ctr[4] = 0;
 
-        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
-        SECURITY_CHECK_RES(hmac_update(ctx, A_i_1, A_len));
-        SECURITY_CHECK_RES(hmac_final(ctx, A_i));
+        MBCRYPT_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
+        MBCRYPT_CHECK_RES(hmac_update(ctx, A_i_1, A_len));
+        MBCRYPT_CHECK_RES(hmac_final(ctx, A_i));
 
-        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
-        SECURITY_CHECK_RES(hmac_update(ctx, A_i, hmac_size));
+        MBCRYPT_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
+        MBCRYPT_CHECK_RES(hmac_update(ctx, A_i, hmac_size));
 
         if ((opts->ctr_rpos == -1) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
 
         if ((opts->ctr_rpos == 0) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
 
         if ((opts->ctr_rpos > 0) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
 
             if ((opts->ctr_rpos != (int64_t)fixed_input_len) &&
-                (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input +
+                (MBCRYPT_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input +
                             opts->ctr_rpos / 8,
-                            fixed_input_len - opts->ctr_rpos / 8) != SECURITY_STATUS_OK))
+                            fixed_input_len - opts->ctr_rpos / 8) != MBCRYPT_STATUS_OK))
             {
-                goto SECURITY_FUNCTION_EXIT;
+                goto MBCRYPT_FUNCTION_EXIT;
             }
         }
         else
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
         }
-        SECURITY_CHECK_RES(hmac_final(ctx, key_out));
+        MBCRYPT_CHECK_RES(hmac_final(ctx, key_out));
 
         A_i_1 = &A[0];
         A_len = hmac_size;
@@ -447,48 +447,48 @@ SECURITY_FUNCTION_BEGIN;
         PUT_UINT32_BE(full_blocks + 1, ctr, 0);
         ctr[4] = 0;
 
-        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
-        SECURITY_CHECK_RES(hmac_update(ctx, A_i_1, A_len));
+        MBCRYPT_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
+        MBCRYPT_CHECK_RES(hmac_update(ctx, A_i_1, A_len));
         {
-            goto SECURITY_FUNCTION_EXIT;
+            goto MBCRYPT_FUNCTION_EXIT;
         }
-        SECURITY_CHECK_RES(hmac_final(ctx, A_i));
+        MBCRYPT_CHECK_RES(hmac_final(ctx, A_i));
 
-        SECURITY_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
+        MBCRYPT_CHECK_RES(hmac_init(ctx, key_in, key_in_len));
 
         if ((opts->ctr_rpos == -1) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
-        SECURITY_CHECK_RES(hmac_update(ctx, A_i, A_len));
+        MBCRYPT_CHECK_RES(hmac_update(ctx, A_i, A_len));
 
         if ((opts->ctr_rpos == 0) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
         }
 
         if ((opts->ctr_rpos > 0) &&
             (opts->ctr_rlen > 0))
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
-            SECURITY_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, fixed_input, opts->ctr_rpos / 8));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, ctr + (RLEN - opts->ctr_rlen), opts->ctr_rlen));
             if ((opts->ctr_rpos != (int64_t)fixed_input_len) &&
-                (SECURITY_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + opts->ctr_rpos / 8, 
-                            fixed_input_len - opts->ctr_rpos / 8) != SECURITY_STATUS_OK))
+                (MBCRYPT_FUNCTION_RET_VAR = hmac_update(ctx, fixed_input + opts->ctr_rpos / 8, 
+                            fixed_input_len - opts->ctr_rpos / 8) != MBCRYPT_STATUS_OK))
             {
-                goto SECURITY_FUNCTION_EXIT;
+                goto MBCRYPT_FUNCTION_EXIT;
             }
         }
         else
         {
-            SECURITY_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
+            MBCRYPT_CHECK_RES(hmac_update(ctx, fixed_input, fixed_input_len));
         }
-        SECURITY_CHECK_RES(hmac_final(ctx, last_block));
+        MBCRYPT_CHECK_RES(hmac_final(ctx, last_block));
 
-        SECURITY_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
-        SECURITY_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
+        MBCRYPT_CHECK_VALID_NOT_NULL(memcpy(key_out, last_block, leftover));
+        MBCRYPT_CHECK_VALID_NOT_NULL(memset(last_block, 0xFF, HMAC_MAX_OUTPUT));
 
         if (modulo)
         {
@@ -503,11 +503,11 @@ SECURITY_FUNCTION_BEGIN;
         }
     }
 
-SECURITY_FUNCTION_EXIT:
-    SECURITY_FUNCTION_RETURN;
+MBCRYPT_FUNCTION_EXIT:
+    MBCRYPT_FUNCTION_RETURN;
 }
 
-security_status_e kbkdf(void *prf_ctx, kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
+mbcrypt_status_e kbkdf(void *prf_ctx, kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
                         kbkdf_hmac_callbacks_t hmac_callbacks,
                         const uint8_t *key_in, const uint32_t key_in_len,
                         const uint8_t *iv_in, const uint32_t iv_in_len,
@@ -515,21 +515,21 @@ security_status_e kbkdf(void *prf_ctx, kbkdf_mode_e mode, kbkdf_hash_type_e hash
                         uint8_t *key_out, const uint32_t key_out_len,
                         kbkdf_opts_t *opts)
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
 
     kbkdf_opts_t tmp_opts =
         {
             .ctr_rlen = 4,
             .ctr_rpos = 0
         };
-    SECURITY_CHECK_VALID_NOT_NULL(key_in);
-    SECURITY_CHECK_VALID_NOT_NULL(iv_in);
-    SECURITY_CHECK_VALID_NOT_NULL(fixed_input);
-    SECURITY_CHECK_VALID_NOT_NULL(key_out);
+    MBCRYPT_CHECK_VALID_NOT_NULL(key_in);
+    MBCRYPT_CHECK_VALID_NOT_NULL(iv_in);
+    MBCRYPT_CHECK_VALID_NOT_NULL(fixed_input);
+    MBCRYPT_CHECK_VALID_NOT_NULL(key_out);
 
-    SECURITY_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_final);
-    SECURITY_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_init);
-    SECURITY_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_update);
+    MBCRYPT_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_final);
+    MBCRYPT_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_init);
+    MBCRYPT_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_update);
 
     if (opts != NULL)
     {
@@ -540,26 +540,26 @@ SECURITY_FUNCTION_BEGIN;
     switch (mode)
     {
     case KBKDF_MODE_COUNTER:
-        SECURITY_CHECK_RES(_kbkdf_counter(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, fixed_input,
+        MBCRYPT_CHECK_RES(_kbkdf_counter(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, fixed_input,
                                 fixed_input_len, key_out, key_out_len, &tmp_opts));
         break;
     case KBKDF_MODE_FEEDBACK:
-        SECURITY_CHECK_RES(_kbkdf_feedback(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, iv_in, iv_in_len,
+        MBCRYPT_CHECK_RES(_kbkdf_feedback(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, iv_in, iv_in_len,
                                  fixed_input, fixed_input_len, key_out, key_out_len, &tmp_opts));
         break;
     case KBKDF_MODE_DOUBLE_PIPELINE:
-        SECURITY_CHECK_RES(_kbkdf_double_pipeline(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, fixed_input,
+        MBCRYPT_CHECK_RES(_kbkdf_double_pipeline(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, fixed_input,
                                         fixed_input_len, key_out, key_out_len, &tmp_opts));
         break;
     default:
-        SECURITY_FUNCTION_RET_VAR = SECURITY_STATUS_FAIL_NOT_IMPLEMENTED;
+        MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL_NOT_IMPLEMENTED;
     }
     
-SECURITY_FUNCTION_EXIT:
+MBCRYPT_FUNCTION_EXIT:
 
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_KBKDF == ENABLED)
+#if (MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL) || (SECURED_KBKDF == ENABLED)
 
 #endif /* SECURED_KBKDF */
 
-    SECURITY_FUNCTION_RETURN;
+    MBCRYPT_FUNCTION_RETURN;
 }

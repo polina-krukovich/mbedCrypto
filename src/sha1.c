@@ -280,7 +280,7 @@ static void _sha1_process(sha1_t *ctx, const uint8_t *data)
     ctx->h3 += D;
     ctx->h4 += E;
     
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_SHA1 == ENABLED)
+#if (MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL) || (SECURED_SHA1 == ENABLED)
     temp = MAX_WORD_VALUE;
     A = MAX_WORD_VALUE;
     B = MAX_WORD_VALUE;
@@ -292,13 +292,13 @@ static void _sha1_process(sha1_t *ctx, const uint8_t *data)
 
 }
 
-security_status_e sha1_init(sha1_t *ctx)
+mbcrypt_status_e sha1_init(sha1_t *ctx)
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
 
-    SECURITY_CHECK_VALID_NOT_NULL(ctx);
+    MBCRYPT_CHECK_VALID_NOT_NULL(ctx);
 
-    SECURITY_CHECK_VALID_NOT_NULL(memset(ctx, 0x00, sizeof(sha1_t)));
+    MBCRYPT_CHECK_VALID_NOT_NULL(memset(ctx, 0x00, sizeof(sha1_t)));
 
     ctx->h0 = 0x67452301;
     ctx->h1 = 0xEFCDAB89;
@@ -306,23 +306,23 @@ SECURITY_FUNCTION_BEGIN;
     ctx->h3 = 0x10325476;
     ctx->h4 = 0xC3D2E1F0;
 
-SECURITY_FUNCTION_EXIT:
-    SECURITY_FUNCTION_RETURN;
+MBCRYPT_FUNCTION_EXIT:
+    MBCRYPT_FUNCTION_RETURN;
 }
 
-security_status_e sha1_update(sha1_t *ctx, const uint8_t *data, uint32_t data_len)
+mbcrypt_status_e sha1_update(sha1_t *ctx, const uint8_t *data, uint32_t data_len)
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
 
     uint32_t fill;
     uint32_t left;
 
-    SECURITY_CHECK_VALID_NOT_NULL(ctx);
-    SECURITY_CHECK_VALID_NOT_NULL(data);
+    MBCRYPT_CHECK_VALID_NOT_NULL(ctx);
+    MBCRYPT_CHECK_VALID_NOT_NULL(data);
 
     if (data_len == 0)
     {
-        goto SECURITY_FUNCTION_EXIT;
+        goto MBCRYPT_FUNCTION_EXIT;
     }
 
     left = ctx->total[0] & 0b00111111; // 63 == 0x3F
@@ -338,7 +338,7 @@ SECURITY_FUNCTION_BEGIN;
 
     if (left != 0 && data_len >= fill)
     {
-        SECURITY_CHECK_VALID_NOT_NULL(memcpy((void *)(ctx->buffer + left), 
+        MBCRYPT_CHECK_VALID_NOT_NULL(memcpy((void *)(ctx->buffer + left), 
                                         data, fill));
         _sha1_process(ctx, ctx->buffer);
         data += fill;
@@ -356,23 +356,23 @@ SECURITY_FUNCTION_BEGIN;
 
     if(data_len > 0)
     {
-         SECURITY_CHECK_VALID_NOT_NULL(memcpy((void *)(ctx->buffer + left), 
+         MBCRYPT_CHECK_VALID_NOT_NULL(memcpy((void *)(ctx->buffer + left), 
                                         data, data_len));
     }
     
-SECURITY_FUNCTION_EXIT:
+MBCRYPT_FUNCTION_EXIT:
 
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_SHA1 == ENABLED)
+#if (MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL) || (SECURED_SHA1 == ENABLED)
     fill = MAX_WORD_VALUE;
     left = MAX_WORD_VALUE;
 #endif /* SECURED_SHA1 */
 
-     SECURITY_FUNCTION_RETURN;
+     MBCRYPT_FUNCTION_RETURN;
 }
 
-security_status_e sha1_finish(sha1_t *ctx, uint8_t *out)
+mbcrypt_status_e sha1_finish(sha1_t *ctx, uint8_t *out)
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
 
     uint32_t last;
     uint32_t padn;
@@ -381,8 +381,8 @@ SECURITY_FUNCTION_BEGIN;
 
     uint8_t msglen[8];
 
-    SECURITY_CHECK_VALID_NOT_NULL(ctx);
-    SECURITY_CHECK_VALID_NOT_NULL(out);
+    MBCRYPT_CHECK_VALID_NOT_NULL(ctx);
+    MBCRYPT_CHECK_VALID_NOT_NULL(out);
 
     /* message len in BE */
     high = (ctx->total[0] >> 29) | (ctx->total[1] << 3);
@@ -394,8 +394,8 @@ SECURITY_FUNCTION_BEGIN;
     last = ctx->total[0] & 0x3F;
     padn = (last < 56) ? (56 - last) : (120 - last);
 
-    SECURITY_CHECK_RES(sha1_update(ctx, _sha1_padding, padn));
-    SECURITY_CHECK_RES(sha1_update(ctx, msglen, 8));
+    MBCRYPT_CHECK_RES(sha1_update(ctx, _sha1_padding, padn));
+    MBCRYPT_CHECK_RES(sha1_update(ctx, msglen, 8));
 
     PUT_UINT32_BE(ctx->h0, out, 0);
     PUT_UINT32_BE(ctx->h1, out, 4);
@@ -403,9 +403,9 @@ SECURITY_FUNCTION_BEGIN;
     PUT_UINT32_BE(ctx->h3, out, 12);
     PUT_UINT32_BE(ctx->h4, out, 16);
 
-SECURITY_FUNCTION_EXIT:
+MBCRYPT_FUNCTION_EXIT:
 
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_SHA1 == ENABLED)
+#if (MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL) || (SECURED_SHA1 == ENABLED)
     last = MAX_WORD_VALUE;
     padn = MAX_WORD_VALUE;
     high = MAX_WORD_VALUE;
@@ -413,24 +413,24 @@ SECURITY_FUNCTION_EXIT:
     memset_safe(msglen, MAX_BYTE_VALUE, 8 * sizeof(msglen[0]));
 #endif /* SECURED_SHA1 */
 
-     SECURITY_FUNCTION_RETURN;
+     MBCRYPT_FUNCTION_RETURN;
 }
 
-security_status_e sha1(const uint8_t *data, uint32_t data_len, uint8_t *out)
+mbcrypt_status_e sha1(const uint8_t *data, uint32_t data_len, uint8_t *out)
 {
-SECURITY_FUNCTION_BEGIN;
+MBCRYPT_FUNCTION_BEGIN;
 
     sha1_t ctx;
 
-    SECURITY_CHECK_RES(sha1_init(&ctx));
-    SECURITY_CHECK_RES(sha1_update(&ctx, data, data_len));
-    SECURITY_CHECK_RES(sha1_finish(&ctx, out));
+    MBCRYPT_CHECK_RES(sha1_init(&ctx));
+    MBCRYPT_CHECK_RES(sha1_update(&ctx, data, data_len));
+    MBCRYPT_CHECK_RES(sha1_finish(&ctx, out));
 
-SECURITY_FUNCTION_EXIT:
+MBCRYPT_FUNCTION_EXIT:
 
-#if (SECURITY_LEVEL == MAX_SECURITY_LEVEL) || (SECURED_SHA1 == ENABLED)
+#if (MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL) || (SECURED_SHA1 == ENABLED)
     memset_safe(&ctx, MAX_BYTE_VALUE, sizeof(ctx));
 #endif /* SECURED_SHA1 */
 
-    SECURITY_FUNCTION_RETURN;
+    MBCRYPT_FUNCTION_RETURN;
 }
