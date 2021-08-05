@@ -27,67 +27,11 @@ extern "C" {
 #endif
 
 
-#if (PBKDF2_HMAC_SHA1 == ENABLED) || defined(DOXYGEN)
-
-/**
- * @brief PBKDF2 function that uses HMAC SHA1
- * 
- * @param[in] password Password for key derivation
- * @param[in] pass_len Password len
- * @param[in] salt PBKDF salt
- * @param[in] salt_len Salt len
- * @param[in] iters Number of iterations should be performed for key derivation
- * @param[out] out Derived key. Array should be out_len size at least
- * @param[in] out_len Key len in bytes.
- * @return mbcrypt_status_e 
- */
-mbcrypt_status_e pbkdf2_hmac_sha1(const uint8_t *password, uint32_t pass_len,
-                        const uint8_t *salt, uint32_t salt_len, uint32_t iters, 
-                        uint8_t *out, uint32_t out_len);
-
-#endif /* (PBKDF2_HMAC_SHA1 == ENABLED) */
-
-
-#if (PBKDF2_HMAC_SHA256 == ENABLED) || defined(DOXYGEN)
-
-/**
- * @brief PBKDF2 function that uses HMAC SHA256
- * 
- * @param[in] password Password for key derivation
- * @param[in] pass_len Password len
- * @param[in] salt PBKDF salt
- * @param[in] salt_len Salt len
- * @param[in] iters Number of iterations should be performed for key derivation
- * @param[out] out Derived key. Array should be out_len size at least
- * @param[in] out_len Key len in bytes.
- * @return mbcrypt_status_e 
- */
-mbcrypt_status_e pbkdf2_hmac_sha256(const uint8_t *password, uint32_t pass_len,
-                        const uint8_t *salt, uint32_t salt_len, uint32_t iters, 
-                        uint8_t *out, uint32_t out_len);
-
-#endif /* (PBKDF2_HMAC_SHA256 == ENABLED) */
-
-
-#if (PBKDF2_HMAC_SHA512 == ENABLED) || defined(DOXYGEN)
-
-/**
- * @brief PBKDF2 function that uses HMAC SHA512
- * 
- * @param[in] password Password for key derivation
- * @param[in] pass_len Password len
- * @param[in] salt PBKDF salt
- * @param[in] salt_len Salt len
- * @param[in] iters Number of iterations should be performed for key derivation
- * @param[out] out Derived key. Array should be out_len size at least
- * @param[in] out_len Key len in bytes.
- * @return mbcrypt_status_e 
- */
-mbcrypt_status_e pbkdf2_hmac_sha512(const uint8_t *password, uint32_t pass_len,
-                        const uint8_t *salt, uint32_t salt_len, uint32_t iters, 
-                        uint8_t *out, uint32_t out_len);
-
-#endif /* (PBKDF2_HMAC_SHA512 == ENABLED) */
+mbcrypt_status_e mbcrypt_pbkdf2_hmac(mbcrypt_hash_type_e hash_type, mbcrypt_hmac_callbacks_t *cbs,
+                                        const uint8_t *password, uint32_t pass_len, 
+                                        const uint8_t *salt, uint32_t salt_len, 
+                                        uint32_t iters,
+                                        uint8_t *out, uint32_t out_len);
 
 
 #ifdef __cplusplus

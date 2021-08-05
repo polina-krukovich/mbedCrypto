@@ -36,7 +36,7 @@
 )
 
 
-static const uint8_t _sha1_padding[SHA1_BUFFER_SIZE] =
+static const uint8_t _sha1_padding[MBCRYPT_SHA1_BUFFER_SIZE] =
 {
  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -44,7 +44,7 @@ static const uint8_t _sha1_padding[SHA1_BUFFER_SIZE] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static void _sha1_process(sha1_t *ctx, const uint8_t *data)
+static void _sha1_process(mbcrypt_sha1_t *ctx, const uint8_t *data)
 {
     uint32_t temp;
     uint32_t W[16];
@@ -61,7 +61,7 @@ static void _sha1_process(sha1_t *ctx, const uint8_t *data)
     E = ctx->h4;
 
 /* Select what implimentation should be */
-#if (SHA1_MIN_SIZE == ENABLED)
+#if (MBCRYPT_SHA1_MIN_SIZE == ENABLED)
 
     for (uint32_t i = 0; i < 16; ++i)
     {
@@ -134,7 +134,7 @@ static void _sha1_process(sha1_t *ctx, const uint8_t *data)
 #undef K
 #undef F
 
-#else /* SHA1_MIN_SIZE */
+#else /* MBCRYPT_SHA1_MIN_SIZE */
 
     GET_UINT32_BE(W[0], data, 0);
     GET_UINT32_BE(W[1], data, 4);
@@ -272,7 +272,7 @@ static void _sha1_process(sha1_t *ctx, const uint8_t *data)
 
 #undef K
 #undef F
-#endif /* SHA1_MIN_SIZE */
+#endif /* MBCRYPT_SHA1_MIN_SIZE */
 
     ctx->h0 += A;
     ctx->h1 += B;
@@ -292,13 +292,13 @@ static void _sha1_process(sha1_t *ctx, const uint8_t *data)
 
 }
 
-mbcrypt_status_e sha1_init(sha1_t *ctx)
+mbcrypt_status_e mbcrypt_sha1_init(mbcrypt_sha1_t *ctx)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
     MBCRYPT_CHECK_VALID_NOT_NULL(ctx);
 
-    MBCRYPT_CHECK_VALID_NOT_NULL(memset(ctx, 0x00, sizeof(sha1_t)));
+    MBCRYPT_CHECK_VALID_NOT_NULL(memset(ctx, 0x00, sizeof(mbcrypt_sha1_t)));
 
     ctx->h0 = 0x67452301;
     ctx->h1 = 0xEFCDAB89;
@@ -310,10 +310,10 @@ MBCRYPT_FUNCTION_EXIT:
     MBCRYPT_FUNCTION_RETURN;
 }
 
-mbcrypt_status_e sha1_update(sha1_t *ctx, const uint8_t *data, uint32_t data_len)
+mbcrypt_status_e mbcrypt_sha1_update(mbcrypt_sha1_t *ctx, const uint8_t *data, uint32_t data_len)
 {
 MBCRYPT_FUNCTION_BEGIN;
-
+    
     uint32_t fill;
     uint32_t left;
 
@@ -326,7 +326,7 @@ MBCRYPT_FUNCTION_BEGIN;
     }
 
     left = ctx->total[0] & 0b00111111; // 63 == 0x3F
-    fill = SHA1_BUFFER_SIZE - left;
+    fill = MBCRYPT_SHA1_BUFFER_SIZE - left;
 
     ctx->total[0] += data_len;
     ctx->total[0] &= MAX_WORD_VALUE;
@@ -347,11 +347,11 @@ MBCRYPT_FUNCTION_BEGIN;
     }
 
     /* if not a complite package */
-    while (data_len >= SHA1_BUFFER_SIZE)
+    while (data_len >= MBCRYPT_SHA1_BUFFER_SIZE)
     {
         _sha1_process(ctx, data);
-        data += SHA1_BUFFER_SIZE;
-        data_len  -= SHA1_BUFFER_SIZE;
+        data += MBCRYPT_SHA1_BUFFER_SIZE;
+        data_len  -= MBCRYPT_SHA1_BUFFER_SIZE;
     }
 
     if(data_len > 0)
@@ -360,6 +360,7 @@ MBCRYPT_FUNCTION_BEGIN;
                                         data, data_len));
     }
     
+
 MBCRYPT_FUNCTION_EXIT:
 
 #if (MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL) || (SECURED_SHA1 == ENABLED)
@@ -370,7 +371,7 @@ MBCRYPT_FUNCTION_EXIT:
      MBCRYPT_FUNCTION_RETURN;
 }
 
-mbcrypt_status_e sha1_finish(sha1_t *ctx, uint8_t *out)
+mbcrypt_status_e mbcrypt_sha1_final(mbcrypt_sha1_t *ctx, uint8_t *out)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
@@ -394,14 +395,15 @@ MBCRYPT_FUNCTION_BEGIN;
     last = ctx->total[0] & 0x3F;
     padn = (last < 56) ? (56 - last) : (120 - last);
 
-    MBCRYPT_CHECK_RES(sha1_update(ctx, _sha1_padding, padn));
-    MBCRYPT_CHECK_RES(sha1_update(ctx, msglen, 8));
+    MBCRYPT_CHECK_RES(mbcrypt_sha1_update(ctx, _sha1_padding, padn));
+    MBCRYPT_CHECK_RES(mbcrypt_sha1_update(ctx, msglen, 8));
 
     PUT_UINT32_BE(ctx->h0, out, 0);
     PUT_UINT32_BE(ctx->h1, out, 4);
     PUT_UINT32_BE(ctx->h2, out, 8);
     PUT_UINT32_BE(ctx->h3, out, 12);
     PUT_UINT32_BE(ctx->h4, out, 16);
+
 
 MBCRYPT_FUNCTION_EXIT:
 
@@ -416,15 +418,16 @@ MBCRYPT_FUNCTION_EXIT:
      MBCRYPT_FUNCTION_RETURN;
 }
 
-mbcrypt_status_e sha1(const uint8_t *data, uint32_t data_len, uint8_t *out)
+mbcrypt_status_e mbcrypt_sha1(const uint8_t *data, uint32_t data_len, uint8_t *out)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
-    sha1_t ctx;
+    mbcrypt_sha1_t ctx;
 
-    MBCRYPT_CHECK_RES(sha1_init(&ctx));
-    MBCRYPT_CHECK_RES(sha1_update(&ctx, data, data_len));
-    MBCRYPT_CHECK_RES(sha1_finish(&ctx, out));
+    MBCRYPT_CHECK_RES(mbcrypt_sha1_init(&ctx));
+    MBCRYPT_CHECK_RES(mbcrypt_sha1_update(&ctx, data, data_len));
+    MBCRYPT_CHECK_RES(mbcrypt_sha1_final(&ctx, out));
+
 
 MBCRYPT_FUNCTION_EXIT:
 

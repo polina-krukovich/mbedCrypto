@@ -22,10 +22,10 @@
 
 #include "mbcrypt.h"
 
-#define SHA512_HASH_SIZE              (64)
-#define SHA512_BUFFER_SIZE            (128)
+#define MBCRYPT_SHA512_HASH_SIZE              (64)
+#define MBCRYPT_SHA512_BUFFER_SIZE            (128)
 
-typedef struct sha512_t
+typedef struct mbcrypt_sha512_t
 {
     uint64_t h0;
     uint64_t h1;
@@ -36,8 +36,8 @@ typedef struct sha512_t
     uint64_t h6;
     uint64_t h7;
     uint32_t total[2];
-    uint8_t buffer[SHA512_BUFFER_SIZE];
-} sha512_t;
+    uint8_t buffer[MBCRYPT_SHA512_BUFFER_SIZE];
+} mbcrypt_sha512_t;
 
 
 #ifdef __cplusplus
@@ -50,7 +50,7 @@ extern "C" {
  * @param[in,out] ctx SHA context to be initialized
  * @return mbcrypt_status_e 
  */
-mbcrypt_status_e MBCRYPT_API sha512_init(sha512_t *ctx);
+mbcrypt_status_e MBCRYPT_API mbcrypt_sha512_init(mbcrypt_sha512_t *ctx);
 
 /**
  * @brief Function updates the context with new hash computations based on 
@@ -61,7 +61,7 @@ mbcrypt_status_e MBCRYPT_API sha512_init(sha512_t *ctx);
  * @param[in] data_len Input data len
  * @return mbcrypt_status_e 
  */
-mbcrypt_status_e MBCRYPT_API sha512_update(sha512_t *ctx, 
+mbcrypt_status_e MBCRYPT_API mbcrypt_sha512_update(mbcrypt_sha512_t *ctx, 
                                             const uint8_t *data, uint32_t data_len);
 
 /**
@@ -71,7 +71,7 @@ mbcrypt_status_e MBCRYPT_API sha512_update(sha512_t *ctx,
  * @param[out] out Output hash. Should be at least allocated SHA512_HASH_SIZE memory
  * @return mbcrypt_status_e 
  */
-mbcrypt_status_e MBCRYPT_API sha512_finish(sha512_t *ctx, uint8_t *out);
+mbcrypt_status_e MBCRYPT_API mbcrypt_sha512_final(mbcrypt_sha512_t *ctx, uint8_t *out);
 
 /**
  * @brief Function implements step be step three functions: 
@@ -82,8 +82,9 @@ mbcrypt_status_e MBCRYPT_API sha512_finish(sha512_t *ctx, uint8_t *out);
  * @param[out] out Output hash. Should be at least allocated SHA512_HASH_SIZE memory
  * @return mbcrypt_status_e 
  */
-mbcrypt_status_e MBCRYPT_API sha512(const uint8_t *data, 
+mbcrypt_status_e MBCRYPT_API mbcrypt_sha512(const uint8_t *data, 
                                     uint32_t data_len, uint8_t *out);
+
 
 #ifdef __cplusplus
 }

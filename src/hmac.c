@@ -16,36 +16,34 @@
 *	@version 1.1
 *	@date 2021.07.04
 */
-#include "../includes/mbcrypt.h"
 
-#include "../includes/hmac.h"
+#include "hmac.h"
 
 #define IPAD_BYTE                   (U8(0x36))
 #define OPAD_BYTE                   (U8(0x5C))
 
 #define HMAC_MAX_BLOCK_SIZE         (128)
 
-static uint32_t _get_hash_block_size_by_hash_type(hash_type_e hash_type)
+static uint32_t get_hash_block_size_by_hash_type(mbcrypt_hash_type_e hash_type)
 {
     uint32_t block_size = HMAC_MAX_BLOCK_SIZE;
 
-    if (hash_type == HASH_TYPE_SHA1)
+    if (hash_type == MBCRYPT_HASH_TYPE_SHA1)
     {
         block_size = 64;
     } 
-    else if (hash_type == HASH_TYPE_SHA256)
+    else if (hash_type == MBCRYPT_HASH_TYPE_SHA256)
     {
         block_size = 64;
     } 
-    else if (hash_type == HASH_TYPE_SHA512)
+    else if (hash_type == MBCRYPT_HASH_TYPE_SHA512)
     {
         block_size = 128;
     }
     return block_size;
 }
 
-mbcrypt_status_e MBCRYPT_API mbcrypt_hmac_init(hmac_t *ctx, 
-                                        hash_type_e hash_type, hash_callbacks_t *cbs,
+mbcrypt_status_e MBCRYPT_API mbcrypt_hmac_init(mbcrypt_hmac_t *ctx,
                                         const uint8_t *key, uint32_t key_len)
 {
 MBCRYPT_FUNCTION_BEGIN;
@@ -53,36 +51,28 @@ MBCRYPT_FUNCTION_BEGIN;
     uint8_t ipad_xor_arr[HMAC_MAX_BLOCK_SIZE];
 
     MBCRYPT_CHECK_VALID_NOT_NULL(ctx);
+    MBCRYPT_CHECK_VALID_NOT_NULL(ctx->cbs);
     MBCRYPT_CHECK_VALID_NOT_NULL(key);
-    MBCRYPT_CHECK_VALID_NOT_NULL(cbs);
-
-    MBCRYPT_CHECK_VALID_NOT_NULL(cbs->hash_ctx);
-    MBCRYPT_CHECK_VALID_NOT_NULL(cbs->hash_init);
-    MBCRYPT_CHECK_VALID_NOT_NULL(cbs->hash_update);
-    MBCRYPT_CHECK_VALID_NOT_NULL(cbs->hash_final);
 
     /* aliasing */
-    void *hash_ctx = cbs->hash_ctx;
-    hash_init_t p_hash_init = cbs->hash_init;
-    hash_update_t p_hash_update = cbs->hash_update;
-    hash_final_t p_hash_final = cbs->hash_final;
+    void *hash_ctx = ctx->cbs->hash_ctx;
+    mbcrypt_hash_init_t p_hash_init = ctx->cbs->hash_init;
+    mbcrypt_hash_update_t p_hash_update = ctx->cbs->hash_update;
+    mbcrypt_hash_final_t p_hash_final = ctx->cbs->hash_final;
 
-    uint32_t block_size = _get_hash_block_size_by_hash_type(hash_type);
-
-    MBCRYPT_CHECK_VALID_NOT_NULL(memset(ctx, 0x00, sizeof(hmac_t)));
+    uint32_t block_size = get_hash_block_size_by_hash_type(ctx->hash_type);
     /* full fill array with ipad */
+    MBCRYPT_CHECK_VALID_NOT_NULL(memset(ctx->key, 0x00, HMAC_MAX_KEY_SIZE));
+
     MBCRYPT_CHECK_VALID_NOT_NULL(memset(ipad_xor_arr, IPAD_BYTE, block_size));
 
-    ctx->cbs = cbs;
-    ctx->hash_type = hash_type;
-    
     if (key_len > block_size)
     {
+
         MBCRYPT_CHECK_RES(p_hash_init(hash_ctx));
         MBCRYPT_CHECK_RES(p_hash_update(hash_ctx, key, key_len));
         MBCRYPT_CHECK_RES(p_hash_final(hash_ctx, ctx->key));
-
-        key_len = GET_HASH_SIZE_BY_HASH_TYPE(hash_type);
+        key_len = GET_HASH_SIZE_BY_HASH_TYPE(ctx->hash_type);
     }
     else 
     {
@@ -128,7 +118,7 @@ MBCRYPT_FUNCTION_EXIT:
     MBCRYPT_FUNCTION_RETURN;
 }
 
-mbcrypt_status_e MBCRYPT_API mbcrypt_hmac_update(hmac_t *ctx, const uint8_t *data, uint32_t data_len)
+mbcrypt_status_e MBCRYPT_API mbcrypt_hmac_update(mbcrypt_hmac_t *ctx, const uint8_t *data, uint32_t data_len)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
@@ -136,9 +126,9 @@ MBCRYPT_FUNCTION_BEGIN;
     MBCRYPT_CHECK_VALID_NOT_NULL(data);
 
     void *hash_ctx = ctx->cbs->hash_ctx;
-    hash_update_t p_hash_update = ctx->cbs->hash_update;
+    mbcrypt_hash_update_t p_hash_update = ctx->cbs->hash_update;
 
-    uint32_t block_size = _get_hash_block_size_by_hash_type(ctx->hash_type);
+    uint32_t block_size = get_hash_block_size_by_hash_type(ctx->hash_type);
 
     if (data_len == 0)
     {
@@ -154,7 +144,7 @@ MBCRYPT_FUNCTION_EXIT:
 }
 
 
-mbcrypt_status_e mbcrypt_hmac_final(hmac_t *ctx, uint8_t *out)
+mbcrypt_status_e mbcrypt_hmac_final(mbcrypt_hmac_t *ctx, uint8_t *out)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
@@ -166,11 +156,11 @@ MBCRYPT_FUNCTION_BEGIN;
     void *hash_ctx = ctx->cbs->hash_ctx;
     uint32_t hash_size = GET_HASH_SIZE_BY_HASH_TYPE(ctx->hash_type);
 
-    hash_init_t p_hash_init = ctx->cbs->hash_init;
-    hash_update_t p_hash_update = ctx->cbs->hash_update;
-    hash_final_t p_hash_final = ctx->cbs->hash_final;
+    mbcrypt_hash_init_t p_hash_init = ctx->cbs->hash_init;
+    mbcrypt_hash_update_t p_hash_update = ctx->cbs->hash_update;
+    mbcrypt_hash_final_t p_hash_final = ctx->cbs->hash_final;
 
-    uint32_t block_size = _get_hash_block_size_by_hash_type(ctx->hash_type);
+    uint32_t block_size = get_hash_block_size_by_hash_type(ctx->hash_type);
     
 
     MBCRYPT_CHECK_VALID_NOT_NULL(memset(opad_xor_arr, 
@@ -220,8 +210,8 @@ MBCRYPT_FUNCTION_EXIT:
 
     MBCRYPT_FUNCTION_RETURN;
 }
-mbedcrypto
-mbcrypt_status_e MBCRYPT_API mbcrypt_hmac(hash_type_e hash_type, const hash_callbacks_t *cbs,
+
+mbcrypt_status_e MBCRYPT_API mbcrypt_hmac(mbcrypt_hash_type_e hash_type, mbcrypt_hash_callbacks_t *cbs,
                                     const uint8_t *key, uint32_t key_len, 
                                     const uint8_t *data, uint32_t data_len, 
                                     uint8_t *out)
@@ -229,10 +219,15 @@ mbcrypt_status_e MBCRYPT_API mbcrypt_hmac(hash_type_e hash_type, const hash_call
 MBCRYPT_FUNCTION_BEGIN;
 
     mbcrypt_hmac_t ctx;
+    
+    MBCRYPT_CHECK_VALID_NOT_NULL(memset(&ctx, 0x00, sizeof(mbcrypt_hmac_t)));
+    
+    ctx.hash_type = hash_type;
+    ctx.cbs = cbs;
 
-    MBCRYPT_CHECK_RES(mbcrypt_hmac_init(&ctx, hash_type, cbs, key, key_len));
+    MBCRYPT_CHECK_RES(mbcrypt_hmac_init(&ctx, key, key_len));
     MBCRYPT_CHECK_RES(mbcrypt_hmac_update(&ctx, data, data_len));
-    MBCRYPT_CHECK_RES(mbcrypt_hmac_finish(&ctx, out));
+    MBCRYPT_CHECK_RES(mbcrypt_hmac_final(&ctx, out));
 
 
 MBCRYPT_FUNCTION_EXIT:

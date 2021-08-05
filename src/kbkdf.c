@@ -53,13 +53,6 @@ static uint8_t _bit_mask_right[] = {
 #define BIT_MASK_RIGHT(n) (_bit_mask_right[n])
 #endif
 
-static uint32_t kbkdf_hash_size[] =
-{
-    32, //KBKDF_HASH_TYPE_SHA384
-    48, //KBKDF_HASH_TYPE_SHA384
-    64  //KBKDF_HASH_TYPE_SHA512
-};
-
 static void _shift_array_right(uint8_t *array, uint32_t length, uint32_t shift, uint8_t carry) // 1 <= shift <= 7
 {
     uint8_t temp;
@@ -72,18 +65,19 @@ static void _shift_array_right(uint8_t *array, uint32_t length, uint32_t shift, 
     }
 }
 
-static uint32_t _kbkdf_counter(void *ctx, kbkdf_hash_type_e hash_type, 
-                               kbkdf_hmac_callbacks_t hmac_callbacks,
+static uint32_t _mbcrypt_kbkdf_counter(mbcrypt_hash_type_e hash_type, 
+                               mbcrypt_hmac_callbacks_t *cbs,
                                const uint8_t *key_in, const uint32_t key_in_len,
                                uint8_t *fixed_input, const uint32_t fixed_input_len,
                                uint8_t *key_out, const uint32_t key_out_len,
-                               kbkdf_opts_t *opts)
+                               mbcrypt_kbkdf_opts_t *opts)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
-    hmac_init_t hmac_init = hmac_callbacks.hmac_init;
-    hmac_update_t hmac_update = hmac_callbacks.hmac_update;
-    hmac_final_t hmac_final = hmac_callbacks.hmac_final;
+    mbcrypt_hmac_init_t hmac_init = cbs->hmac_init;
+    mbcrypt_hmac_update_t hmac_update = cbs->hmac_update;
+    mbcrypt_hmac_final_t hmac_final = cbs->hmac_final;
+    void *ctx = cbs->hmac_ctx;
 
     uint32_t hmac_size;
     uint32_t full_blocks;
@@ -102,7 +96,7 @@ MBCRYPT_FUNCTION_BEGIN;
         goto MBCRYPT_FUNCTION_EXIT;
     }
 
-    hmac_size = kbkdf_hash_size[hash_type];
+    hmac_size = GET_HASH_SIZE_BY_HASH_TYPE(hash_type);
 
     rpos_modulo = opts->ctr_rpos % 8;
     rpos = opts->ctr_rpos / 8;
@@ -200,19 +194,20 @@ MBCRYPT_FUNCTION_EXIT:
     MBCRYPT_FUNCTION_RETURN;
 }
 
-static uint32_t _kbkdf_feedback(void *ctx, kbkdf_hash_type_e hash_type, 
-                                kbkdf_hmac_callbacks_t hmac_callbacks,
+static uint32_t _mbcrypt_kbkdf_feedback(mbcrypt_hash_type_e hash_type, 
+                                mbcrypt_hmac_callbacks_t *cbs,
                                 const uint8_t *key_in, const uint32_t key_in_len,
                                 const uint8_t *iv_in, const uint32_t iv_in_len,
                                 uint8_t *fixed_input, const uint32_t fixed_input_len,
                                 uint8_t *key_out, const uint32_t key_out_len,
-                                kbkdf_opts_t *opts)
+                                mbcrypt_kbkdf_opts_t *opts)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
-    hmac_init_t hmac_init = hmac_callbacks.hmac_init;
-    hmac_update_t hmac_update = hmac_callbacks.hmac_update;
-    hmac_final_t hmac_final = hmac_callbacks.hmac_final;
+    mbcrypt_hmac_init_t hmac_init = cbs->hmac_init;
+    mbcrypt_hmac_update_t hmac_update = cbs->hmac_update;
+    mbcrypt_hmac_final_t hmac_final = cbs->hmac_final;
+    void *ctx = cbs->hmac_ctx;
 
     const uint8_t *k_i_1 = iv_in;
     uint32_t k_i_1_len = 0;
@@ -230,7 +225,7 @@ MBCRYPT_FUNCTION_BEGIN;
         goto MBCRYPT_FUNCTION_EXIT;
     }
 
-    hmac_size = kbkdf_hash_size[hash_type];
+    hmac_size = GET_HASH_SIZE_BY_HASH_TYPE(hash_type);
 
     modulo = ((key_out_len % 8) > 1) ? 1 : 0;
     full_blocks = ((key_out_len / 8) + modulo) / hmac_size;
@@ -348,18 +343,19 @@ MBCRYPT_FUNCTION_EXIT:
     MBCRYPT_FUNCTION_RETURN;
 }
 
-static uint32_t _kbkdf_double_pipeline(void *ctx, kbkdf_hash_type_e hash_type, 
-                                       kbkdf_hmac_callbacks_t hmac_callbacks,
+static uint32_t _mbcrypt_kbkdf_double_pipeline(mbcrypt_hash_type_e hash_type, 
+                                       mbcrypt_hmac_callbacks_t *cbs,
                                        const uint8_t *key_in, const uint32_t key_in_len,
                                        uint8_t *fixed_input, const uint32_t fixed_input_len,
                                        uint8_t *key_out, const uint32_t key_out_len,
-                                       kbkdf_opts_t *opts)
+                                       mbcrypt_kbkdf_opts_t *opts)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
-    hmac_init_t hmac_init = hmac_callbacks.hmac_init;
-    hmac_update_t hmac_update = hmac_callbacks.hmac_update;
-    hmac_final_t hmac_final = hmac_callbacks.hmac_final;
+    mbcrypt_hmac_init_t hmac_init = cbs->hmac_init;
+    mbcrypt_hmac_update_t hmac_update = cbs->hmac_update;
+    mbcrypt_hmac_final_t hmac_final = cbs->hmac_final;
+    void *ctx = cbs->hmac_ctx;
 
     uint32_t hmac_size;
     uint32_t full_blocks;
@@ -384,7 +380,7 @@ MBCRYPT_FUNCTION_BEGIN;
 
     A_i = &A[0];
 
-    hmac_size = kbkdf_hash_size[hash_type];
+    hmac_size = GET_HASH_SIZE_BY_HASH_TYPE(hash_type);
 
     modulo = ((key_out_len % 8) > 1) ? 1 : 0;
     full_blocks = ((key_out_len / 8) + modulo) / hmac_size;
@@ -507,17 +503,17 @@ MBCRYPT_FUNCTION_EXIT:
     MBCRYPT_FUNCTION_RETURN;
 }
 
-mbcrypt_status_e kbkdf(void *prf_ctx, kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
-                        kbkdf_hmac_callbacks_t hmac_callbacks,
+mbcrypt_status_e kbkdf(mbcrypt_kbkdf_mode_e mode, mbcrypt_hash_type_e hash_type,
+                        mbcrypt_hmac_callbacks_t *cbs,
                         const uint8_t *key_in, const uint32_t key_in_len,
                         const uint8_t *iv_in, const uint32_t iv_in_len,
                         uint8_t *fixed_input, const uint32_t fixed_input_len,
                         uint8_t *key_out, const uint32_t key_out_len,
-                        kbkdf_opts_t *opts)
+                        mbcrypt_kbkdf_opts_t *opts)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
-    kbkdf_opts_t tmp_opts =
+    mbcrypt_kbkdf_opts_t tmp_opts =
         {
             .ctr_rlen = 4,
             .ctr_rpos = 0
@@ -527,9 +523,9 @@ MBCRYPT_FUNCTION_BEGIN;
     MBCRYPT_CHECK_VALID_NOT_NULL(fixed_input);
     MBCRYPT_CHECK_VALID_NOT_NULL(key_out);
 
-    MBCRYPT_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_final);
-    MBCRYPT_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_init);
-    MBCRYPT_CHECK_VALID_NOT_NULL(hmac_callbacks.hmac_update);
+    MBCRYPT_CHECK_VALID_NOT_NULL(cbs->hmac_final);
+    MBCRYPT_CHECK_VALID_NOT_NULL(cbs->hmac_init);
+    MBCRYPT_CHECK_VALID_NOT_NULL(cbs->hmac_update);
 
     if (opts != NULL)
     {
@@ -539,16 +535,16 @@ MBCRYPT_FUNCTION_BEGIN;
 
     switch (mode)
     {
-    case KBKDF_MODE_COUNTER:
-        MBCRYPT_CHECK_RES(_kbkdf_counter(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, fixed_input,
+    case MBCRYPT_KBKDF_MODE_COUNTER:
+        MBCRYPT_CHECK_RES(_mbcrypt_kbkdf_counter(hash_type, cbs, key_in, key_in_len, fixed_input,
                                 fixed_input_len, key_out, key_out_len, &tmp_opts));
         break;
-    case KBKDF_MODE_FEEDBACK:
-        MBCRYPT_CHECK_RES(_kbkdf_feedback(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, iv_in, iv_in_len,
+    case MBCRYPT_KBKDF_MODE_FEEDBACK:
+        MBCRYPT_CHECK_RES(_mbcrypt_kbkdf_feedback(hash_type, cbs, key_in, key_in_len, iv_in, iv_in_len,
                                  fixed_input, fixed_input_len, key_out, key_out_len, &tmp_opts));
         break;
-    case KBKDF_MODE_DOUBLE_PIPELINE:
-        MBCRYPT_CHECK_RES(_kbkdf_double_pipeline(prf_ctx, hash_type, hmac_callbacks, key_in, key_in_len, fixed_input,
+    case MBCRYPT_KBKDF_MODE_DOUBLE_PIPELINE:
+        MBCRYPT_CHECK_RES(_mbcrypt_kbkdf_double_pipeline(hash_type, cbs, key_in, key_in_len, fixed_input,
                                         fixed_input_len, key_out, key_out_len, &tmp_opts));
         break;
     default:

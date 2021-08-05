@@ -45,7 +45,7 @@
 }
 
 
-static const uint8_t _sha256_padding[SHA256_BUFFER_SIZE] =
+static const uint8_t _sha256_padding[MBCRYPT_SHA256_BUFFER_SIZE] =
 {
  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -53,7 +53,7 @@ static const uint8_t _sha256_padding[SHA256_BUFFER_SIZE] =
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-static const uint32_t _K[SHA256_BUFFER_SIZE] =
+static const uint32_t _K[MBCRYPT_SHA256_BUFFER_SIZE] =
 {
     0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
     0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
@@ -74,11 +74,11 @@ static const uint32_t _K[SHA256_BUFFER_SIZE] =
 };
 
 
-static void sha256_process(sha256_t *ctx, const uint8_t *data)
+static void sha256_process(mbcrypt_sha256_t *ctx, const uint8_t *data)
 {
     uint32_t tmp1;
     uint32_t tmp2;
-    uint32_t W[SHA256_BUFFER_SIZE];
+    uint32_t W[MBCRYPT_SHA256_BUFFER_SIZE];
     uint32_t A;
     uint32_t B;
     uint32_t C;
@@ -98,7 +98,7 @@ static void sha256_process(sha256_t *ctx, const uint8_t *data)
     H = ctx->h7;
 
 /* Select what implimentation should be */
-#ifdef SHA256_MIN_SIZE
+#ifdef MBCRYPT_SHA256_MIN_SIZE
 
     for (uint32_t i = 0; i < 16; ++i)
     {
@@ -129,7 +129,7 @@ static void sha256_process(sha256_t *ctx, const uint8_t *data)
         PAD(B, C, D, E, F, G, H, A, ROT(i + 7), _K[i + 7]);
     }
 
-#else /* SHA256_MIN_SIZE */
+#else /* MBCRYPT_SHA256_MIN_SIZE */
 
     GET_UINT32_BE(W[0], data, 0);
     GET_UINT32_BE(W[1], data, 4);
@@ -242,19 +242,19 @@ static void sha256_process(sha256_t *ctx, const uint8_t *data)
     F = MAX_WORD_VALUE;
     G = MAX_WORD_VALUE;
     H = MAX_WORD_VALUE;
-    memset_safe(W, MAX_BYTE_VALUE, SHA256_BUFFER_SIZE * sizeof(W[0]));
+    memset_safe(W, MAX_BYTE_VALUE, MBCRYPT_SHA256_BUFFER_SIZE * sizeof(W[0]));
 #endif /* SECURED_SHA256 */
 
 }
 
 
-mbcrypt_status_e sha256_init(sha256_t *ctx)
+mbcrypt_status_e mbcrypt_sha256_init(mbcrypt_sha256_t *ctx)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
     MBCRYPT_CHECK_VALID_NOT_NULL(ctx);
 
-    MBCRYPT_CHECK_VALID_NOT_NULL(memset(ctx, 0x00, sizeof(sha256_t)));
+    MBCRYPT_CHECK_VALID_NOT_NULL(memset(ctx, 0x00, sizeof(mbcrypt_sha256_t)));
 
     ctx->h0 = 0x6A09E667;
     ctx->h1 = 0xBB67AE85;
@@ -270,7 +270,7 @@ MBCRYPT_FUNCTION_EXIT:
 }
 
 
-mbcrypt_status_e sha256_update(sha256_t *ctx, 
+mbcrypt_status_e mbcrypt_sha256_update(mbcrypt_sha256_t *ctx, 
                                 const uint8_t *data, uint32_t data_len)
 {
 MBCRYPT_FUNCTION_BEGIN;
@@ -287,7 +287,7 @@ MBCRYPT_FUNCTION_BEGIN;
     }
 
     left = ctx->total[0] & 0b00111111; // 63 == 0x3F
-    fill = SHA256_BUFFER_SIZE - left;
+    fill = MBCRYPT_SHA256_BUFFER_SIZE - left;
 
     ctx->total[0] += data_len;
     ctx->total[0] &= MAX_WORD_VALUE;
@@ -308,11 +308,11 @@ MBCRYPT_FUNCTION_BEGIN;
     }
 
     /* if not a complite package */
-    while (data_len >= SHA256_BUFFER_SIZE)
+    while (data_len >= MBCRYPT_SHA256_BUFFER_SIZE)
     {
         sha256_process(ctx, data);
-        data += SHA256_BUFFER_SIZE;
-        data_len  -= SHA256_BUFFER_SIZE;
+        data += MBCRYPT_SHA256_BUFFER_SIZE;
+        data_len  -= MBCRYPT_SHA256_BUFFER_SIZE;
     }
 
     if (data_len > 0)
@@ -320,6 +320,7 @@ MBCRYPT_FUNCTION_BEGIN;
         MBCRYPT_CHECK_VALID_NOT_NULL(memcpy((void *)(ctx->buffer + left), 
                                         data, data_len));
     }
+
 
 MBCRYPT_FUNCTION_EXIT:
 
@@ -332,7 +333,7 @@ MBCRYPT_FUNCTION_EXIT:
 }
 
 
-mbcrypt_status_e sha256_finish(sha256_t *ctx, uint8_t *out)
+mbcrypt_status_e mbcrypt_sha256_final(mbcrypt_sha256_t *ctx, uint8_t *out)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
@@ -356,8 +357,8 @@ MBCRYPT_FUNCTION_BEGIN;
     last = ctx->total[0] & 0x3F;
     padn = (last < 56) ? (56 - last) : (120 - last);
 
-    MBCRYPT_CHECK_RES(sha256_update(ctx, _sha256_padding, padn));
-    MBCRYPT_CHECK_RES(sha256_update(ctx, msglen, 8));
+    MBCRYPT_CHECK_RES(mbcrypt_sha256_update(ctx, _sha256_padding, padn));
+    MBCRYPT_CHECK_RES(mbcrypt_sha256_update(ctx, msglen, 8));
 
     PUT_UINT32_BE(ctx->h0, out, 0);
     PUT_UINT32_BE(ctx->h1, out, 4);
@@ -367,6 +368,7 @@ MBCRYPT_FUNCTION_BEGIN;
     PUT_UINT32_BE(ctx->h5, out, 20);
     PUT_UINT32_BE(ctx->h6, out, 24);
     PUT_UINT32_BE(ctx->h7, out, 28);
+
 
 MBCRYPT_FUNCTION_EXIT:
 
@@ -382,15 +384,15 @@ MBCRYPT_FUNCTION_EXIT:
 }
 
 
-mbcrypt_status_e sha256(const uint8_t *data, uint32_t data_len, uint8_t *out)
+mbcrypt_status_e mbcrypt_sha256(const uint8_t *data, uint32_t data_len, uint8_t *out)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
-    sha256_t ctx;
+    mbcrypt_sha256_t ctx;
 
-    MBCRYPT_CHECK_RES(sha256_init(&ctx));
-    MBCRYPT_CHECK_RES(sha256_update(&ctx, data, data_len));
-    MBCRYPT_CHECK_RES(sha256_finish(&ctx, out));
+    MBCRYPT_CHECK_RES(mbcrypt_sha256_init(&ctx));
+    MBCRYPT_CHECK_RES(mbcrypt_sha256_update(&ctx, data, data_len));
+    MBCRYPT_CHECK_RES(mbcrypt_sha256_final(&ctx, out));
 
 MBCRYPT_FUNCTION_EXIT:
 

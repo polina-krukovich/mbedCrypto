@@ -23,44 +23,24 @@
 #include "mbcrypt.h"
 
 /**
- * @brief Hash type to be used in KBKDF
- */
-typedef enum kbkdf_hash_type_e
-{
-    KBKDF_HASH_TYPE_SHA256 = 0,
-    KBKDF_HASH_TYPE_SHA384 = 1,
-    KBKDF_HASH_TYPE_SHA512 = 2,
-} kbkdf_hash_type_e;
-
-/**
- * @brief Struct contains callbacks for hmac functions that used in KBKDF
- */
-typedef struct kbkdf_hmac_callbacks_t
-{
-    hmac_init_t hmac_init;
-    hmac_update_t hmac_update;
-    hmac_final_t hmac_final;
-} kbkdf_hmac_callbacks_t;
-
-/**
  * @brief Extra options for KBKDf
  */
-typedef struct kbkdf_opts_t
+typedef struct mbcrypt_kbkdf_opts_t
 {
     uint32_t ctr_rlen; /* Counter len to be used in bytes. Can be from 1 to 4 bytes */
     int32_t ctr_rpos; /* Counter position. Can be less than 0 relatevly to fixed input*/
-} kbkdf_opts_t;
+} mbcrypt_kbkdf_opts_t;
 
 /**
  * @brief KBKDF mode type
  * 
  */
-typedef enum kbkdf_mode_e
+typedef enum mbcrypt_kbkdf_mode_e
 {
-    KBKDF_MODE_COUNTER = 0,
-    KBKDF_MODE_FEEDBACK = 1,
-    KBKDF_MODE_DOUBLE_PIPELINE = 2,
-} kbkdf_mode_e;
+    MBCRYPT_KBKDF_MODE_COUNTER = 0,
+    MBCRYPT_KBKDF_MODE_FEEDBACK = 1,
+    MBCRYPT_KBKDF_MODE_DOUBLE_PIPELINE = 2,
+} mbcrypt_kbkdf_mode_e;
 
 
 #ifdef __cplusplus
@@ -84,16 +64,17 @@ extern "C" {
 * @param[in] opts Counter options
 * @return mbcrypt_status_e
 */
-mbcrypt_status_e kbkdf(void *prf_ctx, kbkdf_mode_e mode, kbkdf_hash_type_e hash_type,
-                        kbkdf_hmac_callbacks_t hmac_callbacks,
+mbcrypt_status_e mbcrypt_kbkdf(void *prf_ctx, mbcrypt_kbkdf_mode_e mode, 
+                        mbcrypt_hash_type_e hash_type,
+                        mbcrypt_hmac_callbacks_t hmac_callbacks,
                         const uint8_t* key_in, const uint32_t key_in_len,
                         const uint8_t* iv_in, const uint32_t iv_in_len,
                         uint8_t* fixed_input, const uint32_t fixed_input_len,
                         uint8_t* key_out, const uint32_t key_out_len,
-                        kbkdf_opts_t* opts);
+                        mbcrypt_kbkdf_opts_t* opts);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* KBKDF_H */
+#endif /* MBCRYPT_KBKDF_H */

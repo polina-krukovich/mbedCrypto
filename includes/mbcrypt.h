@@ -29,42 +29,44 @@
 
 
 
-typedef uint32_t (*hmac_init_t)(void * __restrict ctx, void * __restrict callbacks,
-                                const uint8_t * __restrict key, uint32_t key_len);
-typedef uint32_t (*hmac_update_t)(void * __restrict ctx, 
-                                    const uint8_t * __restrict data, uint32_t data_len);
-typedef uint32_t (*hmac_final_t)(void * __restrict ctx, 
-                                    const uint8_t * __restrict hmac_out);
+typedef uint32_t (*mbcrypt_hmac_init_t)(void * __restrict ctx,
+                                        const uint8_t * __restrict key, uint32_t key_len);
+typedef uint32_t (*mbcrypt_hmac_update_t)(void * __restrict ctx, 
+                                        const uint8_t * __restrict data, uint32_t data_len);
+typedef uint32_t (*mbcrypt_hmac_final_t)(void * __restrict ctx, 
+                                        const uint8_t * __restrict hmac_out);
 
-typedef uint32_t (*hash_init_t)(void * __restrict ctx);
-typedef uint32_t (*hash_update_t)(void * __restrict ctx, 
-                                    const uint8_t * __restrict data, uint32_t data_len);
-typedef uint32_t (*hash_final_t)(void * __restrict ctx, const uint8_t * __restrict hash_out);
+typedef uint32_t (*mbcrypt_hash_init_t)(void * __restrict ctx);
+
+typedef uint32_t (*mbcrypt_hash_update_t)(void * __restrict ctx, 
+                                        const uint8_t * __restrict data, uint32_t data_len);
+                                    
+typedef uint32_t (*mbcrypt_hash_final_t)(void * __restrict ctx, const uint8_t * __restrict hash_out);
 
 
-typedef struct hmac_callbacks_t{
+typedef struct mbcrypt_hmac_callbacks_t{
     void *hmac_ctx;
-    hmac_init_t *hmac_init;
-    hmac_update_t *hmac_update;
-    hmac_final_t *hmac_final;
-} hmac_callbacks_t;
+    mbcrypt_hmac_init_t *hmac_init;
+    mbcrypt_hmac_update_t *hmac_update;
+    mbcrypt_hmac_final_t *hmac_final;
+} mbcrypt_hmac_callbacks_t;
 
 
-typedef struct hash_callbacks_t{
+typedef struct mbcrypt_hash_callbacks_t{
     void *hash_ctx;
-    hash_init_t *hash_init;
-    hash_update_t *hash_update;
-    hash_final_t *hash_final;
-} hash_callbacks_t;
+    mbcrypt_hash_init_t *hash_init;
+    mbcrypt_hash_update_t *hash_update;
+    mbcrypt_hash_final_t *hash_final;
+} mbcrypt_hash_callbacks_t;
 
-typedef enum hash_type_e{
-    HASH_TYPE_SHA1 =   0,
-    HASH_TYPE_SHA224 = 1,
-    HASH_TYPE_SHA256 = 2,
-    HASH_TYPE_SHA384 = 3,
-    HASH_TYPE_SHA512 = 4,
-    HASH_TYPE_MD5    = 5,
-} hash_type_e;
+typedef enum mbcrypt_hash_type_e{
+    MBCRYPT_HASH_TYPE_SHA1 =   0,
+    MBCRYPT_HASH_TYPE_SHA224 = 1,
+    MBCRYPT_HASH_TYPE_SHA256 = 2,
+    MBCRYPT_HASH_TYPE_SHA384 = 3,
+    MBCRYPT_HASH_TYPE_SHA512 = 4,
+    MBCRYPT_HASH_TYPE_MD5    = 5,
+} mbcrypt_hash_type_e;
 
 static const uint32_t hash_size_lookup[] = {
     20,
@@ -96,8 +98,8 @@ static const uint32_t hash_size_lookup[] = {
 
 #define MBCRYPT_API
 
-#define MBCRYPT_FUNCTION_EXIT                    sec_exit
-#define MBCRYPT_FUNCTION_RET_VAR                 sec_ret
+#define MBCRYPT_FUNCTION_EXIT                    mbcrypt_exit
+#define MBCRYPT_FUNCTION_RET_VAR                 mbcrypt_ret
 #define MBCRYPT_FUNCTION_BEGIN                   mbcrypt_status_e MBCRYPT_FUNCTION_RET_VAR = \
                                                     MBCRYPT_STATUS_OK;
 #define MBCRYPT_FUNCTION_RETURN                  return MBCRYPT_FUNCTION_RET_VAR;
@@ -105,13 +107,13 @@ static const uint32_t hash_size_lookup[] = {
 /**
  * @brief Macro for checking pointer value. if NULL then jumps MBCRYPT_FUNCTION_EXIT
  */
-#define MBCRYPT_CHECK_VALID_NOT_NULL(x)        \
+#define MBCRYPT_CHECK_VALID_NOT_NULL(x)         \
 do{                                             \
     if ((x) == NULL)                            \
     {                                           \
-        MBCRYPT_FUNCTION_RET_VAR =             \
-        MBCRYPT_STATUS_FAIL_NULL_PTR;          \
-        goto MBCRYPT_FUNCTION_EXIT;            \
+        MBCRYPT_FUNCTION_RET_VAR =              \
+        MBCRYPT_STATUS_FAIL_NULL_PTR;           \
+        goto MBCRYPT_FUNCTION_EXIT;             \
     }                                           \
 } while (0)                                     \
 
@@ -119,12 +121,12 @@ do{                                             \
  * @brief Macro for checking mbcrypt function result. 
  * if not MBCRYPT_STATUS_OK then jumps MBCRYPT_FUNCTION_EXIT
  */
-#define MBCRYPT_CHECK_RES(x)                   \
+#define MBCRYPT_CHECK_RES(x)                    \
 do{                                             \
-    if (MBCRYPT_FUNCTION_RET_VAR = (x)         \
-        != MBCRYPT_STATUS_OK)                  \
+    if (MBCRYPT_FUNCTION_RET_VAR = (x)          \
+        != MBCRYPT_STATUS_OK)                   \
     {                                           \
-        goto MBCRYPT_FUNCTION_EXIT;            \
+        goto MBCRYPT_FUNCTION_EXIT;             \
     }                                           \
 } while (0)                                     \
 

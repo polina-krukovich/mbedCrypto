@@ -23,23 +23,23 @@
 #include "sha256.h"
 #include "sha512.h"
 
-#define AES_MAX_KEY_SIZE            (32)
+#define MBCRYPT_AES_MAX_KEY_SIZE            (32)
 
 typedef enum
 {
-    AES_INFO_NK = 0, 
-    AES_INFO_NR = 1, 
+    MBCRYPT_AES_INFO_NK = 0, 
+    MBCRYPT_AES_INFO_NR = 1, 
 };
 
-static const uint32_t _aes_info[][3] = 
+static const uint32_t _mbcrypt_aes_info[][3] = 
 { // Nk, Nr
     {4, 10}, // AES128
     {6, 12}, // AES192
     {8, 14}, // AES256
 };
 
-#define Nk              _aes_info[aes_type][AES_INFO_NK]
-#define Nr              _aes_info[aes_type][AES_INFO_NR]
+#define Nk              _mbcrypt_aes_info[mbcrypt_aes_type][MBCRYPT_AES_INFO_NK]
+#define Nr              _mbcrypt_aes_info[mbcrypt_aes_type][MBCRYPT_AES_INFO_NR]
 /* In NIST standart is only Nb 4 applied*/
 #define Nb              (4)
 
@@ -155,7 +155,7 @@ static INLINE void _inv_sub_word(uint8_t word[4])
     word[3] = _inv_s_box[word[3]];
 }
 
-static void _sub_bytes(uint8_t state[AES_BLOCK_SIZE])
+static void _sub_bytes(uint8_t state[MBCRYPT_AES_BLOCK_SIZE])
 {
 #define SBOX(i) state[i] = _s_box[state[i]]
 
@@ -179,7 +179,7 @@ static void _sub_bytes(uint8_t state[AES_BLOCK_SIZE])
 #undef SBOX
 }
 
-static void _inv_sub_bytes(uint8_t state[AES_BLOCK_SIZE])
+static void _inv_sub_bytes(uint8_t state[MBCRYPT_AES_BLOCK_SIZE])
 {
 #define INV_SBOX(i) state[i] = _inv_s_box[state[i]]
 
@@ -203,7 +203,7 @@ static void _inv_sub_bytes(uint8_t state[AES_BLOCK_SIZE])
 #undef INV_SBOX
 }
 
-static void _shift_rows(uint8_t state[AES_BLOCK_SIZE])
+static void _shift_rows(uint8_t state[MBCRYPT_AES_BLOCK_SIZE])
 {
     _rot_left_word(state + 4);
 
@@ -215,7 +215,7 @@ static void _shift_rows(uint8_t state[AES_BLOCK_SIZE])
     _rot_left_word(state + 12);
 }
 
-static void _inv_shift_rows(uint8_t state[AES_BLOCK_SIZE])
+static void _inv_shift_rows(uint8_t state[MBCRYPT_AES_BLOCK_SIZE])
 {
     _rot_right_word(state + 4);
 
@@ -227,7 +227,7 @@ static void _inv_shift_rows(uint8_t state[AES_BLOCK_SIZE])
     _rot_right_word(state + 12);
 }
 
-static void _mix_coloums(uint8_t state[AES_BLOCK_SIZE], uint8_t *vect)
+static void _mix_coloums(uint8_t state[MBCRYPT_AES_BLOCK_SIZE], uint8_t *vect)
 {
 
    	uint8_t *a = vect; 
@@ -249,7 +249,7 @@ static void _mix_coloums(uint8_t state[AES_BLOCK_SIZE], uint8_t *vect)
 	}
 }
 
-static void _aes_expand_key(aes_type_e aes_type, uint8_t *key, uint8_t *w)
+static void _mbcrypt_aes_expand_key(mbcrypt_aes_type_e mbcrypt_aes_type, uint8_t *key, uint8_t *w)
 {
     uint32_t k;
     uint32_t j;
@@ -292,7 +292,7 @@ static void _aes_expand_key(aes_type_e aes_type, uint8_t *key, uint8_t *w)
     }
 }
 
-static INLINE void _add_round_key(uint32_t round, uint8_t state[AES_BLOCK_SIZE], uint8_t w[AES_BLOCK_SIZE])
+static INLINE void _add_round_key(uint32_t round, uint8_t state[MBCRYPT_AES_BLOCK_SIZE], uint8_t w[MBCRYPT_AES_BLOCK_SIZE])
 {
 	for (uint8_t i = 0; i < Nb; ++i) 
     {
@@ -304,11 +304,11 @@ static INLINE void _add_round_key(uint32_t round, uint8_t state[AES_BLOCK_SIZE],
 	}
 }
 
-static void _aes_encrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
-                                uint8_t out[AES_BLOCK_SIZE])
+static void _mbcrypt_aes_encrypt_block(mbcrypt_aes_key_t *key, const uint8_t in[MBCRYPT_AES_BLOCK_SIZE], 
+                                uint8_t out[MBCRYPT_AES_BLOCK_SIZE])
 {
-    uint8_t state[AES_BLOCK_SIZE];
-    aes_type_e aes_type = key->aes_type;
+    uint8_t state[MBCRYPT_AES_BLOCK_SIZE];
+    mbcrypt_aes_type_e mbcrypt_aes_type = key->mbcrypt_aes_type;
     uint8_t *w = key->w;
 
 	for (uint32_t i = 0; i < 4; ++i) 
@@ -344,11 +344,11 @@ static void _aes_encrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE],
 	}
 }   
 
-static void _aes_decrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
-                                uint8_t out[AES_BLOCK_SIZE])
+static void _mbcrypt_aes_decrypt_block(mbcrypt_aes_key_t *key, const uint8_t in[MBCRYPT_AES_BLOCK_SIZE], 
+                                uint8_t out[MBCRYPT_AES_BLOCK_SIZE])
 {
-    uint8_t state[AES_BLOCK_SIZE];
-    aes_type_e aes_type = key->aes_type;
+    uint8_t state[MBCRYPT_AES_BLOCK_SIZE];
+    mbcrypt_aes_type_e mbcrypt_aes_type = key->mbcrypt_aes_type;
     uint8_t *w = key->w;
 
 	for (uint32_t i = 0; i < 4; ++i) 
@@ -386,44 +386,44 @@ static void _aes_decrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE],
 }
 
 
-mbcrypt_status_e aes_key_init(aes_type_e aes_type, aes_key_t *aes_key)
+mbcrypt_status_e mbcrypt_aes_key_init(mbcrypt_aes_type_e mbcrypt_aes_type, mbcrypt_aes_key_t *mbcrypt_aes_key)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
-    MBCRYPT_CHECK_VALID_NOT_NULL(aes_key);
+    MBCRYPT_CHECK_VALID_NOT_NULL(mbcrypt_aes_key);
 
-    if (aes_type != AES128 && 
-        aes_type != AES192 && 
-        aes_type != AES256)
+    if (mbcrypt_aes_type != AES128 && 
+        mbcrypt_aes_type != AES192 && 
+        mbcrypt_aes_type != AES256)
     {
         MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
         goto MBCRYPT_FUNCTION_EXIT;
     }
 
-    aes_key->aes_type = aes_type;
-    aes_key->w = malloc(4 * Nb * (Nr + 1));
+    mbcrypt_aes_key->mbcrypt_aes_type = mbcrypt_aes_type;
+    mbcrypt_aes_key->w = malloc(4 * Nb * (Nr + 1));
 
-    MBCRYPT_CHECK_VALID_NOT_NULL(aes_key->w);
+    MBCRYPT_CHECK_VALID_NOT_NULL(mbcrypt_aes_key->w);
 
 MBCRYPT_FUNCTION_EXIT:
     MBCRYPT_FUNCTION_RETURN;
 }
 
-mbcrypt_status_e aes_key_expand(aes_key_expansion_hash_type_e key_exp_hash_type,
-                                    const uint8_t *key_in, uint32_t key_in_len, aes_key_t *key_out)
+mbcrypt_status_e mbcrypt_aes_key_expand(mbcrypt_aes_key_expansion_hash_type_e key_exp_hash_type,
+                                    const uint8_t *key_in, uint32_t key_in_len, mbcrypt_aes_key_t *key_out)
 {
 MBCRYPT_FUNCTION_BEGIN;
     
     MBCRYPT_CHECK_VALID_NOT_NULL(key_out);
     MBCRYPT_CHECK_VALID_NOT_NULL(key_in);
     
-    uint8_t tmp_key[AES_MAX_KEY_SIZE * 2];
-    uint32_t aes_type = key_out->aes_type;
+    uint8_t tmp_key[MBCRYPT_AES_MAX_KEY_SIZE * 2];
+    uint32_t mbcrypt_aes_type = key_out->mbcrypt_aes_type;
 
     MBCRYPT_CHECK_VALID_NOT_NULL(memset(tmp_key, 0x00, sizeof(tmp_key)));
 
-    if (key_exp_hash_type == AES_KEY_EXPANSION_SHA1 && 
-        (key_out->aes_type == AES192 || key_out->aes_type == AES256))
+    if (key_exp_hash_type == MBCRYPT_AES_KEY_EXPANSION_SHA1 && 
+        (key_out->mbcrypt_aes_type == AES192 || key_out->mbcrypt_aes_type == AES256))
     {
         MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
         goto MBCRYPT_FUNCTION_EXIT;
@@ -431,16 +431,16 @@ MBCRYPT_FUNCTION_BEGIN;
 
     switch (key_exp_hash_type)
     {
-    case AES_KEY_EXPANSION_SHA1:
+    case MBCRYPT_AES_KEY_EXPANSION_SHA1:
         MBCRYPT_CHECK_RES(sha1(key_in, key_in_len, tmp_key));
         break;
-    case AES_KEY_EXPANSION_SHA256:
+    case MBCRYPT_AES_KEY_EXPANSION_SHA256:
         MBCRYPT_CHECK_RES(sha256(key_in, key_in_len, tmp_key));
         break;
-    case AES_KEY_EXPANSION_SHA512:
+    case MBCRYPT_AES_KEY_EXPANSION_SHA512:
         MBCRYPT_CHECK_RES(sha512(key_in, key_in_len, tmp_key));
         break;
-    case AES_KEY_EXPANSION_NOT_REQUIRED:
+    case MBCRYPT_AES_KEY_EXPANSION_NOT_REQUIRED:
         if (key_in_len != Nk * 4)
         {
             MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
@@ -456,14 +456,14 @@ MBCRYPT_FUNCTION_BEGIN;
         goto MBCRYPT_FUNCTION_EXIT;
         break;
     }
-    _aes_expand_key(key_out->aes_type, tmp_key, key_out->w);
+    _mbcrypt_aes_expand_key(key_out->mbcrypt_aes_type, tmp_key, key_out->w);
 
 MBCRYPT_FUNCTION_EXIT:
     MBCRYPT_FUNCTION_RETURN;
 }
 
-mbcrypt_status_e aes_ecb_encrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
-                                        uint8_t out[AES_BLOCK_SIZE])
+mbcrypt_status_e mbcrypt_aes_ecb_encrypt_block(mbcrypt_aes_key_t *key, const uint8_t in[MBCRYPT_AES_BLOCK_SIZE], 
+                                        uint8_t out[MBCRYPT_AES_BLOCK_SIZE])
 {
 MBCRYPT_FUNCTION_BEGIN;
     
@@ -471,15 +471,15 @@ MBCRYPT_FUNCTION_BEGIN;
     MBCRYPT_CHECK_VALID_NOT_NULL(in);
     MBCRYPT_CHECK_VALID_NOT_NULL(out);
 
-    _aes_encrypt_block(key, in, out);
+    _mbcrypt_aes_encrypt_block(key, in, out);
 
 MBCRYPT_FUNCTION_EXIT:
     MBCRYPT_FUNCTION_RETURN;
     
 }
 
-mbcrypt_status_e aes_ecb_decrypt_block(aes_key_t *key, const uint8_t in[AES_BLOCK_SIZE], 
-                                    uint8_t out[AES_BLOCK_SIZE])
+mbcrypt_status_e mbcrypt_aes_ecb_decrypt_block(mbcrypt_aes_key_t *key, const uint8_t in[MBCRYPT_AES_BLOCK_SIZE], 
+                                    uint8_t out[MBCRYPT_AES_BLOCK_SIZE])
 {
 MBCRYPT_FUNCTION_BEGIN;
     
@@ -487,27 +487,27 @@ MBCRYPT_FUNCTION_BEGIN;
     MBCRYPT_CHECK_VALID_NOT_NULL(in);
     MBCRYPT_CHECK_VALID_NOT_NULL(out);
 
-    _aes_decrypt_block(key, in, out);
+    _mbcrypt_aes_decrypt_block(key, in, out);
 
 MBCRYPT_FUNCTION_EXIT:
     MBCRYPT_FUNCTION_RETURN;
 }
 
-static void _aes_ecb_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_t *aes_out)
+static void _mbcrypt_aes_ecb_encrypt_ex(mbcrypt_aes_key_t *key, mbcrypt_aes_input_t *mbcrypt_aes_in, mbcrypt_aes_output_t *mbcrypt_aes_out)
 {
     /* Aliases */
-    uint8_t *data = aes_in->data;
-    uint8_t *out = aes_out->out;
-    uint32_t data_len = aes_in->data_len;
+    uint8_t *data = mbcrypt_aes_in->data;
+    uint8_t *out = mbcrypt_aes_out->out;
+    uint32_t data_len = mbcrypt_aes_in->data_len;
 
     /* Local data */
-    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint8_t buf[MBCRYPT_AES_BLOCK_SIZE] = {0};
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-    for (uint32_t i = 0; i < full_blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    for (uint32_t i = 0; i < full_blocks; ++i, data += MBCRYPT_AES_BLOCK_SIZE, out += MBCRYPT_AES_BLOCK_SIZE)
     {
-        _aes_encrypt_block(key, data, out);
+        _mbcrypt_aes_encrypt_block(key, data, out);
     }
 
     if (left_data)
@@ -517,40 +517,40 @@ static void _aes_ecb_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_
         /* Copy data left */
         memcpy(buf, data, left_data);
 
-        for (uint32_t i = left_data; i <= AES_BLOCK_SIZE; ++i)
+        for (uint32_t i = left_data; i <= MBCRYPT_AES_BLOCK_SIZE; ++i)
         {
             buf[i] = pad;
         }
-        _aes_encrypt_block(key, buf, out);
+        _mbcrypt_aes_encrypt_block(key, buf, out);
     }
 }
 
-static void _aes_cbc_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_t *aes_out)
+static void _mbcrypt_aes_cbc_encrypt_ex(mbcrypt_aes_key_t *key, mbcrypt_aes_input_t *mbcrypt_aes_in, mbcrypt_aes_output_t *mbcrypt_aes_out)
 {
     /* Aliases */
-    uint8_t *data = aes_in->data;
-    uint8_t *iv = aes_in->iv;
-    uint8_t *out = aes_out->out;
-    uint32_t data_len = aes_in->data_len;
-    uint32_t iv_len = aes_in->iv_len;
+    uint8_t *data = mbcrypt_aes_in->data;
+    uint8_t *iv = mbcrypt_aes_in->iv;
+    uint8_t *out = mbcrypt_aes_out->out;
+    uint32_t data_len = mbcrypt_aes_in->data_len;
+    uint32_t iv_len = mbcrypt_aes_in->iv_len;
 
     /* Local data */
-    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint8_t buf[MBCRYPT_AES_BLOCK_SIZE] = {0};
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-    memcpy(buf, iv, AES_BLOCK_SIZE);
+    memcpy(buf, iv, MBCRYPT_AES_BLOCK_SIZE);
 
-    for (uint32_t i = 0; i < full_blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    for (uint32_t i = 0; i < full_blocks; ++i, data += MBCRYPT_AES_BLOCK_SIZE, out += MBCRYPT_AES_BLOCK_SIZE)
     {
         for (uint32_t j = 0; j < 16; ++j)
         {
             buf[j] = data[j] ^ buf[j];
         }
 
-        _aes_encrypt_block(key, buf, out);
+        _mbcrypt_aes_encrypt_block(key, buf, out);
 
-        memcpy(buf, out, AES_BLOCK_SIZE);
+        memcpy(buf, out, MBCRYPT_AES_BLOCK_SIZE);
     }
 
     if (left_data)
@@ -558,7 +558,7 @@ static void _aes_cbc_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_
         /* PKCS7 padding */
         uint8_t pad = 16 - left_data;
 
-        for (uint32_t i = left_data; i <= AES_BLOCK_SIZE; ++i)
+        for (uint32_t i = left_data; i <= MBCRYPT_AES_BLOCK_SIZE; ++i)
         {
             buf[i] ^= pad;
         }
@@ -567,32 +567,32 @@ static void _aes_cbc_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_
         {
             buf[i] ^= data[i];
         }
-        _aes_encrypt_block(key, buf, out);
+        _mbcrypt_aes_encrypt_block(key, buf, out);
     }
 }
 
 
-static void _aes_ofb_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_t *aes_out)
+static void _mbcrypt_aes_ofb_encrypt_ex(mbcrypt_aes_key_t *key, mbcrypt_aes_input_t *mbcrypt_aes_in, mbcrypt_aes_output_t *mbcrypt_aes_out)
 {
     /* Aliases */
-    uint8_t *data = aes_in->data;
-    uint8_t *iv = aes_in->iv;
-    uint8_t *out = aes_out->out;
-    uint32_t data_len = aes_in->data_len;
-    uint32_t iv_len = aes_in->iv_len;
+    uint8_t *data = mbcrypt_aes_in->data;
+    uint8_t *iv = mbcrypt_aes_in->iv;
+    uint8_t *out = mbcrypt_aes_out->out;
+    uint32_t data_len = mbcrypt_aes_in->data_len;
+    uint32_t iv_len = mbcrypt_aes_in->iv_len;
 
     /* Local data */
-    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint8_t buf[MBCRYPT_AES_BLOCK_SIZE] = {0};
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-    memcpy(buf, iv, AES_BLOCK_SIZE);
+    memcpy(buf, iv, MBCRYPT_AES_BLOCK_SIZE);
 
-    for (uint32_t i = 0; i < full_blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    for (uint32_t i = 0; i < full_blocks; ++i, data += MBCRYPT_AES_BLOCK_SIZE, out += MBCRYPT_AES_BLOCK_SIZE)
     {
-        _aes_encrypt_block(key, buf, out);
+        _mbcrypt_aes_encrypt_block(key, buf, out);
 
-        memcpy(buf, out, AES_BLOCK_SIZE);
+        memcpy(buf, out, MBCRYPT_AES_BLOCK_SIZE);
 
         for (uint32_t j = 0; j < 16; j++)
         {
@@ -603,11 +603,11 @@ static void _aes_ofb_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_
     if (left_data)
     {
         
-        uint8_t tmp[AES_BLOCK_SIZE] = {0};
+        uint8_t tmp[MBCRYPT_AES_BLOCK_SIZE] = {0};
 
-        _aes_encrypt_block(key, buf, tmp);
+        _mbcrypt_aes_encrypt_block(key, buf, tmp);
 
-        memcpy(buf, tmp, AES_BLOCK_SIZE);
+        memcpy(buf, tmp, MBCRYPT_AES_BLOCK_SIZE);
 
         for (uint32_t j = 0; j < left_data; j++)
         {
@@ -616,37 +616,37 @@ static void _aes_ofb_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_
     }
 }
 
-static void _aes_cfb_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_t *aes_out)
+static void _mbcrypt_aes_cfb_encrypt_ex(mbcrypt_aes_key_t *key, mbcrypt_aes_input_t *mbcrypt_aes_in, mbcrypt_aes_output_t *mbcrypt_aes_out)
 {
     /* Aliases */
-    uint8_t *data = aes_in->data;
-    uint8_t *iv = aes_in->iv;
-    uint8_t *out = aes_out->out;
-    uint32_t data_len = aes_in->data_len;
-    uint32_t iv_len = aes_in->iv_len;
+    uint8_t *data = mbcrypt_aes_in->data;
+    uint8_t *iv = mbcrypt_aes_in->iv;
+    uint8_t *out = mbcrypt_aes_out->out;
+    uint32_t data_len = mbcrypt_aes_in->data_len;
+    uint32_t iv_len = mbcrypt_aes_in->iv_len;
 
     /* Local data */
-    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint8_t buf[MBCRYPT_AES_BLOCK_SIZE] = {0};
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-    memcpy(buf, iv, AES_BLOCK_SIZE);
+    memcpy(buf, iv, MBCRYPT_AES_BLOCK_SIZE);
 
-    for (uint32_t i = 0; i < full_blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    for (uint32_t i = 0; i < full_blocks; ++i, data += MBCRYPT_AES_BLOCK_SIZE, out += MBCRYPT_AES_BLOCK_SIZE)
     {
-        _aes_encrypt_block(key, buf, out);
+        _mbcrypt_aes_encrypt_block(key, buf, out);
 
         for (uint32_t j = 0; j < 16; ++j)
         {
             buf[j] = data[j] ^ out[j];
         }
-        memcpy(out, buf, AES_BLOCK_SIZE);
+        memcpy(out, buf, MBCRYPT_AES_BLOCK_SIZE);
     }
     if (left_data)
     {
-        uint8_t tmp[AES_BLOCK_SIZE] = {0};
+        uint8_t tmp[MBCRYPT_AES_BLOCK_SIZE] = {0};
 
-        _aes_encrypt_block(key, buf, tmp);
+        _mbcrypt_aes_encrypt_block(key, buf, tmp);
 
         for (uint32_t j = 0; j < left_data; j++)
         {
@@ -655,25 +655,25 @@ static void _aes_cfb_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_
     }
 }
 
-static void _aes_ctr_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_t *aes_out)
+static void _mbcrypt_aes_ctr_encrypt_ex(mbcrypt_aes_key_t *key, mbcrypt_aes_input_t *mbcrypt_aes_in, mbcrypt_aes_output_t *mbcrypt_aes_out)
 {
     /* Aliases */
-    uint8_t *data = aes_in->data;
-    uint8_t *iv = aes_in->iv;
-    uint8_t *out = aes_out->out;
-    uint32_t data_len = aes_in->data_len;
-    uint32_t iv_len = aes_in->iv_len;
+    uint8_t *data = mbcrypt_aes_in->data;
+    uint8_t *iv = mbcrypt_aes_in->iv;
+    uint8_t *out = mbcrypt_aes_out->out;
+    uint32_t data_len = mbcrypt_aes_in->data_len;
+    uint32_t iv_len = mbcrypt_aes_in->iv_len;
 
     /* Local data */
-    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint8_t buf[MBCRYPT_AES_BLOCK_SIZE] = {0};
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-    memcpy(buf, iv, AES_BLOCK_SIZE);
+    memcpy(buf, iv, MBCRYPT_AES_BLOCK_SIZE);
 
-    for (uint32_t i = 0; i < full_blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    for (uint32_t i = 0; i < full_blocks; ++i, data += MBCRYPT_AES_BLOCK_SIZE, out += MBCRYPT_AES_BLOCK_SIZE)
     {
-        _aes_encrypt_block(key, buf, out);
+        _mbcrypt_aes_encrypt_block(key, buf, out);
 
         for (uint32_t j = 0; j < 16; j++)
         {
@@ -691,9 +691,9 @@ static void _aes_ctr_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_
     }
     if (left_data)
     {
-        uint8_t tmp[AES_BLOCK_SIZE] = {0};
+        uint8_t tmp[MBCRYPT_AES_BLOCK_SIZE] = {0};
 
-        _aes_encrypt_block(key, buf, tmp);
+        _mbcrypt_aes_encrypt_block(key, buf, tmp);
 
         for (uint32_t i = 0; i < left_data; ++i)
         {
@@ -704,30 +704,30 @@ static void _aes_ctr_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_
 }
 
 
-static void _aes_xts_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_t *aes_out)
+static void _mbcrypt_aes_xts_encrypt_ex(mbcrypt_aes_key_t *key, mbcrypt_aes_input_t *mbcrypt_aes_in, mbcrypt_aes_output_t *mbcrypt_aes_out)
 {
     /* Aliases */
-    uint8_t *data = aes_in->data;
-    uint8_t *iv = aes_in->iv;
-    uint8_t *out = aes_out->out;
-    uint32_t data_len = aes_in->data_len;
-    uint32_t iv_len = aes_in->iv_len;
+    uint8_t *data = mbcrypt_aes_in->data;
+    uint8_t *iv = mbcrypt_aes_in->iv;
+    uint8_t *out = mbcrypt_aes_out->out;
+    uint32_t data_len = mbcrypt_aes_in->data_len;
+    uint32_t iv_len = mbcrypt_aes_in->iv_len;
 
     /* Local data */
-    uint8_t buf[AES_BLOCK_SIZE] = {0};
+    uint8_t buf[MBCRYPT_AES_BLOCK_SIZE] = {0};
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-    _aes_encrypt_block(key, iv, T);
+    _mbcrypt_aes_encrypt_block(key, iv, T);
 
-    for (uint32_t i = 0; i < full_blocks; i++, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    for (uint32_t i = 0; i < full_blocks; i++, data += MBCRYPT_AES_BLOCK_SIZE, out += MBCRYPT_AES_BLOCK_SIZE)
     {
         for (uint32_t j = 0; j < 16; j++)
         {
             buf[j] = data[j] ^ T[j];
         }
 
-        _aes_encrypt_block(key, buf, out);
+        _mbcrypt_aes_encrypt_block(key, buf, out);
 
         for (uint32_t j = 0; j < 16; j++)
         {
@@ -744,7 +744,7 @@ static void _aes_xts_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_
             buf[j] = data[j] ^ T[j];
         }
 
-        _aes_encrypt_block(key, buf, out);
+        _mbcrypt_aes_encrypt_block(key, buf, out);
 
         for (uint32_t j = 0; j < 16; j++)
         {
@@ -757,22 +757,22 @@ static void _aes_xts_encrypt_ex(aes_key_t *key, aes_input_t *aes_in, aes_output_
 }
 /*
 
-static void _aes_gcm_encrypt_ex(aes_key_t *key,
+static void _mbcrypt_aes_gcm_encrypt_ex(mbcrypt_aes_key_t *key,
                                 const uint8_t *data, uint32_t data_len, 
                                 const uint8_t *iv, uint32_t iv_len, 
                                 uint8_t *out)
 {
-    uint8_t buf[AES_BLOCK_SIZE] = {0};
-    uint8_t T[AES_BLOCK_SIZE] = {0};
+    uint8_t buf[MBCRYPT_AES_BLOCK_SIZE] = {0};
+    uint8_t T[MBCRYPT_AES_BLOCK_SIZE] = {0};
     uint32_t full_blocks = data_len >> 4;
     uint32_t left_data = data_len & 15;
 
-    memcpy(buf, iv, AES_BLOCK_SIZE);
+    memcpy(buf, iv, MBCRYPT_AES_BLOCK_SIZE);
 
-    _aes_encrypt_block(key, buf, T);
+    _mbcrypt_aes_encrypt_block(key, buf, T);
 
     
-    for (uint32_t i = 0; i < full_blocks; ++i, data += AES_BLOCK_SIZE, out += AES_BLOCK_SIZE)
+    for (uint32_t i = 0; i < full_blocks; ++i, data += MBCRYPT_AES_BLOCK_SIZE, out += MBCRYPT_AES_BLOCK_SIZE)
     {
         for (int32_t j = 15; j >= 0; --j)
         {
@@ -781,7 +781,7 @@ static void _aes_gcm_encrypt_ex(aes_key_t *key,
             break;
         }
 
-        _aes_encrypt_block(key, buf, out);
+        _mbcrypt_aes_encrypt_block(key, buf, out);
 
         for (uint32_t j = 0; j < 16; j++)
         {
@@ -792,9 +792,9 @@ static void _aes_gcm_encrypt_ex(aes_key_t *key,
 
     if (left_data)
     {
-        uint8_t tmp[AES_BLOCK_SIZE] = {0};
+        uint8_t tmp[MBCRYPT_AES_BLOCK_SIZE] = {0};
 
-        _aes_encrypt_block(key, buf, tmp);
+        _mbcrypt_aes_encrypt_block(key, buf, tmp);
 
         for (uint32_t i = 0; i < left_data; ++i)
         {
@@ -804,58 +804,58 @@ static void _aes_gcm_encrypt_ex(aes_key_t *key,
 
 } 
 */
-mbcrypt_status_e aes_encrypt(aes_mode_e aes_mode, aes_type_e aes_type,
-                                aes_key_expansion_hash_type_e key_exp_hash_type, 
-                                aes_input_t *in, aes_output_t *out)
+mbcrypt_status_e mbcrypt_aes_encrypt(mbcrypt_aes_mode_e mbcrypt_aes_mode, mbcrypt_aes_type_e mbcrypt_aes_type,
+                                mbcrypt_aes_key_expansion_hash_type_e key_exp_hash_type, 
+                                mbcrypt_aes_input_t *in, mbcrypt_aes_output_t *out)
 {
 MBCRYPT_FUNCTION_BEGIN;
     
-    aes_key_t aes_key;
+    mbcrypt_aes_key_t mbcrypt_aes_key;
     
-    MBCRYPT_CHECK_RES(aes_key_init(aes_type, &aes_key));
-    MBCRYPT_CHECK_RES(aes_key_expand(key_exp_hash_type, in->key, in->key_len, &aes_key));
+    MBCRYPT_CHECK_RES(mbcrypt_aes_key_init(mbcrypt_aes_type, &mbcrypt_aes_key));
+    MBCRYPT_CHECK_RES(mbcrypt_aes_key_expand(key_exp_hash_type, in->key, in->key_len, &mbcrypt_aes_key));
 
-    switch (aes_mode)
+    switch (mbcrypt_aes_mode)
     {
-    case AES_ECB:
-        _aes_ecb_encrypt_ex(&aes_key, in, out);
+    case MBCRYPT_AES_ECB:
+        _mbcrypt_aes_ecb_encrypt_ex(&mbcrypt_aes_key, in, out);
         break;
-    case AES_CBC:
-        _aes_cbc_encrypt_ex(&aes_key, in, out);
+    case MBCRYPT_AES_CBC:
+        _mbcrypt_aes_cbc_encrypt_ex(&mbcrypt_aes_key, in, out);
         break;
-    case AES_CFB:
-        _aes_cfb_encrypt_ex(&aes_key, in, out);
+    case MBCRYPT_AES_CFB:
+        _mbcrypt_aes_cfb_encrypt_ex(&mbcrypt_aes_key, in, out);
         break;
-    case AES_OFB:
-        _aes_ofb_encrypt_ex(&aes_key, in, out);
+    case MBCRYPT_AES_OFB:
+        _mbcrypt_aes_ofb_encrypt_ex(&mbcrypt_aes_key, in, out);
         break;
-    case AES_CTR:
-        _aes_ctr_encrypt_ex(&aes_key, in, out);
+    case MBCRYPT_AES_CTR:
+        _mbcrypt_aes_ctr_encrypt_ex(&mbcrypt_aes_key, in, out);
         break;
      /*   
-    case AES_GCM:
-        _aes_gcm_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+    case MBCRYPT_AES_GCM:
+        _mbcrypt_aes_gcm_encrypt_ex(&mbcrypt_aes_key, data, data_len, iv, iv_len, out);
         break;
-    case AES_AEAD:
-        _aes_cfb_encrypt_ex(&aes_key, data, data_len, iv, iv_len, out);
+    case MBCRYPT_AES_AEAD:
+        _mbcrypt_aes_cfb_encrypt_ex(&mbcrypt_aes_key, data, data_len, iv, iv_len, out);
         break;
         */
-    case AES_XTS:
-        _aes_xts_encrypt_ex(&aes_key, in, out);
+    case MBCRYPT_AES_XTS:
+        _mbcrypt_aes_xts_encrypt_ex(&mbcrypt_aes_key, in, out);
         break;
     default:
         break;
     }
  
 MBCRYPT_FUNCTION_EXIT:
-    aes_key_free(&aes_key);
+    mbcrypt_aes_key_free(&mbcrypt_aes_key);
     MBCRYPT_FUNCTION_RETURN;   
 }
 
-void aes_key_free(aes_key_t *aes_key)
+void mbcrypt_aes_key_free(mbcrypt_aes_key_t *mbcrypt_aes_key)
 {
-    if (aes_key != NULL && aes_key->w != NULL)
+    if (mbcrypt_aes_key != NULL && mbcrypt_aes_key->w != NULL)
     {
-        free(aes_key->w);
+        free(mbcrypt_aes_key->w);
     }
 }

@@ -17,38 +17,41 @@
 *	@date 2021.06.19
 */
 
-#ifndef HMAC_SHA1_H
-#define HMAC_SHA1_H
+#ifndef HMAC_H
+#define HMAC_H
 
 #include "mbcrypt.h"
 
+#define HMAC_MAX_KEY_SIZE       (128)
 
-typedef struct hmac_t
+typedef struct mbcrypt_hmac_t
 {
-    hash_callbacks_t *cbs;
-    hash_type_e hash_type;
-    uint8_t key[128];
-} hmac_t;
+    mbcrypt_hash_callbacks_t *cbs;
+    mbcrypt_hash_type_e hash_type;
+    uint8_t key[HMAC_MAX_KEY_SIZE];
+} mbcrypt_hmac_t;
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-mbcrypt_status_e MBCRYPT_API hmac(hash_type_e hash_type, hash_callbacks_t *cbs, const uint8_t *key, uint32_t key_len, 
+mbcrypt_status_e MBCRYPT_API mbcrypt_hmac(mbcrypt_hash_type_e hash_type, mbcrypt_hash_callbacks_t *cbs, 
+                                            const uint8_t *key, uint32_t key_len, 
                                             const uint8_t *data, uint32_t data_len, 
                                             uint8_t *out);
 
-mbcrypt_status_e MBCRYPT_API hmac_init(hmac_t *ctx, hash_type_e hash_type, hash_callbacks_t *cbs,
+mbcrypt_status_e MBCRYPT_API mbcrypt_hmac_init(mbcrypt_hmac_t *ctx,
                                                 const uint8_t *key, uint32_t key_len);
 
-mbcrypt_status_e MBCRYPT_API hmac_update(hmac_t *ctx, 
+mbcrypt_status_e MBCRYPT_API mbcrypt_hmac_update(mbcrypt_hmac_t *ctx, 
                                                 const uint8_t *data, uint32_t data_len);
 
-mbcrypt_status_e MBCRYPT_API hmac_final(hmac_t *ctx, uint8_t *out);
+mbcrypt_status_e MBCRYPT_API mbcrypt_hmac_final(mbcrypt_hmac_t *ctx, uint8_t *out);
+
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* HMAC_SHA1_H */
+#endif /* HMAC_H */

@@ -83,7 +83,7 @@ static const uint64_t _K[80] =
     U64(0x5FCB6FAB3AD6FAEC),  U64(0x6C44198C4A475817)
 };
 
-static const uint8_t _sha512_padding[SHA512_BUFFER_SIZE] =
+static const uint8_t _sha512_padding[MBCRYPT_SHA512_BUFFER_SIZE] =
 {
  0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -96,7 +96,7 @@ static const uint8_t _sha512_padding[SHA512_BUFFER_SIZE] =
 };
 
 
-static void _sha512_process(sha512_t *ctx, const uint8_t *data)
+static void _sha512_process(mbcrypt_sha512_t *ctx, const uint8_t *data)
 {
     uint64_t tmp1;
     uint64_t tmp2;
@@ -246,13 +246,13 @@ static void _sha512_process(sha512_t *ctx, const uint8_t *data)
 }
 
 
-mbcrypt_status_e sha512_init(sha512_t *ctx)
+mbcrypt_status_e mbcrypt_sha512_init(mbcrypt_sha512_t *ctx)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
     MBCRYPT_CHECK_VALID_NOT_NULL(ctx);
 
-    MBCRYPT_CHECK_VALID_NOT_NULL(memset(ctx, 0x00, sizeof(sha512_t)));
+    MBCRYPT_CHECK_VALID_NOT_NULL(memset(ctx, 0x00, sizeof(mbcrypt_sha512_t)));
 
     ctx->h0 = U64(0x6A09E667F3BCC908);
     ctx->h1 = U64(0xBB67AE8584CAA73B);
@@ -268,7 +268,7 @@ MBCRYPT_FUNCTION_EXIT:
 }
 
 
-mbcrypt_status_e sha512_update(sha512_t *ctx, 
+mbcrypt_status_e mbcrypt_sha512_update(mbcrypt_sha512_t *ctx, 
                                 const uint8_t *data, uint32_t data_len)
 {
 MBCRYPT_FUNCTION_BEGIN;
@@ -282,7 +282,7 @@ MBCRYPT_FUNCTION_BEGIN;
     }
 
     left = (unsigned int) (ctx->total[0] & 0b01111111); // 0x7F
-    fill = SHA512_BUFFER_SIZE - left;
+    fill = MBCRYPT_SHA512_BUFFER_SIZE - left;
 
     ctx->total[0] += (uint64_t)data_len;
 
@@ -302,11 +302,11 @@ MBCRYPT_FUNCTION_BEGIN;
     }
 
     /* if not a complite package */
-    while (data_len >= SHA512_BUFFER_SIZE)
+    while (data_len >= MBCRYPT_SHA512_BUFFER_SIZE)
     {
         _sha512_process(ctx, data);
-        data += SHA512_BUFFER_SIZE;
-        data_len -= SHA512_BUFFER_SIZE;
+        data += MBCRYPT_SHA512_BUFFER_SIZE;
+        data_len -= MBCRYPT_SHA512_BUFFER_SIZE;
     }
 
     if (data_len > 0)
@@ -325,7 +325,7 @@ MBCRYPT_FUNCTION_EXIT:
     MBCRYPT_FUNCTION_RETURN;
 }
 
-mbcrypt_status_e sha512_finish(sha512_t *ctx, uint8_t *out)
+mbcrypt_status_e mbcrypt_sha512_final(mbcrypt_sha512_t *ctx, uint8_t *out)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
@@ -349,8 +349,8 @@ MBCRYPT_FUNCTION_BEGIN;
     last = (uint32_t)(ctx->total[0] & 0x7F);
     padn = (last < 112) ? (112 - last) : (240 - last);
 
-    MBCRYPT_CHECK_RES(sha512_update(ctx, _sha512_padding, padn));
-    MBCRYPT_CHECK_RES(sha512_update(ctx, msglen, 16));
+    MBCRYPT_CHECK_RES(mbcrypt_sha512_update(ctx, _sha512_padding, padn));
+    MBCRYPT_CHECK_RES(mbcrypt_sha512_update(ctx, msglen, 16));
 
     PUT_UINT64_BE(ctx->h0, out, 0);
     PUT_UINT64_BE(ctx->h1, out, 8);
@@ -374,15 +374,15 @@ MBCRYPT_FUNCTION_EXIT:
     MBCRYPT_FUNCTION_RETURN;  
 }
 
-mbcrypt_status_e sha512(const uint8_t *data, uint32_t data_len, uint8_t *out)
+mbcrypt_status_e mbcrypt_sha512(const uint8_t *data, uint32_t data_len, uint8_t *out)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
-    sha512_t ctx;
+    mbcrypt_sha512_t ctx;
 
-    MBCRYPT_CHECK_RES(sha512_init(&ctx));
-    MBCRYPT_CHECK_RES(sha512_update(&ctx, data, data_len));
-    MBCRYPT_CHECK_RES(sha512_finish(&ctx, out));
+    MBCRYPT_CHECK_RES(mbcrypt_sha512_init(&ctx));
+    MBCRYPT_CHECK_RES(mbcrypt_sha512_update(&ctx, data, data_len));
+    MBCRYPT_CHECK_RES(mbcrypt_sha512_final(&ctx, out));
 
 MBCRYPT_FUNCTION_EXIT:
 

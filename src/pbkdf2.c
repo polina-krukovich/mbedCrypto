@@ -20,24 +20,19 @@
 #include "pbkdf2.h"
 
 
-#define PBKDF2_HMAC_SHA1_BUFFER_SIZE            (32)
-#define PBKDF2_HMAC_SHA256_BUFFER_SIZE          (64)
-#define PBKDF2_HMAC_SHA512_BUFFER_SIZE          (128)
-#define PBKDF2_HMAC_MAX_BUFFER_SIZE             (PBKDF2_HMAC_SHA512_BUFFER_SIZE)
+#define PBKDF2_HMAC_MAX_BUFFER_SIZE             (128)
 
-static mbcrypt_status_e _pbkdf2_hmac(void *ctx, hmac_init_t hmac_init,
-                                        hmac_update_t hmac_update, 
-                                        hmac_final_t hmac_finish,
-                                        uint32_t hmac_size, const uint8_t *password, 
-                                        uint32_t pass_len, const uint8_t *salt, 
-                                        uint32_t salt_len, uint32_t iters, 
+mbcrypt_status_e mbcrypt_pbkdf2_hmac(mbcrypt_hash_type_e hash_type, mbcrypt_hmac_callbacks_t *cbs,
+                                        const uint8_t *password, uint32_t pass_len, 
+                                        const uint8_t *salt, uint32_t salt_len, 
+                                        uint32_t iters,
                                         uint8_t *out, uint32_t out_len)
 {
 MBCRYPT_FUNCTION_BEGIN;
 
     uint8_t U[PBKDF2_HMAC_MAX_BUFFER_SIZE];
     uint8_t T[PBKDF2_HMAC_MAX_BUFFER_SIZE];
-    uint32_t U_len = hmac_size;
+    uint32_t U_len = GET_HASH_SIZE_BY_HASH_TYPE(hash_type);
 
     uint8_t *out_p = out;
     uint8_t ctr[4];
@@ -50,12 +45,16 @@ MBCRYPT_FUNCTION_BEGIN;
     MBCRYPT_CHECK_VALID_NOT_NULL(salt);
     MBCRYPT_CHECK_VALID_NOT_NULL(out);
 
+    void *ctx = cbs->hmac_ctx;
+    mbcrypt_hmac_init_t p_hmac_init = cbs->hmac_init;
+    mbcrypt_hmac_update_t p_hmac_update = cbs->hmac_update;
+    mbcrypt_hmac_final_t p_hmac_final = cbs->hmac_final;
+
     if (!pass_len || !salt_len || !out_len || !iters)
     {
         MBCRYPT_FUNCTION_RET_VAR = MBCRYPT_STATUS_FAIL_INCORRECT_FUNCTION_PARAM;
         goto MBCRYPT_FUNCTION_EXIT;
     }
-
 
     MBCRYPT_CHECK_VALID_NOT_NULL(memset(ctr, 0x00, ctr_len));
 
@@ -66,23 +65,22 @@ MBCRYPT_FUNCTION_BEGIN;
     while (out_len != 0)
     {
         /* salt||ctr */
-        MBCRYPT_CHECK_RES(hmac_init(ctx, password, pass_len));
-        MBCRYPT_CHECK_RES(hmac_update(ctx, salt, salt_len));
-        MBCRYPT_CHECK_RES(hmac_update(ctx, ctr, ctr_len));
-        MBCRYPT_CHECK_RES(hmac_finish(ctx, T));
+        MBCRYPT_CHECK_RES(p_hmac_init(ctx, password, pass_len));
+
+        MBCRYPT_CHECK_RES(p_hmac_update(ctx, salt, salt_len));
+        MBCRYPT_CHECK_RES(p_hmac_update(ctx, ctr, ctr_len));
+        MBCRYPT_CHECK_RES(p_hmac_final(ctx, T));
         
-        
-    
         MBCRYPT_CHECK_VALID_NOT_NULL(memcpy(U, T, U_len));
 
-        MBCRYPT_CHECK_RES(hmac_init(ctx, password, pass_len));
-        
+        MBCRYPT_CHECK_RES(p_hmac_init(ctx, password, pass_len));
+
         for(uint32_t i = 1; i < iters; ++i)
         {   
             /* Uj= HMAC(P, Uj-1) */
-            MBCRYPT_CHECK_RES(hmac_update(ctx, U, U_len));
-            MBCRYPT_CHECK_RES(hmac_finish(ctx, U));
-            MBCRYPT_CHECK_RES(hmac_init(ctx, password, pass_len));
+            MBCRYPT_CHECK_RES(p_hmac_update(ctx, U, U_len));
+            MBCRYPT_CHECK_RES(p_hmac_final(ctx, U));
+            MBCRYPT_CHECK_RES(p_hmac_init(ctx, password, pass_len));
             /* Ti = Ti xor Uj */
 #if (PBKDF2_MIN_SIZE == ENABLED)
 
@@ -147,103 +145,3 @@ MBCRYPT_FUNCTION_EXIT:
 
     MBCRYPT_FUNCTION_RETURN;
 }
-
-
-
-/*=============================== PBKDF2_HMAC_SHA1 ===============================*/
-#if (PBKDF2_HMAC_SHA1 == ENABLED)
-
-#include "hmac_sha1.h"
-
-mbcrypt_status_e pbkdf2_hmac_sha1(const uint8_t *password, uint32_t pass_len,
-                                    const uint8_t *salt, uint32_t salt_len, 
-                                    uint32_t iters, uint8_t *out, uint32_t out_len)
-{
-MBCRYPT_FUNCTION_BEGIN;
-    
-    hmac_sha1_t hmac;
-
-    MBCRYPT_CHECK_RES(
-        _pbkdf2_hmac(&hmac, hmac_sha1_init, hmac_sha1_update, hmac_sha1_finish,
-                HMAC_SHA1_HASH_SIZE, password, pass_len, salt, salt_len, iters,
-                out, out_len)
-    );
-
-    
-MBCRYPT_FUNCTION_EXIT:
-
-#if (MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL) || defined(SECURED_PBKDF2_HMAC_SHA1)    
-    memset_safe(&hmac, MAX_BYTE_VALUE, sizeof(hmac));
-#endif /* MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL */
-
-    MBCRYPT_FUNCTION_RETURN;
-}
-
-#endif /* (PBKDF2_HMAC_SHA1 == ENABLED) */
-
-
-
-/*=============================== PBKDF2_HMAC_SHA256 ===============================*/
-#if (PBKDF2_HMAC_SHA256 == ENABLED)
-
-#include "hmac_sha256.h"
-
-mbcrypt_status_e pbkdf2_hmac_sha256(const uint8_t *password, uint32_t pass_len,
-                                    const uint8_t *salt, uint32_t salt_len, 
-                                    uint32_t iters, uint8_t *out, uint32_t out_len)
-{
-MBCRYPT_FUNCTION_BEGIN;
-    
-    hmac_sha256_t hmac;
-
-    MBCRYPT_CHECK_RES(
-        _pbkdf2_hmac(&hmac, hmac_sha256_init, hmac_sha256_update, hmac_sha256_finish,
-                HMAC_SHA256_HASH_SIZE, password, pass_len, salt, salt_len, iters,
-                out, out_len)
-    );
-
-    
-MBCRYPT_FUNCTION_EXIT:
-
-#if (MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL) || defined(SECURED_PBKDF2_HMAC_SHA256)    
-    memset_safe(&hmac, MAX_BYTE_VALUE, sizeof(hmac));
-#endif /* MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL */
-
-    MBCRYPT_FUNCTION_RETURN;
-}
-
-#endif /* (PBKDF2_HMAC_SHA256 == ENABLED) */
-
-
-
-/*=============================== PBKDF2_HMAC_SHA512 ===============================*/
-#if (PBKDF2_HMAC_SHA512 == ENABLED)
-
-#include "hmac_sha512.h"
-
-mbcrypt_status_e pbkdf2_hmac_sha512(const uint8_t *password, uint32_t pass_len,
-                                    const uint8_t *salt, uint32_t salt_len, 
-                                    uint32_t iters, uint8_t *out, uint32_t out_len)
-{
-MBCRYPT_FUNCTION_BEGIN;
-    
-    hmac_sha512_t hmac;
-
-    MBCRYPT_CHECK_RES(
-        _pbkdf2_hmac(&hmac, hmac_sha512_init, hmac_sha512_update, hmac_sha512_finish,
-                HMAC_SHA512_HASH_SIZE, password, pass_len, salt, salt_len, iters,
-                out, out_len)
-    );
-
-    
-MBCRYPT_FUNCTION_EXIT:
-
-#if (MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL) || defined(SECURED_PBKDF2_HMAC_SHA512)    
-    memset_safe(&hmac, MAX_BYTE_VALUE, sizeof(hmac));
-#endif /* MBCRYPT_LEVEL == MAX_MBCRYPT_LEVEL */
-
-    MBCRYPT_FUNCTION_RETURN;
-}
-
-#endif /* (PBKDF2_HMAC_SHA512 == ENABLED) */
-

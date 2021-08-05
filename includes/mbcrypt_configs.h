@@ -165,29 +165,29 @@
 
 
 /**
- * @brief When SECURED_KBKDF_HMAC_SHA1 is enabled algorithm get rid of mbcrypt 
+ * @brief When SECURED_MBCRYPT_KBKDF_HMAC_SHA1 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
-#ifndef SECURED_KBKDF_HMAC_SHA1
-	#define SECURED_KBKDF_HMAC_SHA1                  (ENABLED)
+#ifndef SECURED_MBCRYPT_KBKDF_HMAC_SHA1
+	#define SECURED_MBCRYPT_KBKDF_HMAC_SHA1                  (ENABLED)
 #endif 
 
 
 /**
- * @brief When SECURED_KBKDF_HMAC_SHA256 is enabled algorithm get rid of mbcrypt 
+ * @brief When SECURED_MBCRYPT_KBKDF_HMAC_SHA256 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
-#ifndef SECURED_KBKDF_HMAC_SHA256
-	#define SECURED_KBKDF_HMAC_SHA256                (ENABLED)
+#ifndef SECURED_MBCRYPT_KBKDF_HMAC_SHA256
+	#define SECURED_MBCRYPT_KBKDF_HMAC_SHA256                (ENABLED)
 #endif
 
 
 /**
- * @brief When SECURED_KBKDF_HMAC_SHA512 is enabled algorithm get rid of mbcrypt 
+ * @brief When SECURED_MBCRYPT_KBKDF_HMAC_SHA512 is enabled algorithm get rid of mbcrypt 
  * sensitive data after that.
  */
-#ifndef SECURED_KBKDF_HMAC_SHA512
-	#define SECURED_KBKDF_HMAC_SHA512                (ENABLED)
+#ifndef SECURED_MBCRYPT_KBKDF_HMAC_SHA512
+	#define SECURED_MBCRYPT_KBKDF_HMAC_SHA512                (ENABLED)
 #endif
 
 
@@ -251,8 +251,8 @@
  * @brief When this macro is enabled algorithm try to implementation that
  * takes less physical memory but much time.
  */
-#ifndef KBKDF_MIN_SIZE
-	#define KBKDF_MIN_SIZE                 			 (ENABLED)
+#ifndef MBCRYPT_KBKDF_MIN_SIZE
+	#define MBCRYPT_KBKDF_MIN_SIZE                 			 (ENABLED)
 #endif
 
 

@@ -14,6 +14,8 @@
 #include "sha512.h"
 
 #include "hmac.h"
+#include "pbkdf2.h"
+#include "kbkdf.h"
 
 
 void print_arr(uint8_t *data, uint32_t data_len)
@@ -46,8 +48,8 @@ const uint8_t sha_test_len = sizeof(sha_test)/DATA_SIZE;
 #define TEST_HMAC_SHA1
 #define TEST_HMAC_SHA256
 #define TEST_HMAC_SHA512
-//#define TEST_PBKDF2
-//#define TEST_KBKDF
+#define TEST_PBKDF2
+#define TEST_KBKDF
 //#define TEST_DRBG
 //#define TEST_ENTROPY
 //#define TEST_RSA
@@ -65,22 +67,22 @@ const uint8_t sha_test_len = sizeof(sha_test)/DATA_SIZE;
 void test_sha1()
 {
     printf("SHA1 test\n");
-    uint8_t *out[SHA1_HASH_SIZE];
-    uint8_t *out1[SHA1_HASH_SIZE];
+    uint8_t *out[MBCRYPT_SHA1_HASH_SIZE];
+    uint8_t *out1[MBCRYPT_SHA1_HASH_SIZE];
     int cnt = 0;
     for(int i = 0; i < sha_test_len; i++)
     {
-        sha1_t ctx;
-        sha1_init(&ctx);
+        mbcrypt_sha1_t ctx;
+        mbcrypt_sha1_init(&ctx);
         for (int j = 0; j < DATA_SIZE; j++)
-            sha1_update(&ctx, &sha_test[i][j], 1);
-        sha1_finish(&ctx, out);
+            mbcrypt_sha1_update(&ctx, &sha_test[i][j], 1);
+        mbcrypt_sha1_final(&ctx, out);
         
-        print_arr(out, SHA1_HASH_SIZE);
+        print_arr(out, MBCRYPT_SHA1_HASH_SIZE);
 
         SHA1(sha_test[i], DATA_SIZE, out1);
-        print_arr(out1, SHA1_HASH_SIZE);
-        if(!memcmp(out, out1, SHA1_HASH_SIZE)){
+        print_arr(out1, MBCRYPT_SHA1_HASH_SIZE);
+        if(!memcmp(out, out1, MBCRYPT_SHA1_HASH_SIZE)){
             cnt++;
         } else {
             printf("ERROR!\n");
@@ -99,22 +101,23 @@ void test_sha1()
 void test_sha256()
 {
     printf("SHA256 test\n");
-    uint8_t *out[SHA256_HASH_SIZE];
-    uint8_t *out1[SHA256_HASH_SIZE];
+    const uint32_t hash_size = MBCRYPT_SHA256_HASH_SIZE;
+    uint8_t *out[hash_size];
+    uint8_t *out1[hash_size];
     int cnt = 0;
     for(int i = 0; i < sha_test_len; i++)
     {
-        sha256_t ctx;
-        sha256_init(&ctx);
+        mbcrypt_sha256_t ctx;
+        mbcrypt_sha256_init(&ctx);
         for (int j = 0; j < DATA_SIZE; j++)
-            sha256_update(&ctx, &sha_test[i][j], 1);
-        sha256_finish(&ctx, out);
+            mbcrypt_sha256_update(&ctx, &sha_test[i][j], 1);
+        mbcrypt_sha256_final(&ctx, out);
         
-        print_arr(out, SHA256_HASH_SIZE);
+        print_arr(out, hash_size);
 
         SHA256(sha_test[i], DATA_SIZE, out1);
-        print_arr(out1, SHA256_HASH_SIZE);
-        if(!memcmp(out, out1, SHA256_HASH_SIZE)){
+        print_arr(out1, hash_size);
+        if(!memcmp(out, out1, hash_size)){
             cnt++;
         } else {
             printf("ERROR!\n");
@@ -133,22 +136,23 @@ void test_sha256()
 void test_sha512()
 {
     printf("SHA512 test\n");
-    uint8_t *out[SHA512_HASH_SIZE];
-    uint8_t *out1[SHA512_HASH_SIZE];
+    const uint32_t hash_size = MBCRYPT_SHA512_HASH_SIZE;
+    uint8_t *out[hash_size];
+    uint8_t *out1[hash_size];
     int cnt = 0;
     for(int i = 0; i < sha_test_len; i++)
     {
-        sha512_t ctx;
-        sha512_init(&ctx);
+        mbcrypt_sha512_t ctx;
+        mbcrypt_sha512_init(&ctx);
         for (int j = 0; j < DATA_SIZE; j++)
-            sha512_update(&ctx, &sha_test[i][j], 1);
-        sha512_finish(&ctx, out);
+            mbcrypt_sha512_update(&ctx, &sha_test[i][j], 1);
+        mbcrypt_sha512_final(&ctx, out);
         
-        print_arr(out, SHA512_HASH_SIZE);
+        print_arr(out, hash_size);
 
         SHA512(sha_test[i], DATA_SIZE, out1);
-        print_arr(out1, SHA512_HASH_SIZE);
-        if(!memcmp(out, out1, SHA512_HASH_SIZE)){
+        print_arr(out1, hash_size);
+        if(!memcmp(out, out1, hash_size)){
             cnt++;
         } else {
             printf("ERROR!\n");
@@ -170,21 +174,26 @@ void test_hmac_sha1()
     uint8_t *out[32];
     uint8_t *out1[32];
     int cnt = 0;
+    uint32_t hash_size = GET_HASH_SIZE_BY_HASH_TYPE(MBCRYPT_HASH_TYPE_SHA1);
+
     for(int i = 0; i < sha_test_len; i++)
     {
-        hmac_t ctx;
-        sha1_t sha;
-        hash_callbacks_t cbs = {&sha, sha1_init, sha1_update, sha1_finish};
-        hmac_init(&ctx, HASH_TYPE_SHA1, &cbs, sha_test[i], strlen(sha_test[i]));
+        mbcrypt_hmac_t ctx;
+        mbcrypt_sha1_t sha;
+        mbcrypt_hash_callbacks_t cbs = {&sha, mbcrypt_sha1_init, mbcrypt_sha1_update, mbcrypt_sha1_final};
+
+        ctx.cbs = &cbs;
+        ctx.hash_type = MBCRYPT_HASH_TYPE_SHA1;
+        mbcrypt_hmac_init(&ctx, sha_test[i], strlen(sha_test[i]));
         for (int j = 0; j < strlen(sha_test[i]); j++)
-            hmac_update(&ctx, &sha_test[i][j], 1);
-        hmac_final(&ctx, out);
+            mbcrypt_hmac_update(&ctx, &sha_test[i][j], 1);
+        mbcrypt_hmac_final(&ctx, out);
         
-        print_arr(out, SHA1_HASH_SIZE);
+        print_arr(out, hash_size);
         uint32_t len;
         HMAC(EVP_sha1(), sha_test[i], strlen(sha_test[i]), sha_test[i], strlen(sha_test[i]), out1, &len);
-        print_arr(out1, SHA1_HASH_SIZE);
-        if(!memcmp(out, out1, SHA1_HASH_SIZE)){
+        print_arr(out1, hash_size);
+        if(!memcmp(out, out1, hash_size)){
             cnt++;
         } else {
             printf("ERROR!\n");
@@ -206,21 +215,27 @@ void test_hmac_sha256()
     uint8_t *out[128];
     uint8_t *out1[128];
     int cnt = 0;
+    uint32_t hash_size = GET_HASH_SIZE_BY_HASH_TYPE(MBCRYPT_HASH_TYPE_SHA256);
+
     for(int i = 0; i < sha_test_len; i++)
     {
-        sha256_t sha;
-        hash_callbacks_t cbs = {&sha, sha256_init, sha256_update, sha256_finish};
-        hmac_t ctx;
-        hmac_init(&ctx, HASH_TYPE_SHA256, &cbs, sha_test[i], strlen(sha_test[i]));
+        mbcrypt_sha256_t sha;
+        mbcrypt_hash_callbacks_t cbs = {&sha, mbcrypt_sha256_init, 
+                                        mbcrypt_sha256_update, mbcrypt_sha256_final};
+        mbcrypt_hmac_t ctx;
+
+        ctx.cbs = &cbs;
+        ctx.hash_type = MBCRYPT_HASH_TYPE_SHA256;
+        mbcrypt_hmac_init(&ctx, sha_test[i], strlen(sha_test[i]));
         for (int j = 0; j < strlen(sha_test[i]); j++)
-            hmac_update(&ctx, &sha_test[i][j], 1);
-        hmac_final(&ctx, out);
+            mbcrypt_hmac_update(&ctx, &sha_test[i][j], 1);
+        mbcrypt_hmac_final(&ctx, out);
         
-        print_arr(out, SHA256_HASH_SIZE);
+        print_arr(out, hash_size);
         uint32_t len;
         HMAC(EVP_sha256(), sha_test[i], strlen(sha_test[i]), sha_test[i], strlen(sha_test[i]), out1, &len);
-        print_arr(out1, SHA256_HASH_SIZE);
-        if(!memcmp(out, out1, SHA256_HASH_SIZE)){
+        print_arr(out1, hash_size);
+        if(!memcmp(out, out1, hash_size)){
             cnt++;
         } else {
             printf("ERROR!\n");
@@ -242,22 +257,28 @@ void test_hmac_sha512()
     uint8_t *out[128];
     uint8_t *out1[128];
     int cnt = 0;
+    uint32_t hash_size = GET_HASH_SIZE_BY_HASH_TYPE(MBCRYPT_HASH_TYPE_SHA512);
+
     for(int i = 0; i < sha_test_len; i++)
     {
 
-        sha512_t sha;
-        hash_callbacks_t cbs = {&sha, sha512_init, sha512_update, sha512_finish};
-        hmac_t ctx;
-        hmac_init(&ctx, HASH_TYPE_SHA512, &cbs,sha_test[i], strlen(sha_test[i]));
+        mbcrypt_sha512_t sha;
+        mbcrypt_hash_callbacks_t cbs = {&sha, mbcrypt_sha512_init, 
+                            mbcrypt_sha512_update, mbcrypt_sha512_final};
+        mbcrypt_hmac_t ctx;
+
+        ctx.cbs = &cbs;
+        ctx.hash_type = MBCRYPT_HASH_TYPE_SHA512;
+        mbcrypt_hmac_init(&ctx, sha_test[i], strlen(sha_test[i]));
         for (int j = 0; j < strlen(sha_test[i]); j++)
-            hmac_update(&ctx, &sha_test[i][j], 1);
-        hmac_final(&ctx, out);
+            mbcrypt_hmac_update(&ctx, &sha_test[i][j], 1);
+        mbcrypt_hmac_final(&ctx, out);
         
-        print_arr(out, SHA512_HASH_SIZE);
+        print_arr(out, hash_size);
         uint32_t len;
         HMAC(EVP_sha512(), sha_test[i], strlen(sha_test[i]), sha_test[i], strlen(sha_test[i]), out1, &len);
-        print_arr(out1, SHA512_HASH_SIZE);
-        if(!memcmp(out, out1, SHA512_HASH_SIZE)){
+        print_arr(out1, hash_size);
+        if(!memcmp(out, out1, hash_size)){
             cnt++;
         } else {
             printf("ERROR!\n");
@@ -273,7 +294,7 @@ void test_hmac_sha512()
 
 #if defined(TEST_PBKDF2)
 
-void test_pbkdf2_hmac_sha1()
+void test_mbcrypt_pbkdf2_hmac_sha1()
 {
     printf("PBKDF2_HMAC_SHA1 test\n");
     uint8_t *out[32];
@@ -281,9 +302,19 @@ void test_pbkdf2_hmac_sha1()
     int cnt = 0;
     for(int i = 0; i < sha_test_len; i++)
     {
-        hmac_sha512_t ctx;
 
-        pbkdf2_hmac_sha1(sha_test[i], strlen(sha_test[i]), sha_test[i], strlen(sha_test[i]), 433, out, 32);
+        mbcrypt_sha1_t sha_ctx;
+        mbcrypt_hash_callbacks_t sha_cbs = {&sha_ctx, mbcrypt_sha1_init, 
+                                            mbcrypt_sha1_update, mbcrypt_sha1_final};
+        mbcrypt_hmac_t hmac_ctx;
+
+        hmac_ctx.cbs = &sha_cbs;
+        hmac_ctx.hash_type = MBCRYPT_HASH_TYPE_SHA1;
+
+        mbcrypt_hmac_callbacks_t hmac_cbs = {&hmac_ctx, mbcrypt_hmac_init,
+                                                mbcrypt_hmac_update,mbcrypt_hmac_final};
+
+        mbcrypt_pbkdf2_hmac(MBCRYPT_HASH_TYPE_SHA1, &hmac_cbs, sha_test[i], strlen(sha_test[i]), sha_test[i], strlen(sha_test[i]), 433, out, 32);
 
         print_arr(out, 32);
         PKCS5_PBKDF2_HMAC_SHA1(sha_test[i], strlen(sha_test[i]), sha_test[i], strlen(sha_test[i]), 433, 32, out1);
@@ -298,7 +329,7 @@ void test_pbkdf2_hmac_sha1()
     printf("PBKDF2_HMAC_SHA1 tests finished\n");
     assert(cnt == sha_test_len);
 }
-void test_pbkdf2_hmac_sha256()
+void test_mbcrypt_pbkdf2_hmac_sha256()
 {
     printf("PBKDF2_HMAC_SHA256 test\n");
     uint8_t *out[32];
@@ -306,9 +337,18 @@ void test_pbkdf2_hmac_sha256()
     int cnt = 0;
     for(int i = 0; i < sha_test_len; i++)
     {
-        hmac_sha256_t ctx;
+        mbcrypt_sha256_t sha_ctx;
+        mbcrypt_hash_callbacks_t sha_cbs = {&sha_ctx, mbcrypt_sha256_init, 
+                                            mbcrypt_sha256_update, mbcrypt_sha256_final};
+        mbcrypt_hmac_t hmac_ctx;
 
-        pbkdf2_hmac_sha256(sha_test[i], strlen(sha_test[i]), sha_test[i], strlen(sha_test[i]), 433, out, 32);
+        hmac_ctx.cbs = &sha_cbs;
+        hmac_ctx.hash_type = MBCRYPT_HASH_TYPE_SHA256;
+
+        mbcrypt_hmac_callbacks_t hmac_cbs = {&hmac_ctx, mbcrypt_hmac_init,
+                                                mbcrypt_hmac_update,mbcrypt_hmac_final};
+
+        mbcrypt_pbkdf2_hmac(MBCRYPT_HASH_TYPE_SHA256, &hmac_cbs, sha_test[i], strlen(sha_test[i]), sha_test[i], strlen(sha_test[i]), 433, out, 32);
 
         print_arr(out, 32);
         PKCS5_PBKDF2_HMAC(sha_test[i], strlen(sha_test[i]), sha_test[i], 
@@ -325,7 +365,7 @@ void test_pbkdf2_hmac_sha256()
     assert(cnt == sha_test_len);
 }
 
-void test_pbkdf2_hmac_sha512()
+void test_mbcrypt_pbkdf2_hmac_sha512()
 {
     printf("PBKDF2_HMAC_SHA512 test\n");
     uint8_t *out[32];
@@ -333,9 +373,18 @@ void test_pbkdf2_hmac_sha512()
     int cnt = 0;
     for(int i = 0; i < sha_test_len; i++)
     {
-        hmac_sha512_t ctx;
+        mbcrypt_sha512_t sha_ctx;
+        mbcrypt_hash_callbacks_t sha_cbs = {&sha_ctx, mbcrypt_sha512_init, 
+                                            mbcrypt_sha512_update, mbcrypt_sha512_final};
+        mbcrypt_hmac_t hmac_ctx;
 
-        pbkdf2_hmac_sha512(sha_test[i], strlen(sha_test[i]), sha_test[i], strlen(sha_test[i]), 433, out, 32);
+        hmac_ctx.cbs = &sha_cbs;
+        hmac_ctx.hash_type = MBCRYPT_HASH_TYPE_SHA512;
+
+        mbcrypt_hmac_callbacks_t hmac_cbs = {&hmac_ctx, mbcrypt_hmac_init,
+                                                mbcrypt_hmac_update,mbcrypt_hmac_final};
+
+        mbcrypt_pbkdf2_hmac(MBCRYPT_HASH_TYPE_SHA512, &hmac_cbs, sha_test[i], strlen(sha_test[i]), sha_test[i], strlen(sha_test[i]), 433, out, 32);
 
         print_arr(out, 32);
         PKCS5_PBKDF2_HMAC(sha_test[i], strlen(sha_test[i]), sha_test[i], 
@@ -357,17 +406,65 @@ void test_pbkdf2_hmac_sha512()
 
 #if defined(TEST_KBKDF)
 
-void test_kbkdf_ctr()
+void test_mbcrypt_kbkdf_ctr()
 {
+    mbcrypt_sha1_t sha_ctx;
+    mbcrypt_hash_callbacks_t sha_cbs = {&sha_ctx, mbcrypt_sha1_init, 
+                                        mbcrypt_sha1_update, mbcrypt_sha1_final};
+    mbcrypt_hmac_t hmac_ctx;
 
+    hmac_ctx.cbs = &sha_cbs;
+    hmac_ctx.hash_type = MBCRYPT_HASH_TYPE_SHA1;
+
+    mbcrypt_hmac_callbacks_t hmac_cbs = {&hmac_ctx, mbcrypt_hmac_init,
+                                            mbcrypt_hmac_update,mbcrypt_hmac_final};
+
+    uint8_t key_out[128];
+    uint8_t *_in = "00a39bd547fb88b2d98727cf64c195c61e1cad6c";
+    uint8_t *_fixed = "98132c1ffaf59ae5cbc0a3133d84c551bb97e0c75ecaddfc30056f6876f59803009bffc7d75c4ed46f40b8f80426750d15bc1ddb14ac5dcb69a68242";
+    uint8_t *_iv = "0198132c1ffaf59ae5cbc0a3133d84c551bb97e0c75ecaddfc30056f6876f59803009bffc7d75c4ed46f40b8f80426750d15bc1ddb14ac5dcb69a68242";
+    uint8_t key_exp = "0611e1903609b47ad7a5fc2c82e47702";
+
+    uint8_t in[128];
+    uint8_t fixed[128];
+    uint8_t iv[128];
+    uint8_t *p = in;
+    #define GET_LET(x) (((x) >= '0' && (x) <= '9') ? ((x)-'0') : (((x)-'a') + 10))
+    for (int i = 0; i < strlen(_in); i += 2, p++)
+    {
+        *p = (GET_LET(_in[i])) * 16 | (GET_LET(_in[i + 1]));
+    }
+    p = fixed;
+    for (int i = 0; i < strlen(_fixed); i += 2, p++)
+    {
+        *p = (GET_LET(_fixed[i])) * 16 | (GET_LET(_fixed[i + 1]));
+    }
+    p = iv;
+    for (int i = 0; i < strlen(iv); i += 2, p++)
+    {
+        *p = (GET_LET(_iv[i])) * 16 | (GET_LET(_iv[i + 1]));
+    }
+    mbcrypt_kbkdf_opts_t t = {1,0};
+    kbkdf(MBCRYPT_KBKDF_MODE_COUNTER, MBCRYPT_HASH_TYPE_SHA1,
+                        &hmac_cbs,
+                        in, strlen(_in)/2,
+                        iv, strlen(_iv)/2,
+                        fixed, strlen(_fixed)/2,
+                        key_out, 128,
+                        &t);
+    for (int i = 0; i < 128 / 8; i++)
+    {
+        printf("%02x", key_out[i]);
+    }
+    printf("\n");
 }
 
-void test_kbkdf_fb()
+void test_mbcrypt_kbkdf_fb()
 {
     
 }
 
-void test_kbkdf_dp()
+void test_mbcrypt_kbkdf_dp()
 {
     
 }
@@ -375,7 +472,7 @@ void test_kbkdf_dp()
 
 #ifdef RRR
 
-void aes_tests()
+void mbcrypt_aes_tests()
 {
     uint8_t out1[128];
 
@@ -383,8 +480,8 @@ void aes_tests()
     uint8_t iv[] = "1234567812345678";
     uint8_t key[] = "1234567812345678";
 
-    aes_input_t in;
-    aes_output_t out;
+    mbcrypt_aes_input_t in;
+    mbcrypt_aes_output_t out;
 
     in.data = data;
     in.data_len = sizeof(data) - 1;
@@ -401,7 +498,7 @@ void aes_tests()
     printf("AES ECB test\n");
 
     memset(out.out, 0, 128);
-    aes_encrypt(AES_ECB, AES128, AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
+    mbcrypt_aes_encrypt(MBCRYPT_AES_ECB, AES128, MBCRYPT_AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
     printf("Res: ");
     print_arr(out.out, 64);
     printf("exp: ");
@@ -412,7 +509,7 @@ void aes_tests()
     printf("AES CBC test\n");
 
     memset(out.out, 0, 128);
-    aes_encrypt(AES_CBC, AES128, AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
+    mbcrypt_aes_encrypt(MBCRYPT_AES_CBC, AES128, MBCRYPT_AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
     printf("Res: ");
     print_arr(out.out, 64);
     printf("exp: ");
@@ -424,7 +521,7 @@ void aes_tests()
     printf("AES CFB test\n");
 
     memset(out.out, 0, 128);
-    aes_encrypt(AES_CFB, AES128, AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
+    mbcrypt_aes_encrypt(MBCRYPT_AES_CFB, AES128, MBCRYPT_AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
     printf("Res: ");
     print_arr(out.out, 64);
     printf("exp: ");
@@ -435,7 +532,7 @@ void aes_tests()
     printf("AES OFB test\n");
 
     memset(out.out, 0, 128);
-    aes_encrypt(AES_OFB, AES128, AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
+    mbcrypt_aes_encrypt(MBCRYPT_AES_OFB, AES128, MBCRYPT_AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
     printf("Res: ");
     print_arr(out.out, 64);
     printf("exp: ");
@@ -447,7 +544,7 @@ void aes_tests()
     printf("AES CTR test\n");
 
     memset(out.out, 0, 128);
-    aes_encrypt(AES_CTR, AES128, AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
+    mbcrypt_aes_encrypt(MBCRYPT_AES_CTR, AES128, MBCRYPT_AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
     printf("Res: ");
     print_arr(out.out, 64);
     printf("exp: ");
@@ -459,7 +556,7 @@ void aes_tests()
     printf("AES XTS test\n");
 
     memset(out.out, 0, 128);
-    aes_encrypt(AES_XTS, AES128, AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
+    mbcrypt_aes_encrypt(MBCRYPT_AES_XTS, AES128, MBCRYPT_AES_KEY_EXPANSION_NOT_REQUIRED, &in, &out);
     printf("Res: ");
     print_arr(out.out, 64);
     printf("exp: ");
@@ -502,16 +599,16 @@ int main()
 
 
 #if defined(TEST_PBKDF2)
-    test_pbkdf2_hmac_sha1();
-    test_pbkdf2_hmac_sha256();
-    test_pbkdf2_hmac_sha512();
+    test_mbcrypt_pbkdf2_hmac_sha1();
+    test_mbcrypt_pbkdf2_hmac_sha256();
+    test_mbcrypt_pbkdf2_hmac_sha512();
 #endif
 
 
 #if defined(TEST_KBKDF)
-    test_kbkdf_ctr();
-    test_kbkdf_fb();
-    test_kbkdf_dp();
+    test_mbcrypt_kbkdf_ctr();
+    test_mbcrypt_kbkdf_fb();
+    test_mbcrypt_kbkdf_dp();
 #endif
 
 
@@ -534,13 +631,13 @@ int main()
 
 
 #if defined(TEST_AES)
-    test_aes_ecb();
-    test_aes_cbc();
-    test_aes_ofb();
-    test_aes_cfb();
-    test_aes_ctr();
-    test_aes_xts();
-    test_aes_aead();
+    test_mbcrypt_aes_ecb();
+    test_mbcrypt_aes_cbc();
+    test_mbcrypt_aes_ofb();
+    test_mbcrypt_aes_cfb();
+    test_mbcrypt_aes_ctr();
+    test_mbcrypt_aes_xts();
+    test_mbcrypt_aes_aead();
 #endif
 
 
