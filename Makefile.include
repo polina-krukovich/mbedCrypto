@@ -1,0 +1,12 @@
+MBCRYPT_SRC_DIR ?= ./src
+
+INCLUDES += includes
+
+SRCS += $(MBCRYPT_SRC_DIR)/self_tests.c				\
+		$(MBCRYPT_SRC_DIR)/mbcrypt_utils.c			\
+		$(MBCRYPT_SRC_DIR)/sha1.c 					\
+		$(MBCRYPT_SRC_DIR)/sha256.c 				\
+		$(MBCRYPT_SRC_DIR)/sha512.c					\
+		$(MBCRYPT_SRC_DIR)/hmac.c					\
+		$(MBCRYPT_SRC_DIR)/pbkdf2.c					\
+		$(MBCRYPT_SRC_DIR)/kbkdf.c				

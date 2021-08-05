@@ -1,25 +1,56 @@
-SRC_DIR=src
-SRCS =  $(SRC_DIR)/self_tests.c				\
-		$(SRC_DIR)/mbcrypt_utils.c			\
-		$(SRC_DIR)/sha1.c 					\
-		$(SRC_DIR)/sha256.c 				\
-		$(SRC_DIR)/sha512.c					\
-		$(SRC_DIR)/hmac.c					\
-		$(SRC_DIR)/pbkdf2.c					\
-		$(SRC_DIR)/kbkdf.c					\
+.PHONY: docs clean
+
+TEST_PROJECT=run_tests
+
+#=========== DIRS ===========#
+
+VPATH += lib/
+VPATH += docs/
+VPATH += helpers/
+VPATH += includes/
+VPATH += src/
+VPATH += tests/
+
+#=========== TOOLS ===========#
+
+CC ?= gcc
+LD ?= gcc
+
+#=========== FLAGS ===========#
+
+LDFLAGS ?= -w -g
+CFLAGS ?= -w -g
+LDLIBS	?= -lcrypto -lssl
+
+DEFINES ?= DEBUG
+
+#=========== INCLUDE ===========#
+
+include lib/Makefile.include
+include Makefile.include
+
+#=========== INCLUDE ===========#
+
+OBJS = $(addprefix bin/, $(SRCS:.c=.o))
 
 
-#SRCS += $(SRC_DIR)/rsa.c
-#SRCS += $(SRC_DIR)/drbg.c
-#SRCS += $(SRC_DIR)/aes.c
-#SRCS += $(SRC_DIR)/rc4.c
-#SRCS += $(SRC_DIR)/entropy.c
 
-all:
-	@rm -f run_tests.out
-	@gcc -w -g  $(SRCS) -I./includes/ -lcrypto -lssl -o run_tests.out
+#=========== COMMANDS ===========#
 
+all: $(TEST_PROJECT)
+
+$(TEST_PROJECT): $(OBJS)
+	@gcc $(LDFLAGS) $(OBJS) -o $@ $(LDLIBS)
 	@echo "Compilation done!"
 
-.PHONY docs:
+bin/%.o : %.c
+	@mkdir -p $(dir $@)
+	@gcc $(CFLAGS) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCLUDES)) -c $< -o $@
+	@echo cc -c $< -o $@
+
+clean:
+	rm -rf bin/
+	rm -f $(TEST_PROJECT)
+
+docs:
 	doxygen dox/doxygen.cfg
