@@ -1,9 +1,15 @@
-.PHONY: docs clean
+.PHONY: docs clean menuconfig tests shared static
 
-TEST_PROJECT=run_tests
+PROJECT=mbedcrypto
+
+KCONFIG_CONFIG=mbcrypt.config
+
+#=========== TOOLS ===========#
+
+CC ?= gcc
+LD ?= gcc
 
 #=========== DIRS ===========#
-
 VPATH += lib/
 VPATH += docs/
 VPATH += helpers/
@@ -11,46 +17,39 @@ VPATH += includes/
 VPATH += src/
 VPATH += tests/
 
-#=========== TOOLS ===========#
+#=========== INCLUDES ===========#
 
-CC ?= gcc
-LD ?= gcc
-
-#=========== FLAGS ===========#
-
-LDFLAGS ?= -w -g
-CFLAGS ?= -w -g
-LDLIBS	?= -lcrypto -lssl
-
-DEFINES ?= DEBUG
-
-#=========== INCLUDE ===========#
+include mbcrypt.config
 
 include lib/Makefile.include
 include Makefile.include
 
-#=========== INCLUDE ===========#
-
-OBJS = $(addprefix bin/, $(SRCS:.c=.o))
-
-
 
 #=========== COMMANDS ===========#
 
-all: $(TEST_PROJECT)
+all: tests
 
-$(TEST_PROJECT): $(OBJS)
-	@gcc $(LDFLAGS) $(OBJS) -o $@ $(LDLIBS)
-	@echo "Compilation done!"
+shared:
+	@${MAKE} $(PROJECT)_shared BUILD_TYPE=SHARED
 
-bin/%.o : %.c
-	@mkdir -p $(dir $@)
-	@gcc $(CFLAGS) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCLUDES)) -c $< -o $@
-	@echo cc -c $< -o $@
+static:
+	@${MAKE} $(PROJECT)_static BUILD_TYPE=STATIC
+
+tests: 
+	@${MAKE} $(PROJECT)_tests BUILD_TYPE=EXECUTABLE
+
 
 clean:
-	rm -rf bin/
-	rm -f $(TEST_PROJECT)
+	@rm -rf bin/
+	@rm -f $(PROJECT)_shared
+	@rm -f $(PROJECT)_static
+	@rm -f $(PROJECT)_tests
 
 docs:
-	doxygen dox/doxygen.cfg
+	@doxygen docs/doxygen.cfg
+
+menuconfig:
+	@kconfig-mconf KConfig
+
+
+-include Makefile.build

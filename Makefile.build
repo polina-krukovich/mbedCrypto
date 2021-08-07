@@ -1,0 +1,40 @@
+#=========== FLAGS ===========#
+
+ifneq ($(CONFIG_BUILD_WARNINGS), y)
+    CFLAGS += -w
+    LDFLAGS += -w
+endif
+
+ifneq ($(CONFIG_BUILD_MODE_DEBUG), y)
+    CFLAGS += -g
+    LDFLAGS += -g
+    DEFINES += MBCRYPT_DEBUG
+else
+    DEFINES += MBCRYPT_RELEASE
+endif
+
+ifeq ($(CONFIG_TESTS_WITH_OPENSSL), y)
+    DEFINES += OPENSSL_TESTS
+    LDLIBS := -lcrypto -lssl
+endif
+
+
+ifeq ($(BUILD_TYPE), SHARED)
+endif
+
+
+ifeq ($(BUILD_TYPE), STATIC)
+endif
+
+OBJS = $(addprefix bin/, $(SRCS:.c=.o))
+
+
+
+$(PROJECT)_tests: $(OBJS)
+	@gcc $(LDFLAGS) $^ -o $@ $(LDLIBS)
+	@echo "Compilation done!"
+
+bin/%.o : %.c
+	@mkdir -p $(dir $@)
+	@gcc $(CFLAGS) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCLUDES)) -c $< -o $@
+	@echo cc -c $< -o $@

@@ -1,12 +1,35 @@
-MBCRYPT_SRC_DIR ?= ./src
+MBCRYPT_SRC_DIR ?= src
 
-INCLUDES += includes
+INCLUDES +=  $(shell pwd)/includes
 
-SRCS += $(MBCRYPT_SRC_DIR)/self_tests.c				\
-		$(MBCRYPT_SRC_DIR)/mbcrypt_utils.c			\
-		$(MBCRYPT_SRC_DIR)/sha1.c 					\
-		$(MBCRYPT_SRC_DIR)/sha256.c 				\
-		$(MBCRYPT_SRC_DIR)/sha512.c					\
-		$(MBCRYPT_SRC_DIR)/hmac.c					\
-		$(MBCRYPT_SRC_DIR)/pbkdf2.c					\
-		$(MBCRYPT_SRC_DIR)/kbkdf.c				
+
+SRCS += $(MBCRYPT_SRC_DIR)/mbcrypt_utils.c
+
+
+ifeq ($(BUILD_TYPE), EXECUTABLE)
+	SRCS += $(MBCRYPT_SRC_DIR)/self_tests.c
+endif
+
+ifeq ($(CONFIG_MBCRYPT_SHA1_ENABLE), y)
+	SRCS += $(MBCRYPT_SRC_DIR)/sha1.c
+endif
+
+ifeq ($(CONFIG_MBCRYPT_SHA256_ENABLE), y)
+	SRCS += $(MBCRYPT_SRC_DIR)/sha256.c
+endif
+
+ifeq ($(CONFIG_MBCRYPT_SHA512_ENABLE), y)
+	SRCS += $(MBCRYPT_SRC_DIR)/sha512.c
+endif
+
+ifeq ($(CONFIG_MBCRYPT_HMAC_ENABLE), y)
+	SRCS += $(MBCRYPT_SRC_DIR)/hmac.c
+endif
+
+ifeq ($(CONFIG_MBCRYPT_PBKDF2_ENABLE), y)
+	SRCS += $(MBCRYPT_SRC_DIR)/pbkdf2.c
+endif
+
+ifeq ($(CONFIG_MBCRYPT_KBKDF_ENABLE), y)
+	SRCS += $(MBCRYPT_SRC_DIR)/kbkdf.c
+endif
