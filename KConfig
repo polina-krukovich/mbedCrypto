@@ -1,0 +1,139 @@
+mainmenu "mbedCrypto menu config"
+
+
+############################ build artifact ############################
+choice BUILD_ARTIFACT_TYPE
+    prompt "Artifact type"
+
+config BUILD_ARTIFACT_TYPE_EXECUTABLE
+    bool "executable"
+config BUILD_ARTIFACT_TYPY_LIBRARY
+    bool "library"
+endchoice
+
+
+############################ library type ############################
+choice LIBRARY_TYPE
+    prompt "Library type"
+    depends on BUILD_ARTIFACT_TYPY_LIBRARY
+config LIBRARY_TYPE_DYNAMIC
+    bool "dinamic"
+config LIBRARY_TYPE_STATIC
+    bool "static"
+endchoice
+
+
+############################ build mode ############################
+choice BUILD_MODE
+    prompt "Build mode"
+    default BUILD_MODE_RELEASE
+
+config BUILD_MODE_RELEASE
+    bool "release"
+config BUILD_MODE_DEBUG
+    bool "debug"
+endchoice
+
+
+############################ build warnings ############################
+choice BUILD_WARNINGS
+    prompt "Build warnings"
+    default BUILD_WARNINGS_YES
+
+config BUILD_WARNINGS_YES
+    bool "yes"
+config BUILD_WARNINGS_NO
+    bool "no"
+endchoice
+
+
+############################ security level setup ############################
+choice MBCRYPT_SECURITY_LEVEL
+    prompt "Security level"
+    default MBCRYPT_SECURITY_LEVEL_0
+
+config MBCRYPT_SECURITY_LEVEL_0
+    bool "security level 0"
+config MBCRYPT_SECURITY_LEVEL_1
+    bool "security level 1"
+config MBCRYPT_SECURITY_LEVEL_2
+    bool "security level 2"
+endchoice
+
+
+############################ cryptography algorithms menu ############################
+menu "Algorithms setups"
+
+############################ SHA1 setup ############################
+config SHA1_ENABLE
+    bool "SHA1 enable"
+
+config SHA1_MIN_SIZE
+    bool "SHA1 min size release"
+    depends on SHA1_ENABLE
+
+
+############################ SHA256 setup ############################
+config SHA256_ENABLE
+    bool "SHA256 enable"
+
+config SHA256_MIN_SIZE
+    bool "SHA256 min size release"
+    depends on SHA256_ENABLE
+
+
+############################ SHA512 setup ############################
+config SHA512_ENABLE
+    bool "SHA512 enable"
+
+config SHA512_MIN_SIZE
+    bool "SHA512 min size release"
+    depends on SHA512_ENABLE
+
+
+############################ HMAC setup ############################
+config HMAC_ENABLE
+    bool "HMAC enable"
+
+config HMAC_MIN_SIZE
+    bool "HMAC min size release"
+    depends on HMAC_ENABLE
+
+
+############################ PBKDF2 setup ############################
+config PBKDF2_ENABLE
+    bool "PBKDF2 enable"
+
+config PBKDF2_MIN_SIZE
+    bool "PBKDF2 min size release"
+    depends on PBKDF2_ENABLE
+
+
+############################ KBKDF setup ############################
+config KBKDF_ENABLE
+    bool "KBKDF enable"
+
+config KBKDF_MIN_SIZE
+    bool "KBKDF min size release"
+    depends on KBKDF_ENABLE
+
+
+############################ DRBG setup ############################
+config DRBG_ENABLE
+    bool "DRBG enable"
+
+choice DRBG_TYPE
+    prompt "Select drbg type"
+    depends on DRBG_ENABLE
+
+config DRBG_HASH
+    bool "hash drbg"
+config DRBG_HMAC
+    bool "hmac drbg"
+config DRBG_CTR
+    bool "counter mode drbg"
+config DRBG_UNIX
+    bool "posix drbg"
+endchoice
+
+endmenu # Algorithms setups #
