@@ -9,8 +9,8 @@
 *.user
 *.userosscache
 *.sln.docstates
-test
-test.sh
+*.config
+*.ignore
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -28,6 +28,7 @@ x86/
 [Aa][Rr][Mm]64/
 bld/
 [Bb]in/
+[Bb]uild/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
