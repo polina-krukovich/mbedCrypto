@@ -14,13 +14,14 @@
 *   @brief File contains AES API functions.
 *	@author Zontec
 *	@version 1.1
-*	@date 2021.07.04
+*	@date 2021.08.09
 */
 
 #ifndef AES_H
 #define AES_H
 
 #include "mbcrypt.h"
+
 
 #define MBCRYPT_AES_BLOCK_SIZE          (16)
 

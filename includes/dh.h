@@ -11,20 +11,24 @@
 **************************************************************************/
 /*!
 *   @file dh.h
-*   @brief File contains Diffi Halman API functions.
+*   @brief File contains Diffi-Halman API functions.
 *	@author Zontec
 *	@version 1.1
-*	@date 2021.07.02
+*	@date 2021.08.09
 */
 
 #ifndef DH_H
 #define DH_H
+
+#include "mbcrypt.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
+/* API is here*/
 
 
 #ifdef __cplusplus

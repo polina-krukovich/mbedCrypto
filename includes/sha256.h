@@ -44,6 +44,7 @@ typedef struct mbcrypt_sha256_t
 extern "C" {
 #endif
 
+
 /**
  * @brief Function inits sha256 context with default values
  * 

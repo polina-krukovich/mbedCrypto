@@ -44,6 +44,7 @@ typedef struct mbcrypt_sha512_t
 extern "C" {
 #endif
 
+
 /**
  * @brief Function inits sha512 context with default values
  * 

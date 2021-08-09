@@ -14,17 +14,21 @@
 *   @brief File contains RSA 2048/3072/4096 API functions.
 *	@author Zontec
 *	@version 1.1
-*	@date 2021.07.02
+*	@date 2021.08.09
 */
 
 #ifndef RSA_H
 #define RSA_H
+
+#include "mbcrypt.h"
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
+/* API is here */
 
 
 #ifdef __cplusplus

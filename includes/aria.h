@@ -10,15 +10,18 @@
 * furnished to do so, subject to the following conditions:
 **************************************************************************/
 /*!
-*   @file chacha.h
-*   @brief File contains ChaCha API functions.
+*   @file aria.h
+*   @brief File contains ARIA API functions.
 *	@author Zontec
 *	@version 1.1
-*	@date 2021.07.02
+*	@date 2021.08.09
 */
 
-#ifndef CHACHA_H
-#define CHACHA_H
+#ifndef ARIA_H
+#define ARIA_H
+
+
+#include "mbcrypt.h"
 
 
 #ifdef __cplusplus
@@ -33,4 +36,4 @@ extern "C" {
 }
 #endif /* __cplusplus */
 
-#endif /* CHACHA_H */
+#endif /* ARIA_H */

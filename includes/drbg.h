@@ -14,7 +14,7 @@
 *   @brief File contains API for rundom number and sequnces generating.
 *	@author Zontec
 *	@version 1.1
-*	@date 2021.06.19
+*	@date 2021.08.09
 */
 
 #ifndef DRBG_H
@@ -22,12 +22,16 @@
 
 #include "mbcrypt.h"
 
+
 #define BASE_SEED_SIZE      (64)
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+
+/* API is here */
 
 
 #ifdef __cplusplus

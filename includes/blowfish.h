@@ -20,11 +20,15 @@
 #ifndef BLOWFISH_H
 #define BLOWFISH_H
 
+#include "mbcrypt.h"
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
+/* API is here */
 
 
 #ifdef __cplusplus

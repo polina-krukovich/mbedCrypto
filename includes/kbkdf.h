@@ -14,13 +14,14 @@
 *   @brief File contains API for KBKDF function.
 *	@author Zontec
 *	@version 1.1
-*	@date 2021.06.19
+*	@date 2021.08.09
 */
 
 #ifndef KBKDF_H
 #define KBKDF_H
 
 #include "mbcrypt.h"
+
 
 /**
  * @brief Extra options for KBKDf
@@ -47,6 +48,7 @@ typedef enum mbcrypt_kbkdf_mode_e
 extern "C" {
 #endif
 
+
 /**
 * @brief This function derives a key based on the provided key and fixed input string using HMAC KBKDF algorithm.
 *
@@ -72,6 +74,7 @@ mbcrypt_status_e mbcrypt_kbkdf(void *prf_ctx, mbcrypt_kbkdf_mode_e mode,
                         uint8_t* fixed_input, const uint32_t fixed_input_len,
                         uint8_t* key_out, const uint32_t key_out_len,
                         mbcrypt_kbkdf_opts_t* opts);
+
 
 #ifdef __cplusplus
 }

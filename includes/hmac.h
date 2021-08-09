@@ -20,6 +20,7 @@
 #ifndef HMAC_H
 #define HMAC_H
 
+
 #include "mbcrypt.h"
 
 #define HMAC_MAX_KEY_SIZE       (128)
@@ -35,6 +36,7 @@ typedef struct mbcrypt_hmac_t
 #ifdef __cplusplus
 extern "C" {
 #endif
+
 
 mbcrypt_status_e MBCRYPT_API mbcrypt_hmac(mbcrypt_hash_type_e hash_type, mbcrypt_hash_callbacks_t *cbs, 
                                             const uint8_t *key, uint32_t key_len, 
