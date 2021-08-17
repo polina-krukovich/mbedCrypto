@@ -14,42 +14,10 @@
 *   @brief File contains DRBG implementation.
 *	@author Zontec
 *	@version 1.1
-*	@date 2021.07.04
+*	@date 2021.08.11
 */
 
-#include "rand.h"
-
-
-#if (MEASURE_ENTROPY == ENABLED)
-
-#include <math.h>
-
-#define ENTROPY_TESTS       (1000000)
-#define ENTROPY_MOD         (1000)
-
-double get_entropy(rnd_callback_t rnd)
-{
-    uint32_t cnt[ENTROPY_MOD] = {0};
-    double sum = 0;
-
-    for(uint32_t i = 0; i < ENTROPY_TESTS; ++i)
-    {
-        cnt[rnd() % ENTROPY_MOD]++;
-    }
-
-    for (uint32_t i = 0; i < ENTROPY_MOD; ++i)
-    {
-        if (cnt[i] == 0)
-        {
-            continue;
-        }
-        double p = (double)(cnt[i]) / (double)(ENTROPY_TESTS);
-        sum += (p * log2(p));
-    }
-    sum *= -1;
-    return sum;
-}
-#endif /* MEASURE_ENTROPY */
+#include "sha256.h"
 
 union u32_e
 {
@@ -57,7 +25,7 @@ union u32_e
     uint16_t w;
     uint8_t b[4];
 };
-
+#define BASE_SEED_SIZE 32
 static volatile uint8_t _seed[BASE_SEED_SIZE] = {0};
 
 static void inc_seed()
@@ -113,7 +81,7 @@ void rand_bytes(uint8_t *dst, uint32_t size)
 {
    rand_bytes_ex(dst, size, NULL);
 }
-
+#ifdef www
 void rand_bytes_ex(uint8_t *dst, uint32_t size, rnd_callback_t rnd)
 {
     union u32_e tmp;
@@ -160,16 +128,17 @@ void rand_bytes_ex(uint8_t *dst, uint32_t size, rnd_callback_t rnd)
 #endif /* PLATFORM_LE */
 
 }
+#endif
 
 
 #include "sha256.h"
 
 int32_t rand()
 {
-    uint8_t hash[SHA256_HASH_SIZE];
+    uint8_t hash[MBCRYPT_SHA256_HASH_SIZE];
     int32_t res = 0;
 
-    sha256(_seed, BASE_SEED_SIZE, hash);
+    mbcrypt_sha256(_seed, BASE_SEED_SIZE, hash);
 
     res |= hash[0];
     res <<= 8;
@@ -184,7 +153,7 @@ int32_t rand()
 
     inc_seed();
 
-    memset(hash, 0xFF, SHA256_HASH_SIZE);
+    memset(hash, 0xFF, MBCRYPT_SHA256_HASH_SIZE);
 
     return res;
 }
@@ -208,7 +177,7 @@ int32_t rand()
 {
     int32_t res = 0;
 #if (RAND_FAST == ENABLED)
-    uint8_t hash[SHA256_HASH_SIZE];
+    uint8_t hash[MBCRYPT_SHA256_HASH_SIZE];
     mbcrypt_status_e sec_ret = 0;
     
     ASSERT(sha256(_seed, BASE_SEED_SIZE, hash) == MBCRYPT_STATUS_OK, "SHA256 return status not OK!")
