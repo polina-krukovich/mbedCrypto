@@ -18,3 +18,35 @@
 */
 
 #include "entropy.h"
+
+
+#if (MEASURE_ENTROPY == ENABLED)
+
+#include <math.h>
+
+#define ENTROPY_TESTS       (1000000)
+#define ENTROPY_MOD         (1000)
+
+double get_entropy(rnd_callback_t rnd)
+{
+    uint32_t cnt[ENTROPY_MOD] = {0};
+    double sum = 0;
+
+    for(uint32_t i = 0; i < ENTROPY_TESTS; ++i)
+    {
+        cnt[rnd() % ENTROPY_MOD]++;
+    }
+
+    for (uint32_t i = 0; i < ENTROPY_MOD; ++i)
+    {
+        if (cnt[i] == 0)
+        {
+            continue;
+        }
+        double p = (double)(cnt[i]) / (double)(ENTROPY_TESTS);
+        sum += (p * log2(p));
+    }
+    sum *= -1;
+    return sum;
+}
+#endif
