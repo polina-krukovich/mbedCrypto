@@ -1,0 +1,29 @@
+
+CC ?= gcc
+LD ?= gcc
+
+ifneq ($(CONFIG_BUILD_WARNINGS), y)
+    CFLAGS += -w
+    LDFLAGS += -w
+endif
+
+ifneq ($(CONFIG_BUILD_MODE_DEBUG), y)
+    CFLAGS += -g
+    LDFLAGS += -g
+    DEFINES += MBCRYPT_DEBUG
+else
+    DEFINES += MBCRYPT_RELEASE
+endif
+
+ifeq ($(CONFIG_TESTS_WITH_OPENSSL), y)
+    DEFINES += OPENSSL_TESTS
+    LDLIBS := -lcrypto -lssl
+endif
+
+
+ifeq ($(BUILD_TYPE), SHARED)
+endif
+
+
+ifeq ($(BUILD_TYPE), STATIC)
+endif

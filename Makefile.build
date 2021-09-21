@@ -1,40 +1,44 @@
-#=========== FLAGS ===========#
-
-ifneq ($(CONFIG_BUILD_WARNINGS), y)
-    CFLAGS += -w
-    LDFLAGS += -w
-endif
-
-ifneq ($(CONFIG_BUILD_MODE_DEBUG), y)
-    CFLAGS += -g
-    LDFLAGS += -g
-    DEFINES += MBCRYPT_DEBUG
-else
-    DEFINES += MBCRYPT_RELEASE
-endif
-
-ifeq ($(CONFIG_TESTS_WITH_OPENSSL), y)
-    DEFINES += OPENSSL_TESTS
-    LDLIBS := -lcrypto -lssl
-endif
+#=========== PROJECT NAME ===========#
+PROJECT := mbedcrypto
 
 
-ifeq ($(BUILD_TYPE), SHARED)
-endif
+#=========== DIRS ===========#
+SRC_DIR := src
+INCLUDES_DIR = includes
+LIB_DIR = lib
+
+#=========== PROJECT CONFIG FILE ===========#
+KCONFIG_CONFIG ?= .config
+include $(KCONFIG_CONFIG)
 
 
-ifeq ($(BUILD_TYPE), STATIC)
-endif
+#=========== VPATH ===========#
+VPATH += lib/
+VPATH += docs/
+VPATH += helpers/
+VPATH += includes/
+VPATH += src/
+VPATH += tests/
 
+
+#=========== SOURCES ===========#
+include $(LIB_DIR)/Makefile.include
+include $(SRC_DIR)/Makefile.include
+
+
+#=========== FLAGS AND TOOLS ===========#
+include Makefile.tools
+
+
+#=========== OBJECTS ===========#
 OBJS = $(addprefix bin/, $(SRCS:.c=.o))
 
 
-
 $(PROJECT)_tests: $(OBJS)
-	@gcc $(LDFLAGS) $^ -o $@ $(LDLIBS)
+	@$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 	@echo "Compilation done!"
 
 bin/%.o : %.c
 	@mkdir -p $(dir $@)
-	@gcc $(CFLAGS) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCLUDES)) -c $< -o $@
-	@echo cc -c $< -o $@
+	@$(CC) $(CFLAGS) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCLUDES)) -c $< -o $@
+	@echo CC -c $< -o $@
