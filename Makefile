@@ -1,8 +1,8 @@
 .PHONY: docs clean menuconfig tests shared static
 
-PROJECT=mbedcrypto
+PROJECT:=mbedcrypto
 
-KCONFIG_CONFIG=mbcrypt.config
+KCONFIG_CONFIG:=mbcrypt.config
 
 #=========== TOOLS ===========#
 
@@ -16,14 +16,19 @@ VPATH += helpers/
 VPATH += includes/
 VPATH += src/
 VPATH += tests/
+#VPATH += arch/
 
 #=========== INCLUDES ===========#
 
-include mbcrypt.config
+ifneq ("$(wildcard $(KCONFIG_CONFIG))","")
+include $(KCONFIG_CONFIG)
+else
+$(info $(KCONFIG_CONFIG) not found! Use < make menuconfig > to configure the library)
+endif
+
 
 include lib/Makefile.include
 include Makefile.include
-
 
 #=========== COMMANDS ===========#
 
@@ -38,6 +43,11 @@ static:
 tests: 
 	@${MAKE} $(PROJECT)_tests BUILD_TYPE=EXECUTABLE
 
+debug:
+	@${MAKE} $(PROJECT)_tests BUILD_TYPE=EXECUTABLE CONFIG_BUILD_MODE_DEBUG=y
+
+cicd: 
+	@${MAKE} $(PROJECT)_tests BUILD_TYPE=EXECUTABLE_TESTS 
 
 clean:
 	@rm -rf bin/
@@ -51,5 +61,10 @@ docs:
 menuconfig:
 	@kconfig-mconf KConfig
 
+config:
+	@kconfig-conf KConfig
+
+def-config:
+	@ echo def_$(KCONFIG_CONFIG) > $(KCONFIG_CONFIG)
 
 -include Makefile.build
