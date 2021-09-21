@@ -4,6 +4,8 @@ PROJECT := mbedcrypto
 
 #=========== DIRS ===========#
 SRC_DIR := src
+BIN_DIR := bin
+BUILD_DIR := build
 INCLUDES_DIR = includes
 LIB_DIR = lib
 
@@ -31,14 +33,24 @@ include Makefile.tools
 
 
 #=========== OBJECTS ===========#
-OBJS = $(addprefix bin/, $(SRCS:.c=.o))
+OBJS = $(addprefix $(BUILD_DIR)/, $(SRCS:.c=.o))
 
 
 $(PROJECT)_tests: $(OBJS)
 	@$(CC) $(LDFLAGS) $^ -o $@ $(LDLIBS)
 	@echo "Compilation done!"
 
-bin/%.o : %.c
+$(BUILD_DIR)/%.o : %.c
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCLUDES)) -c $< -o $@
+	@echo CC -c $< -o $@
+
+$(BUILD_DIR)/%.o : %.cpp
+	@mkdir -p $(dir $@)
+	@$(CPP) $(CFLAGS) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCLUDES)) -c $< -o $@
+	@echo CC -c $< -o $@
+
+$(BUILD_DIR)/%.o : %.s
+	@mkdir -p $(dir $@)
+	@$(AS) $(CFLAGS) $(addprefix -D, $(DEFINES)) $(addprefix -I, $(INCLUDES)) -c $< -o $@
 	@echo CC -c $< -o $@

@@ -1,7 +1,7 @@
 # mbedCrypto
 ## _Free open source cryptolibrary for embedded systems_
 #### Dev version: 0.1.0
-[![Build Status](https://app.travis-ci.com/Zontec/mbedCrypto.svg?branch=dev)](https://app.travis-ci.com/Zontec/mbedCrypto)
+[![Build Status](https://app.travis-ci.com/Zontec/mbedCrypto.svg?branch=dev)](https://app.travis-ci.com/Zontec/mbedCrypto) [![seccode](https://img.shields.io/badge/code-SEI/CERT-brightgreen.svg?style=flat)](https://wiki.sei.cmu.edu/confluence/display/c/SEI+CERT+C+Coding+Standard) [![code style](https://img.shields.io/badge/code%20style-c/cpp-brightgreen.svg?style=flat)](https://google.github.io/styleguide/cppguide.html)
 
 ## Description
 

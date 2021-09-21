@@ -172,7 +172,10 @@ void srand(uint32_t seed)
         _seed[i] = _seed[i] ^ ((seed >> (i & 3)) & 0xFF);
     }
 }
-
+/*
+    next = next * 1103515245 + 12345;
+    return (unsigned int)(next/65536) % 32768;
+*/
 int32_t rand()
 {
     int32_t res = 0;
