@@ -18,6 +18,15 @@
 #include "kbkdf.h"
 
 
+int s_mp_rand_source(void *out, size_t size){
+    char *p = out;
+    for (int i = 0; i < size; i++)
+    {
+        p[i] = rand() & 0xFF;
+    }
+    return 0;
+}
+
 void print_arr(uint8_t *data, uint32_t data_len)
 {
     for (int i = 0; i < data_len; i++)
@@ -382,7 +391,7 @@ void test_mbcrypt_pbkdf2_hmac_sha512()
         hmac_ctx.hash_type = MBCRYPT_HASH_TYPE_SHA512;
 
         mbcrypt_hmac_callbacks_t hmac_cbs = {&hmac_ctx, mbcrypt_hmac_init,
-                                                mbcrypt_hmac_update,mbcrypt_hmac_final};
+                                                mbcrypt_hmac_update, mbcrypt_hmac_final};
 
         mbcrypt_pbkdf2_hmac(MBCRYPT_HASH_TYPE_SHA512, &hmac_cbs, sha_test[i], strlen(sha_test[i]), sha_test[i], strlen(sha_test[i]), 433, out, 32);
 
@@ -469,6 +478,43 @@ void test_mbcrypt_kbkdf_dp()
     
 }
 #endif /* TEST_KBKDF */
+#if 0
+void test_rc4() 
+{
+    uint8_t key[] = "12";
+    uint8_t in[] = "The quick brown fox jumps over the lazy dog.";
+    uint8_t out[333];
+
+    rc4(key, 2, in, sizeof(in)-1, out, 555);
+   // RC4(key,in,out);
+    print_arr(out, 44);
+}
+
+
+
+
+
+void test_rsa()
+{
+    rsa();
+}
+void test_rsa_pss()
+{
+
+}
+void test_rsa_oaep()
+{
+
+}
+void test_rsa_kem()
+{
+
+}
+void test_rsa_kw()
+{
+
+}
+#endif
 
 #ifdef RRR
 
@@ -627,6 +673,9 @@ int main()
 #if defined(TEST_RSA)
     test_rsa();
     test_rsa_pss();
+    test_rsa_oaep();
+    test_rsa_kem();
+    test_rsa_kw();
 #endif
 
 
