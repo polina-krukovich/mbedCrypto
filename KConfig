@@ -5,7 +5,6 @@ mainmenu "mbedCrypto menu config"
 
 config TESTS_WITH_OPENSSL
     bool "Tests with openssl"
-    depends on BUILD_ARTIFACT_TYPE_EXECUTABLE
 
 
 ############################ build mode ############################
@@ -101,6 +100,45 @@ config MBCRYPT_HMAC_MIN_SIZE
 config MBCRYPT_HMAC_SELF_TESTS
     bool "HMAC self tests"
     depends on MBCRYPT_HMAC_ENABLE
+
+############################ RSA setup ############################
+
+config MBCRYPT_RSA_ENABLE
+    bool "RSA enable"
+
+config MBCRYPT_RSA_MIN_SIZE
+    bool "RSA min size release"
+    depends on MBCRYPT_RSA_ENABLE
+
+config MBCRYPT_RSA_SELF_TESTS
+    bool "RSA self tests"
+    depends on MBCRYPT_RSA_ENABLE
+
+############################ entropy setup ############################
+
+config MBCRYPT_ENTROPY_ENABLE
+    bool "Entropy enable"
+
+config MBCRYPT_ENTROPY_MIN_SIZE
+    bool "Entropy min size release"
+    depends on MBCRYPT_ENTROPY_ENABLE
+
+config MBCRYPT_ENTROPY_SELF_TESTS
+    bool "Entropy self tests"
+    depends on MBCRYPT_ENTROPY_ENABLE
+
+############################ RC4 setup ############################
+
+config MBCRYPT_RC4_ENABLE
+    bool "RC4 enable"
+
+config MBCRYPT_RC4_MIN_SIZE
+    bool "RC4 min size release"
+    depends on MBCRYPT_RC4_ENABLE
+
+config MBCRYPT_RC4_SELF_TESTS
+    bool "RC4 self tests"
+    depends on MBCRYPT_RC4_ENABLE
 
 ############################ PBKDF2 setup ############################
 
