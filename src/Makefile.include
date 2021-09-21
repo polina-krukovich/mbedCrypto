@@ -2,9 +2,7 @@ MBCRYPT_SRC_DIR ?= src
 
 INCLUDES +=  $(shell pwd)/includes
 
-
 SRCS += $(MBCRYPT_SRC_DIR)/mbcrypt_utils.c
-
 
 ifeq ($(BUILD_TYPE), EXECUTABLE)
 	SRCS += $(MBCRYPT_SRC_DIR)/self_tests.c
@@ -33,3 +31,9 @@ endif
 ifeq ($(CONFIG_MBCRYPT_KBKDF_ENABLE), y)
 	SRCS += $(MBCRYPT_SRC_DIR)/kbkdf.c
 endif
+
+
+#SRCS += $(MBCRYPT_SRC_DIR)/rc4.c
+#SRCS += $(MBCRYPT_SRC_DIR)/drbg.c
+#SRCS += $(MBCRYPT_SRC_DIR)/rsa.c
+#SRCS += $(MBCRYPT_SRC_DIR)/aes.c
