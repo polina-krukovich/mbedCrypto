@@ -1,6 +1,6 @@
 LIBTOM_DIR = libtommath
 
-INCLUDES += libtommath/
+INCLUDES += $(shell pwd)/lib/libtommath/
 DEFINES += MP_FIXED_CUTOFFS
 
 SRCS +=         $(LIBTOM_DIR)/mp_2expt.c                                 \
